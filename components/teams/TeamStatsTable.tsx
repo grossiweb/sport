@@ -78,17 +78,6 @@ export function TeamStatsTable({
           { key: 'yardsAgainst', label: 'YDS A', width: 'w-20' },
           { key: 'turnoverDifferential', label: 'TO Diff', width: 'w-20' }
         ]
-      case 'NBA':
-      case 'CBB':
-        return [
-          ...baseColumns,
-          { key: 'pointsPerGame', label: 'PPG', width: 'w-20' },
-          { key: 'pointsAllowedPerGame', label: 'OPP', width: 'w-20' },
-          { key: 'reboundsPerGame', label: 'RPG', width: 'w-20' },
-          { key: 'assistsPerGame', label: 'APG', width: 'w-20' },
-          { key: 'fieldGoalPercentage', label: 'FG%', width: 'w-20' },
-          { key: 'threePointPercentage', label: '3P%', width: 'w-20' }
-        ]
       default:
         return baseColumns
     }
@@ -292,11 +281,6 @@ function TeamDetailView({ team, stats, sport }: { team: Team; stats?: TeamStats;
           { label: 'Total Yards', value: stats.yardsFor },
           { label: 'Yards Allowed', value: stats.yardsAgainst },
           { label: 'Turnovers', value: stats.turnovers },
-        ]
-      case 'NBA':
-      case 'CBB':
-        return [
-          { label: 'Free Throw %', value: stats.freeThrowPercentage ? (stats.freeThrowPercentage * 100).toFixed(1) + '%' : '-' },
         ]
       default:
         return []

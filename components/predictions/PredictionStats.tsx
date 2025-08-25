@@ -3,7 +3,7 @@
 import { 
   ArrowTrendingUpIcon as TrendingUpIcon, 
   ArrowTrendingDownIcon as TrendingDownIcon, 
-  TargetIcon, 
+  CheckBadgeIcon, 
   BoltIcon 
 } from '@heroicons/react/24/outline'
 
@@ -35,7 +35,7 @@ export function PredictionStats({ stats }: PredictionStatsProps) {
       label: 'Overall Accuracy',
       value: `${Math.round(accuracy * 100)}%`,
       subValue: `${correctPredictions}/${totalPredictions}`,
-      icon: TargetIcon,
+      icon: CheckBadgeIcon,
       color: accuracy >= 0.6 ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400',
       bgColor: accuracy >= 0.6 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-yellow-50 dark:bg-yellow-900/20'
     },
