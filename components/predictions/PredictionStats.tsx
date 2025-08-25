@@ -1,6 +1,11 @@
 'use client'
 
-import { TrendingUpIcon, TrendingDownIcon, TargetIcon, BoltIcon } from '@heroicons/react/24/outline'
+import { 
+  ArrowTrendingUpIcon as TrendingUpIcon, 
+  ArrowTrendingDownIcon as TrendingDownIcon, 
+  TargetIcon, 
+  BoltIcon 
+} from '@heroicons/react/24/outline'
 
 interface PredictionStatsProps {
   stats: {
