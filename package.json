@@ -1,0 +1,53 @@
+{
+  "name": "statspro-sports",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "next lint",
+    "automation": "node scripts/daily-automation.js",
+    "wordpress:setup": "node scripts/wordpress-setup.js",
+    "wordpress:check": "node scripts/wordpress-setup.js"
+  },
+  "dependencies": {
+    "next": "14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+
+    "@headlessui/react": "^1.7.17",
+    "@heroicons/react": "^2.0.18",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "axios": "^1.6.0",
+    "clsx": "^2.0.0",
+    "date-fns": "^2.30.0",
+    "framer-motion": "^10.16.4",
+    "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0",
+    "js-cookie": "^3.0.5",
+    "next-auth": "^4.24.5",
+    "next-themes": "^0.2.1",
+    "nodemailer": "^6.9.7",
+    "react-hook-form": "^7.47.0",
+    "react-hot-toast": "^2.4.1",
+    "react-query": "^3.39.3",
+    "recharts": "^2.8.0",
+    "tailwind-merge": "^2.0.0",
+    "zustand": "^4.4.6"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "@types/node": "^20.8.6",
+    "@types/react": "^18.2.28",
+    "@types/react-dom": "^18.2.13",
+    "@types/js-cookie": "^3.0.6",
+    "@types/nodemailer": "^6.4.14",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.51.0",
+    "eslint-config-next": "14.0.0",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5"
+  }
+}
