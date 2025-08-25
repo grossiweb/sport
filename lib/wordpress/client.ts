@@ -279,9 +279,9 @@ export class WordPressClient {
         }
       )
 
-      const data = await authenticatedClient.request(VALIDATE_TOKEN_QUERY)
+      const data = await authenticatedClient.request(VALIDATE_TOKEN_QUERY) as any
 
-      if (data.viewer && data.viewer.id) {
+      if (data && data.viewer && data.viewer.id) {
         return {
           success: true,
           user: this.mapUserData(data.viewer)

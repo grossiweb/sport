@@ -130,9 +130,9 @@ export class WordPressAuth {
         }
       `
 
-      const data = await client.request(query)
+      const data = await client.request(query) as any
       
-      if (data.viewer?.roles?.nodes) {
+      if (data && data.viewer?.roles?.nodes) {
         return data.viewer.roles.nodes.some((role: any) => 
           role.capabilities && role.capabilities.includes(capability)
         )

@@ -42,9 +42,10 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    const data = await client.request(VALIDATE_TOKEN_QUERY)
+    const data = await client.request(VALIDATE_TOKEN_QUERY) as any
+    console.log('Validation response:', JSON.stringify(data, null, 2))
 
-    if (data.viewer) {
+    if (data && data.viewer) {
       const user = data.viewer
       
       // Map WordPress user to your User type
