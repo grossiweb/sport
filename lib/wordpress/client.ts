@@ -206,7 +206,7 @@ export class WordPressClient {
       const data = await client.request(LOGIN_MUTATION, {
         username: email,
         password: password
-      })
+      }) as any
 
       if (data.login?.authToken && data.login?.user) {
         const user = data.login.user
@@ -239,7 +239,7 @@ export class WordPressClient {
         username: username,
         email: email,
         password: password
-      })
+      }) as any
 
       if (data.registerUser?.user) {
         return {
@@ -303,7 +303,7 @@ export class WordPressClient {
 
   async getPosts(first: number = 10, after?: string): Promise<{ posts: WordPressPost[], hasNextPage: boolean, endCursor?: string }> {
     try {
-      const data = await client.request(GET_POSTS, { first, after })
+      const data = await client.request(GET_POSTS, { first, after }) as any
       
       return {
         posts: data.posts.nodes.map(this.mapPostData),
@@ -318,7 +318,7 @@ export class WordPressClient {
 
   async getPostBySlug(slug: string): Promise<WordPressPost | null> {
     try {
-      const data = await client.request(GET_POST_BY_SLUG, { slug })
+      const data = await client.request(GET_POST_BY_SLUG, { slug }) as any
       
       if (!data.postBy) return null
       
@@ -331,7 +331,7 @@ export class WordPressClient {
 
   async getEmailTemplates(): Promise<EmailContent[]> {
     try {
-      const data = await client.request(GET_EMAIL_TEMPLATES)
+      const data = await client.request(GET_EMAIL_TEMPLATES) as any
       
       return data.emailTemplates.nodes.map((template: any) => ({
         subject: template.emailTemplateFields.subject,
@@ -348,7 +348,7 @@ export class WordPressClient {
 
   async getSocialPosts(status?: 'draft' | 'scheduled' | 'published'): Promise<SocialPost[]> {
     try {
-      const data = await client.request(GET_SOCIAL_POSTS, { status })
+      const data = await client.request(GET_SOCIAL_POSTS, { status }) as any
       
       return data.socialPosts.nodes.map((post: any) => ({
         platform: post.socialPostFields.platform,
@@ -375,7 +375,7 @@ export class WordPressClient {
             scheduledDate: emailContent.scheduledDate?.toISOString()
           }
         }
-      })
+      }) as any
       
       return data.createEmailCampaign.emailCampaign.id
     } catch (error) {
@@ -397,7 +397,7 @@ export class WordPressClient {
             status: socialPost.status
           }
         }
-      })
+      }) as any
       
       return data.createSocialPost.socialPost.id
     } catch (error) {

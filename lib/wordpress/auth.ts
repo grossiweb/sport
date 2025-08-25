@@ -22,7 +22,7 @@ export class WordPressAuth {
         }
       `
       
-      const data = await this.client.request(query)
+      const data = await this.client.request(query) as any
       return !!data.generalSettings
     } catch (error) {
       console.error('WordPress connection failed:', error)
@@ -62,7 +62,7 @@ export class WordPressAuth {
         username,
         email,
         password
-      })
+      }) as any
 
       if (data.registerUser?.user) {
         // If you need to set a specific role, you might need to use WordPress REST API

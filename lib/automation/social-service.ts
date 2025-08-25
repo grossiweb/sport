@@ -10,15 +10,12 @@ export class SocialService {
       const today = format(new Date(), 'yyyy-MM-dd')
       const allGames: Game[] = []
       
-      const sports: SportType[] = ['CFB']
-      
-      for (const sport of sports) {
-        try {
-          const games = await sportsAPI.getGames(sport, today)
-          allGames.push(...games.slice(0, 2)) // Top 2 games per sport
-        } catch (error) {
-          console.error(`Error fetching ${sport} games:`, error)
-        }
+      // Get CFB games for today
+      try {
+        const games = await sportsAPI.getGames(today)
+        allGames.push(...games.slice(0, 2)) // Top 2 games
+      } catch (error) {
+        console.error('Error fetching CFB games:', error)
       }
 
       const posts: SocialPost[] = []

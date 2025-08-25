@@ -8,7 +8,7 @@ export class EmailService {
   private transporter: nodemailer.Transporter
 
   constructor() {
-    this.transporter = nodemailer.createTransporter({
+    this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT || '587'),
       secure: false,
@@ -25,15 +25,12 @@ export class EmailService {
       const today = format(new Date(), 'yyyy-MM-dd')
       const allGames: Game[] = []
       
-      const sports: SportType[] = ['CFB']
-      
-      for (const sport of sports) {
-        try {
-          const games = await sportsAPI.getGames(sport, today)
-          allGames.push(...games)
-        } catch (error) {
-          console.error(`Error fetching ${sport} games:`, error)
-        }
+      // Get CFB games for today
+      try {
+        const games = await sportsAPI.getGames(today)
+        allGames.push(...games)
+      } catch (error) {
+        console.error('Error fetching CFB games:', error)
       }
 
       // Generate HTML content
