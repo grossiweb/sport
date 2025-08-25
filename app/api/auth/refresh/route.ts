@@ -1,6 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GraphQLClient } from 'graphql-request'
 
+// Type definitions for GraphQL responses
+interface ViewerData {
+  viewer?: {
+    id: string
+    username: string
+    email: string
+    firstName?: string
+    lastName?: string
+    nicename?: string
+    roles?: {
+      nodes: Array<{
+        name: string
+      }>
+    }
+  }
+}
+
+interface RefreshTokenResponse {
+  refreshJwtAuthToken?: {
+    authToken: string
+  }
+}
+
 // WordPress GraphQL mutation for refresh token
 const REFRESH_TOKEN_MUTATION = `
   mutation RefreshAuthToken($refreshToken: String!) {
@@ -50,7 +73,7 @@ export async function POST(request: NextRequest) {
       // Try to use the refresh token mutation first
       const refreshData = await client.request(REFRESH_TOKEN_MUTATION, {
         refreshToken: refreshToken
-      }) as any
+      }) as RefreshTokenResponse
 
       if (refreshData.refreshJwtAuthToken?.authToken) {
         // Get user data with the new token
@@ -63,7 +86,7 @@ export async function POST(request: NextRequest) {
           }
         )
 
-        const userData = await userClient.request(VALIDATE_REFRESH_TOKEN_QUERY)
+        const userData = await userClient.request(VALIDATE_REFRESH_TOKEN_QUERY) as ViewerData
         console.log('User data response (first attempt):', JSON.stringify(userData, null, 2))
 
         if (userData && userData.viewer) {
@@ -105,7 +128,7 @@ export async function POST(request: NextRequest) {
           }
         )
 
-        const userData = await userClient.request(VALIDATE_REFRESH_TOKEN_QUERY)
+        const userData = await userClient.request(VALIDATE_REFRESH_TOKEN_QUERY) as ViewerData
         console.log('User data response (fallback attempt):', JSON.stringify(userData, null, 2))
 
         if (userData && userData.viewer) {
