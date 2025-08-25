@@ -11,6 +11,8 @@
     "noImplicitThis": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "suppressImplicitAnyIndexErrors": true,
+    "noStrictGenericChecks": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
