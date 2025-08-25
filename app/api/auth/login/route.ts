@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GraphQLClient } from 'graphql-request'
 
-const client = new GraphQLClient(process.env.WORDPRESS_API_URL || 'http://localhost/statspro/graphql')
+const client = new GraphQLClient(process.env.WORDPRESS_API_URL || 'https://bpheadlessb852.wpenginepowered.com/graphql')
 
 // WordPress GraphQL mutation for login
 const LOGIN_MUTATION = `

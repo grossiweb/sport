@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost', 'therundown.io', 'sportsdata.io'],
+    domains: ['localhost', 'bpheadlessb852.wpenginepowered.com', 'therundown.io', 'sportsdata.io'],
   },
   env: {
-    WORDPRESS_API_URL: process.env.WORDPRESS_API_URL || 'http://localhost/statspro/graphql',
+    WORDPRESS_API_URL: process.env.WORDPRESS_API_URL || 'https://bpheadlessb852.wpenginepowered.com/graphql',
     THERUNDOWN_API_KEY: process.env.THERUNDOWN_API_KEY || 'demo-key',
     SPORTSDATA_API_KEY: process.env.SPORTSDATA_API_KEY || 'demo-key',
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'development-secret-key',

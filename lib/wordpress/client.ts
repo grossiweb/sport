@@ -1,7 +1,7 @@
 import { GraphQLClient } from 'graphql-request'
 import { WordPressPost, EmailContent, SocialPost, User } from '@/types'
 
-const client = new GraphQLClient(process.env.WORDPRESS_API_URL || 'http://localhost/statspro/graphql')
+const client = new GraphQLClient(process.env.WORDPRESS_API_URL || 'https://bpheadlessb852.wpenginepowered.com/graphql')
 
 // WordPress GraphQL authentication queries and mutations
 const LOGIN_MUTATION = `
@@ -271,7 +271,7 @@ export class WordPressClient {
   async validateToken(token: string): Promise<{ success: boolean, user?: User, error?: string }> {
     try {
       const authenticatedClient = new GraphQLClient(
-        process.env.WORDPRESS_API_URL || 'http://localhost/statspro/graphql',
+        process.env.WORDPRESS_API_URL || 'https://bpheadlessb852.wpenginepowered.com/graphql',
         {
           headers: {
             authorization: `Bearer ${token}`,

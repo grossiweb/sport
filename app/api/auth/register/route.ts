@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GraphQLClient } from 'graphql-request'
 
 // Try different possible GraphQL endpoints
-const WORDPRESS_GRAPHQL_URL = process.env.WORDPRESS_API_URL || 'http://localhost/statspro/graphql'
+const WORDPRESS_GRAPHQL_URL = process.env.WORDPRESS_API_URL || 'https://bpheadlessb852.wpenginepowered.com/graphql'
 const client = new GraphQLClient(WORDPRESS_GRAPHQL_URL)
 
 // WordPress GraphQL mutation for user registration
@@ -111,9 +111,9 @@ export async function POST(request: NextRequest) {
       
       // Try alternative URLs
       const alternativeUrls = [
-        'http://localhost/statspro/wp-json/graphql',
-        'http://localhost/statspro/index.php?graphql',
-        'http://localhost/statspro/?graphql'
+        'https://bpheadlessb852.wpenginepowered.com/wp-json/graphql',
+        'https://bpheadlessb852.wpenginepowered.com/index.php?graphql',
+        'https://bpheadlessb852.wpenginepowered.com/?graphql'
       ]
       
       let foundWorkingUrl = false
