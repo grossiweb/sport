@@ -64,8 +64,9 @@ export async function POST(request: NextRequest) {
         )
 
         const userData = await userClient.request(VALIDATE_REFRESH_TOKEN_QUERY)
+        console.log('User data response (first attempt):', JSON.stringify(userData, null, 2))
 
-        if (userData.viewer) {
+        if (userData && userData.viewer) {
           const user = userData.viewer
           
           const mappedUser = {
@@ -82,6 +83,12 @@ export async function POST(request: NextRequest) {
             token: refreshData.refreshJwtAuthToken.authToken,
             user: mappedUser
           })
+        } else {
+          console.log('No viewer data found in response (first attempt):', userData)
+          return NextResponse.json(
+            { error: 'User data not found in GraphQL response' },
+            { status: 401 }
+          )
         }
       }
     } catch (refreshError) {
@@ -99,8 +106,9 @@ export async function POST(request: NextRequest) {
         )
 
         const userData = await userClient.request(VALIDATE_REFRESH_TOKEN_QUERY)
+        console.log('User data response (fallback attempt):', JSON.stringify(userData, null, 2))
 
-        if (userData.viewer) {
+        if (userData && userData.viewer) {
           const user = userData.viewer
           
           const mappedUser = {
@@ -118,9 +126,20 @@ export async function POST(request: NextRequest) {
             token: refreshToken,
             user: mappedUser
           })
+        } else {
+          console.log('No viewer data found in response:', userData)
+          return NextResponse.json(
+            { error: 'User data not found in GraphQL response' },
+            { status: 401 }
+          )
         }
-      } catch (validationError) {
+      } catch (validationError: any) {
         console.error('Token validation also failed:', validationError)
+        console.error('Validation error details:', validationError.response?.errors || validationError.message)
+        return NextResponse.json(
+          { error: 'Token validation failed', details: validationError.message },
+          { status: 401 }
+        )
       }
     }
 
