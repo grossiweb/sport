@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
         timeframe: timeframe || '15d',
         totalTrends: trends.length,
         highImpactTrends: trends.filter(t => t.impact === 'high').length,
-        categories: [...new Set(trends.map(t => t.type))],
+        categories: Array.from(new Set(trends.map(t => t.type))),
         avgImpactValue: Math.round(
           trends.reduce((sum, t) => sum + Math.abs(t.value), 0) / trends.length
         )
