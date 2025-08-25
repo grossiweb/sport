@@ -69,17 +69,6 @@ export function TeamStatsTable({
     ]
 
     switch (sport) {
-      case 'MLB':
-        return [
-          ...baseColumns,
-          { key: 'runs', label: 'R', width: 'w-16' },
-          { key: 'runsAllowed', label: 'RA', width: 'w-16' },
-          { key: 'battingAverage', label: 'AVG', width: 'w-20' },
-          { key: 'ops', label: 'OPS', width: 'w-20' },
-          { key: 'era', label: 'ERA', width: 'w-20' },
-          { key: 'whip', label: 'WHIP', width: 'w-20' }
-        ]
-      case 'NFL':
       case 'CFB':
         return [
           ...baseColumns,
@@ -298,13 +287,6 @@ function TeamDetailView({ team, stats, sport }: { team: Team; stats?: TeamStats;
 
   const getDetailStats = () => {
     switch (sport) {
-      case 'MLB':
-        return [
-          { label: 'On-Base %', value: stats.onBasePercentage?.toFixed(3) },
-          { label: 'Slugging %', value: stats.sluggingPercentage?.toFixed(3) },
-          { label: 'FIP', value: stats.fip?.toFixed(2) },
-        ]
-      case 'NFL':
       case 'CFB':
         return [
           { label: 'Total Yards', value: stats.yardsFor },

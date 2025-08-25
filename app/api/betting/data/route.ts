@@ -4,7 +4,7 @@ import { BettingData, SportType } from '@/types'
 // Mock betting data generator
 function generateMockBettingData(sport?: SportType, date?: string): BettingData[] {
   const bettingData: BettingData[] = []
-  const sports = sport ? [sport] : ['MLB', 'NFL', 'NBA', 'CFB', 'CBB'] as SportType[]
+  const sports = sport ? [sport] : ['CFB'] as SportType[]
   
   sports.forEach((currentSport) => {
     const gamesPerSport = Math.floor(Math.random() * 6) + 2 // 2-7 games per sport

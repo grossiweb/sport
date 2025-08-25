@@ -4,7 +4,7 @@ import { TrendData, SportType } from '@/types'
 // Mock trend data generator
 function generateMockTrends(sport?: SportType, category?: string, timeframe?: string): TrendData[] {
   const trends: TrendData[] = []
-  const sports = sport ? [sport] : ['MLB', 'NFL', 'NBA', 'CFB', 'CBB'] as SportType[]
+  const sports = sport ? [sport] : ['CFB'] as SportType[]
   
   const trendTemplates = {
     betting: [

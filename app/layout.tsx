@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'StatsPro Sports Analytics',
   description: 'Professional sports analytics platform with advanced statistics, predictions, and betting insights',
-  keywords: 'sports analytics, MLB, NFL, NBA, college football, college basketball, betting, predictions',
+  keywords: 'sports analytics, college football, CFB, betting, predictions, college sports',
 }
 
 export default function RootLayout({

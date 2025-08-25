@@ -61,7 +61,7 @@ export default function PredictionsPage() {
 
   const groupedPredictions = filteredPredictions.reduce((acc, prediction) => {
     // Note: In a real app, you'd need to get the sport from the game data
-    const sport = 'MLB' // This would come from joining with game data
+    const sport = 'CFB' // This would come from joining with game data
     if (!acc[sport]) {
       acc[sport] = []
     }

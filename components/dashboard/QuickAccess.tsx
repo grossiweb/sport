@@ -57,7 +57,7 @@ const quickLinks = [
   },
   {
     title: 'Bullpen Report',
-    description: 'MLB bullpen usage and effectiveness analysis',
+    description: 'CFB defense efficiency and analysis',
     href: '/bullpen',
     icon: DocumentTextIcon,
     color: 'bg-pink-500'

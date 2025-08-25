@@ -13,7 +13,7 @@ function generatePredictionStats() {
   
   const avgConfidence = 0.68 + Math.random() * 0.15 // 68-83% average
   
-  const sports = ['MLB', 'NFL', 'NBA', 'CFB', 'CBB']
+  const sports = ['CFB']
   const sportAccuracies = sports.map(sport => ({
     sport,
     accuracy: 0.50 + Math.random() * 0.30

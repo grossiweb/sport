@@ -73,19 +73,6 @@ export function PlayerStatsTable({
     ]
 
     switch (sport) {
-      case 'MLB':
-        return [
-          ...baseColumns,
-          { key: 'atBats', label: 'AB', width: 'w-16' },
-          { key: 'hits', label: 'H', width: 'w-16' },
-          { key: 'homeRuns', label: 'HR', width: 'w-16' },
-          { key: 'rbi', label: 'RBI', width: 'w-16' },
-          { key: 'battingAverage', label: 'AVG', width: 'w-20' },
-          { key: 'ops', label: 'OPS', width: 'w-20' },
-          { key: 'era', label: 'ERA', width: 'w-20' },
-          { key: 'whip', label: 'WHIP', width: 'w-20' }
-        ]
-      case 'NFL':
       case 'CFB':
         return [
           ...baseColumns,
@@ -309,16 +296,6 @@ function PlayerDetailView({ player, stats, sport }: { player: Player; stats?: Pl
 
   const getDetailStats = () => {
     switch (sport) {
-      case 'MLB':
-        return [
-          { label: 'Walks', value: stats.walks },
-          { label: 'Strikeouts', value: stats.strikeouts },
-          { label: 'Stolen Bases', value: stats.stolenBases },
-          { label: 'Innings Pitched', value: stats.inningsPitched?.toFixed(1) },
-          { label: 'Saves', value: stats.saves },
-          { label: 'Wins', value: stats.wins },
-        ]
-      case 'NFL':
       case 'CFB':
         return [
           { label: 'Interceptions', value: stats.interceptions },

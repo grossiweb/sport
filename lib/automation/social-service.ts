@@ -10,7 +10,7 @@ export class SocialService {
       const today = format(new Date(), 'yyyy-MM-dd')
       const allGames: Game[] = []
       
-      const sports: SportType[] = ['MLB', 'NFL', 'NBA', 'CFB', 'CBB']
+      const sports: SportType[] = ['CFB']
       
       for (const sport of sports) {
         try {

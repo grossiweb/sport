@@ -23,7 +23,7 @@ const mockStats: StatItem[] = [
     value: '.892',
     change: 2.3,
     changeType: 'increase',
-    sport: 'MLB'
+    sport: 'CFB'
   },
   {
     id: '2',
@@ -31,7 +31,7 @@ const mockStats: StatItem[] = [
     value: '2.84',
     change: -0.12,
     changeType: 'decrease',
-    sport: 'MLB'
+    sport: 'CFB'
   },
   {
     id: '3',
