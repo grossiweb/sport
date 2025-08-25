@@ -83,18 +83,6 @@ export function PlayerStatsTable({
           { key: 'receivingYards', label: 'Rec Yds', width: 'w-20' },
           { key: 'tackles', label: 'Tackles', width: 'w-20' }
         ]
-      case 'NBA':
-      case 'CBB':
-        return [
-          ...baseColumns,
-          { key: 'points', label: 'PTS', width: 'w-16' },
-          { key: 'rebounds', label: 'REB', width: 'w-16' },
-          { key: 'assists', label: 'AST', width: 'w-16' },
-          { key: 'steals', label: 'STL', width: 'w-16' },
-          { key: 'blocks', label: 'BLK', width: 'w-16' },
-          { key: 'fieldGoalPercentage', label: 'FG%', width: 'w-20' },
-          { key: 'threePointPercentage', label: '3P%', width: 'w-20' }
-        ]
       default:
         return baseColumns
     }
@@ -302,13 +290,6 @@ function PlayerDetailView({ player, stats, sport }: { player: Player; stats?: Pl
           { label: 'Receptions', value: stats.receptions },
           { label: 'Sacks', value: stats.sacks },
           { label: 'Fumbles', value: stats.fumbles },
-        ]
-      case 'NBA':
-      case 'CBB':
-        return [
-          { label: 'Turnovers', value: stats.turnovers },
-          { label: 'Minutes', value: stats.minutesPlayed?.toFixed(1) },
-          { label: 'FT%', value: stats.freeThrowPercentage ? (stats.freeThrowPercentage * 100).toFixed(1) + '%' : '-' },
         ]
       default:
         return []
