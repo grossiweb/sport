@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
           }
         )
 
-        const userData = await userClient.request(VALIDATE_REFRESH_TOKEN_QUERY) as ViewerData
+        const userData = await userClient.request(VALIDATE_REFRESH_TOKEN_QUERY) as any
         console.log('User data response (first attempt):', JSON.stringify(userData, null, 2))
 
         if (userData && userData.viewer) {
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
           }
         )
 
-        const userData = await userClient.request(VALIDATE_REFRESH_TOKEN_QUERY) as ViewerData
+        const userData = await userClient.request(VALIDATE_REFRESH_TOKEN_QUERY) as any
         console.log('User data response (fallback attempt):', JSON.stringify(userData, null, 2))
 
         if (userData && userData.viewer) {
