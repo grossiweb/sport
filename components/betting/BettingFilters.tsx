@@ -8,8 +8,10 @@ import {
 } from '@heroicons/react/24/outline'
 
 interface BettingFiltersProps {
+  selectedSport: 'CFB' | 'ALL'
   selectedDate: string
   showOnlyRLM: boolean
+  onSportChange: (sport: 'CFB' | 'ALL') => void
   onDateChange: (date: string) => void
   onRLMToggle: (rlm: boolean) => void
   onRefresh: () => void
@@ -18,8 +20,10 @@ interface BettingFiltersProps {
 }
 
 export function BettingFilters({
+  selectedSport,
   selectedDate,
   showOnlyRLM,
+  onSportChange,
   onDateChange,
   onRLMToggle,
   onRefresh,
@@ -64,7 +68,22 @@ export function BettingFilters({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Sport Filter */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Sport
+          </label>
+          <select
+            value={selectedSport}
+            onChange={(e) => onSportChange(e.target.value as 'CFB' | 'ALL')}
+            className="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          >
+            <option value="ALL">All Sports</option>
+            <option value="CFB">College Football</option>
+          </select>
+        </div>
+
         {/* Date Filter */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
