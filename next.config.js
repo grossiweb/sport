@@ -9,6 +9,8 @@ const nextConfig = {
     SPORTSDATA_API_KEY: process.env.SPORTSDATA_API_KEY || 'demo-key',
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'development-secret-key',
     NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+    WORDPRESS_JWT_SECRET: process.env.WORDPRESS_JWT_SECRET || 'development-jwt-secret',
+    WORDPRESS_JWT_EXPIRE: process.env.WORDPRESS_JWT_EXPIRE || '3600',
   },
 }
 

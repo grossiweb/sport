@@ -92,10 +92,10 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const date = searchParams.get('date') || format(new Date(), 'yyyy-MM-dd')
-
-    // Get college football games only
-    const games = await sportsAPI.getGames(date)
-
+    
+          // Get college football games only
+      const games = await sportsAPI.getGames(date)
+      console.log('Games fetched for date:', date, 'Total games:', games.length)
     // Generate matchup data for each game
     const matchups: Matchup[] = await Promise.all(
       games.map(async (game) => {
@@ -115,16 +115,52 @@ export async function GET(request: NextRequest) {
           const trends = generateTrends(game.id)
           const injuries = generateInjuries(game.id)
           
-          // Get key players (mock data)
+          // Get enhanced matchup analysis
+          let matchupAnalysis = null
+          try {
+            matchupAnalysis = await sportsAPI.getMatchupAnalysis(game.homeTeam.id, game.awayTeam.id)
+          } catch (error) {
+            console.error(`Error fetching matchup analysis for game ${game.id}:`, error)
+          }
+
+          // Get head-to-head history
+          let headToHead = []
+          try {
+            headToHead = await sportsAPI.getHeadToHeadHistory(game.homeTeam.id, game.awayTeam.id)
+          } catch (error) {
+            console.error(`Error fetching H2H history for game ${game.id}:`, error)
+          }
+
+          // Get key players for both teams
           let keyPlayers = []
           try {
-            const allPlayers = await sportsAPI.getPlayers()
-            // Filter by teams and get top players
-            keyPlayers = allPlayers
-              .filter(p => p.teamId === game.homeTeam.id || p.teamId === game.awayTeam.id)
-              .slice(0, 4) // Top 4 players
+            const [homePlayers, awayPlayers] = await Promise.allSettled([
+              sportsAPI.getPlayers(game.homeTeam.id),
+              sportsAPI.getPlayers(game.awayTeam.id)
+            ])
+            
+            const homePlayerList = homePlayers.status === 'fulfilled' ? homePlayers.value.slice(0, 2) : []
+            const awayPlayerList = awayPlayers.status === 'fulfilled' ? awayPlayers.value.slice(0, 2) : []
+            
+            keyPlayers = [...homePlayerList, ...awayPlayerList]
           } catch (error) {
             console.error(`Error fetching players for game ${game.id}:`, error)
+          }
+
+          // Get team season stats for both teams
+          let teamStats = null
+          try {
+            const [homeStats, awayStats] = await Promise.allSettled([
+              sportsAPI.getTeamSeasonStats(game.homeTeam.id),
+              sportsAPI.getTeamSeasonStats(game.awayTeam.id)
+            ])
+            
+            teamStats = {
+              home: homeStats.status === 'fulfilled' ? homeStats.value : null,
+              away: awayStats.status === 'fulfilled' ? awayStats.value : null
+            }
+          } catch (error) {
+            console.error(`Error fetching team stats for game ${game.id}:`, error)
           }
 
           return {
@@ -133,7 +169,10 @@ export async function GET(request: NextRequest) {
             bettingData,
             trends,
             keyPlayers,
-            injuries
+            injuries,
+            matchupAnalysis,
+            headToHead,
+            teamStats
           }
         } catch (error) {
           console.error(`Error generating matchup for game ${game.id}:`, error)
@@ -144,7 +183,10 @@ export async function GET(request: NextRequest) {
             bettingData: null,
             trends: [],
             keyPlayers: [],
-            injuries: []
+            injuries: [],
+            matchupAnalysis: null,
+            headToHead: [],
+            teamStats: null
           }
         }
       })

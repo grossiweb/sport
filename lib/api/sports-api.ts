@@ -13,6 +13,7 @@ class TheRundownAPI {
 
   private async makeRequest(endpoint: string, params?: Record<string, any>) {
     try {
+      console.log('Making request to:', `${this.baseUrl}${endpoint}`, 'with params:', params)
       const response = await axios.get(`${this.baseUrl}${endpoint}`, {
         headers: {
           'X-RapidAPI-Key': this.apiKey,
@@ -20,76 +21,134 @@ class TheRundownAPI {
         },
         params
       })
+      console.log('Response status:', response.status)
+      console.log('Response data keys:', Object.keys(response.data))
       return response.data
     } catch (error) {
       console.error('TheRundown API error:', error)
+      if (axios.isAxiosError(error)) {
+        console.error('Error response:', error.response?.data)
+        console.error('Error status:', error.response?.status)
+      }
       throw error
     }
   }
 
-  async getGames(date?: string): Promise<Game[]> {
-    const endpoint = `/sports/${this.sportId}/events`
-    const params = date ? { date } : {}
+  async getGames(date?: string, limit?: number): Promise<Game[]> {
+    // Use the correct schedule endpoint for TheRundown API
+    const fromDate = date || new Date().toISOString().split('T')[0]
+    const endpoint = `/sports/${this.sportId}/schedule`
+    const params = {
+      from: fromDate,
+      limit: limit || 10
+    }
+  
+    // Make the API request
     const data = await this.makeRequest(endpoint, params)
-    
-    return data.events?.map((event: any) => ({
-      id: event.event_id,
-      homeTeam: {
-        id: event.teams_normalized[0].team_id,
-        name: event.teams_normalized[0].name,
-        city: event.teams_normalized[0].mascot,
-        abbreviation: event.teams_normalized[0].abbreviation,
-        league: 'CFB' as SportType
-      },
-      awayTeam: {
-        id: event.teams_normalized[1].team_id,
-        name: event.teams_normalized[1].name,
-        city: event.teams_normalized[1].mascot,
-        abbreviation: event.teams_normalized[1].abbreviation,
-        league: 'CFB' as SportType
-      },
-      league: 'CFB' as SportType,
-      gameDate: new Date(event.event_date),
-      status: this.mapEventStatus(event.score.event_status),
-      homeScore: event.score.score_home,
-      awayScore: event.score.score_away,
-      venue: event.venue?.name
-    })) || []
+  
+    console.log('✅ Raw API response:', data)
+  
+    // Extract schedules safely
+    const events = Array.isArray(data?.schedules) ? data.schedules : []
+  
+    console.log(`📌 Total events found: ${events.length}`)
+    if (events.length > 0) {
+      console.log('📄 First event structure:', Object.keys(events[0]))
+    }
+  
+    // If no events found, return an empty array
+    if (events.length === 0) {
+      console.warn('⚠️ No events found for date:', fromDate)
+      return []
+    }
+  
+    // Map response into your Game[] structure
+    return events.map((event: any) => {
+      console.log('⚡ Processing event:', {
+        id: event.event_id,
+        home: event.home_team,
+        away: event.away_team,
+        date: event.date_event,
+        status: event.event_status
+      })
+  
+      return {
+        id: event.event_id,
+        homeTeam: {
+          id: event.home_team_id?.toString() || event.home_team_id,
+          name: event.home_team || 'Home Team',
+          city: '', // ❌ Not provided in response
+          abbreviation: event.home_team?.substring(0, 3).toUpperCase() || 'HOM',
+          league: 'CFB' as SportType
+        },
+        awayTeam: {
+          id: event.away_team_id?.toString() || event.away_team_id,
+          name: event.away_team || 'Away Team',
+          city: '', // ❌ Not provided in response
+          abbreviation: event.away_team?.substring(0, 3).toUpperCase() || 'AWY',
+          league: 'CFB' as SportType
+        },
+        league: 'CFB' as SportType,
+        gameDate: new Date(event.date_event),
+        status: this.mapEventStatus(event.event_status),
+        statusDetail: event.event_status_detail || '', // ✅ Added for better UI
+        homeScore: event.home_score ?? 0,
+        awayScore: event.away_score ?? 0,
+        venue: event.event_location || 'TBD',
+        broadcast: event.broadcast || 'N/A' // ✅ Added for live game info
+      }
+    })
   }
+  
 
   async getBettingData(eventId: string): Promise<BettingData | null> {
-    const endpoint = `/events/${eventId}/lines`
-    const data = await this.makeRequest(endpoint)
-    
-    if (!data.lines?.length) return null
+    try {
+      // Get the line ID from the event first
+      const eventData = await this.makeRequest(`/events/${eventId}/?include=scores`)
+      const lineId = eventData?.lines?.[0]?.line_id
+      
+      if (!lineId) return null
 
-    const latestLine = data.lines[0]
-    
-    return {
-      gameId: eventId,
-      spread: {
-        home: latestLine.spread?.point_spread_home || 0,
-        away: latestLine.spread?.point_spread_away || 0,
-        juice: latestLine.spread?.point_spread_home_money || 0
-      },
-      moneyLine: {
-        home: latestLine.moneyline?.moneyline_home || 0,
-        away: latestLine.moneyline?.moneyline_away || 0
-      },
-      total: {
-        over: latestLine.total?.total_over || 0,
-        under: latestLine.total?.total_under || 0,
-        points: latestLine.total?.total_over_money || 0
-      },
-      publicBets: {
-        homePercentage: 50, // TheRundown doesn't provide this
-        awayPercentage: 50
-      },
-      handle: {
-        homePercentage: 50,
-        awayPercentage: 50
-      },
-      reverseLineMovement: false
+      // Fetch spread, moneyline, and totals in parallel
+      const [spreadData, moneylineData, totalData] = await Promise.allSettled([
+        this.makeRequest(`/lines/${lineId}/spread?include=all_periods`),
+        this.makeRequest(`/lines/${lineId}/moneyline?include=all_periods`), 
+        this.makeRequest(`/lines/${lineId}/total?include=all_periods`)
+      ])
+
+      const spread = spreadData.status === 'fulfilled' ? spreadData.value : null
+      const moneyline = moneylineData.status === 'fulfilled' ? moneylineData.value : null
+      const total = totalData.status === 'fulfilled' ? totalData.value : null
+
+      return {
+        gameId: eventId,
+        spread: {
+          home: spread?.point_spread_home || 0,
+          away: spread?.point_spread_away || 0,
+          juice: spread?.point_spread_home_money || 0
+        },
+        moneyLine: {
+          home: moneyline?.moneyline_home || 0,
+          away: moneyline?.moneyline_away || 0
+        },
+        total: {
+          over: total?.total_over || 0,
+          under: total?.total_under || 0,
+          points: total?.total_over_money || 0
+        },
+        publicBets: {
+          homePercentage: 50,
+          awayPercentage: 50
+        },
+        handle: {
+          homePercentage: 50,
+          awayPercentage: 50
+        },
+        reverseLineMovement: false
+      }
+    } catch (error) {
+      console.error('Error fetching betting data:', error)
+      return null
     }
   }
 
@@ -391,6 +450,123 @@ class TheRundownAPI {
     return allStats
   }
 
+  async getPlayerGameStats(eventId: string): Promise<any> {
+    try {
+      const endpoint = `/v2/events/${eventId}/players/stats`
+      return await this.makeRequest(endpoint)
+    } catch (error) {
+      console.error('Error fetching player game stats:', error)
+      return null
+    }
+  }
+
+  async getTeamGameStats(eventId: string): Promise<any> {
+    try {
+      const endpoint = `/v2/events/${eventId}/stats`
+      return await this.makeRequest(endpoint)
+    } catch (error) {
+      console.error('Error fetching team game stats:', error)
+      return null
+    }
+  }
+
+  async getTeamSeasonStats(teamId: string): Promise<any> {
+    try {
+      const endpoint = `/v2/teams/${teamId}/stats`
+      return await this.makeRequest(endpoint)
+    } catch (error) {
+      console.error('Error fetching team season stats:', error)
+      return null
+    }
+  }
+
+  async getPlayerSeasonStats(teamId: string): Promise<any> {
+    try {
+      const endpoint = `/v2/teams/${teamId}/players/stats`
+      return await this.makeRequest(endpoint)
+    } catch (error) {
+      console.error('Error fetching player season stats:', error)
+      return null
+    }
+  }
+
+  async getHeadToHeadHistory(team1Id: string, team2Id: string): Promise<any[]> {
+    try {
+      // TheRundown API doesn't have direct H2H endpoint, so we'll simulate this
+      // In a real implementation, you might need to fetch historical games and filter
+      console.log(`Getting H2H history for teams ${team1Id} vs ${team2Id}`)
+      return []
+    } catch (error) {
+      console.error('Error fetching head-to-head history:', error)
+      return []
+    }
+  }
+
+  async getMatchupAnalysis(homeTeamId: string, awayTeamId: string): Promise<any> {
+    try {
+      // Get both teams' season stats for comparison
+      const [homeStats, awayStats] = await Promise.allSettled([
+        this.getTeamSeasonStats(homeTeamId),
+        this.getTeamSeasonStats(awayTeamId)
+      ])
+
+      const homeTeamStats = homeStats.status === 'fulfilled' ? homeStats.value : null
+      const awayTeamStats = awayStats.status === 'fulfilled' ? awayStats.value : null
+
+      // Generate analytical insights based on team stats
+      const insights = this.generateMatchupInsights(homeTeamStats, awayTeamStats)
+
+      return {
+        homeTeamStats,
+        awayTeamStats,
+        insights,
+        keyMatchups: this.identifyKeyMatchups(homeTeamStats, awayTeamStats)
+      }
+    } catch (error) {
+      console.error('Error generating matchup analysis:', error)
+      return null
+    }
+  }
+
+  private generateMatchupInsights(homeStats: any, awayStats: any): string[] {
+    const insights: string[] = []
+    
+    if (homeStats && awayStats) {
+      // Offensive vs Defensive matchups
+      if (homeStats.rushing_yards_per_game > awayStats.rushing_defense_yards_per_game) {
+        insights.push(`Home team's rushing offense (${homeStats.rushing_yards_per_game} YPG) vs away team's rushing defense (${awayStats.rushing_defense_yards_per_game} YPG allowed) - Advantage: Home`)
+      }
+      
+      if (awayStats.passing_yards_per_game > homeStats.passing_defense_yards_per_game) {
+        insights.push(`Away team's passing offense (${awayStats.passing_yards_per_game} YPG) vs home team's passing defense (${homeStats.passing_defense_yards_per_game} YPG allowed) - Advantage: Away`)
+      }
+      
+      // Turnover analysis
+      if (homeStats.turnover_margin > awayStats.turnover_margin) {
+        insights.push(`Home team has better turnover margin (+${homeStats.turnover_margin} vs ${awayStats.turnover_margin})`)
+      }
+    }
+    
+    return insights
+  }
+
+  private identifyKeyMatchups(homeStats: any, awayStats: any): any[] {
+    return [
+      {
+        category: 'Rushing Offense vs Rushing Defense',
+        homeAdvantage: homeStats?.rushing_yards_per_game || 0,
+        awayAdvantage: awayStats?.rushing_defense_yards_per_game || 0,
+        advantage: 'home' // Simplified logic
+      },
+      {
+        category: 'Passing Offense vs Passing Defense', 
+        homeAdvantage: homeStats?.passing_yards_per_game || 0,
+        awayAdvantage: awayStats?.passing_defense_yards_per_game || 0,
+        advantage: 'away'
+      }
+    ]
+  }
+
   async getPredictions(date?: string): Promise<any[]> {
     const endpoint = `/sports/${this.sportId}/predictions`
     const params = date ? { date } : {}
@@ -411,17 +587,24 @@ class TheRundownAPI {
 
   private mapEventStatus(status: string): Game['status'] {
     switch (status.toLowerCase()) {
+      case 'status_scheduled':
       case 'scheduled':
       case 'upcoming':
         return 'scheduled'
+      case 'status_inprogress':
+      case 'status_live':
       case 'inprogress':
       case 'live':
         return 'live'
+      case 'status_final':
+      case 'status_completed':
       case 'final':
       case 'completed':
         return 'final'
+      case 'status_postponed':
       case 'postponed':
         return 'postponed'
+      case 'status_cancelled':
       case 'cancelled':
         return 'cancelled'
       default:
@@ -441,8 +624,8 @@ export class SportsAPI {
   }
 
   // Games and schedules
-  async getGames(date?: string): Promise<Game[]> {
-    return this.theRundown.getGames(date)
+  async getGames(date?: string, limit?: number): Promise<Game[]> {
+    return this.theRundown.getGames(date, limit)
   }
 
   // Betting data
@@ -478,6 +661,31 @@ export class SportsAPI {
   // Predictions
   async getPredictions(date?: string): Promise<any[]> {
     return this.theRundown.getPredictions(date)
+  }
+
+  // Enhanced analytics and matchup data
+  async getPlayerGameStats(eventId: string): Promise<any> {
+    return this.theRundown.getPlayerGameStats(eventId)
+  }
+
+  async getTeamGameStats(eventId: string): Promise<any> {
+    return this.theRundown.getTeamGameStats(eventId)
+  }
+
+  async getTeamSeasonStats(teamId: string): Promise<any> {
+    return this.theRundown.getTeamSeasonStats(teamId)
+  }
+
+  async getPlayerSeasonStats(teamId: string): Promise<any> {
+    return this.theRundown.getPlayerSeasonStats(teamId)
+  }
+
+  async getHeadToHeadHistory(team1Id: string, team2Id: string): Promise<any[]> {
+    return this.theRundown.getHeadToHeadHistory(team1Id, team2Id)
+  }
+
+  async getMatchupAnalysis(homeTeamId: string, awayTeamId: string): Promise<any> {
+    return this.theRundown.getMatchupAnalysis(homeTeamId, awayTeamId)
   }
 }
 

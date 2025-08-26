@@ -191,6 +191,12 @@ export interface Matchup {
   trends: TrendData[]
   keyPlayers: Player[]
   injuries: InjuryReport[]
+  matchupAnalysis?: any
+  headToHead?: any[]
+  teamStats?: {
+    home: any
+    away: any
+  }
 }
 
 // Prediction and Betting Types

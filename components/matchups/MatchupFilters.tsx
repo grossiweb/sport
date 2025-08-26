@@ -102,6 +102,7 @@ export function MatchupFilters({
         </div>
 
         {/* Premium Filter */}
+        {/* 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Premium Picks
@@ -117,7 +118,7 @@ export function MatchupFilters({
             <StarIcon className="h-4 w-4" />
             <span>{showOnlyPremium ? 'Premium Only' : 'All Games'}</span>
           </button>
-        </div>
+        </div>*/}
 
         {/* Quick Stats */}
         <div>
@@ -139,6 +140,7 @@ export function MatchupFilters({
       </div>
 
       {/* Advanced Options */}
+      {/*
       <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         <div className="flex items-center space-x-2 mb-4">
           <FunnelIcon className="h-4 w-4 text-gray-500" />
@@ -161,7 +163,7 @@ export function MatchupFilters({
             Weather Impact
           </button>
         </div>
-      </div>
+      </div>*/}
     </div>
   )
 }
