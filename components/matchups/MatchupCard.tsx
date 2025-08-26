@@ -21,7 +21,56 @@ interface MatchupCardProps {
 
 export function MatchupCard({ matchup }: MatchupCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const { game, predictions, bettingData, trends, keyPlayers, injuries, matchupAnalysis, headToHead, teamStats } = matchup
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false)
+  const [detailedData, setDetailedData] = useState<{
+    bettingData: any
+    keyPlayers: any[]
+    teamStats: any
+    matchupAnalysis: any
+    headToHead: any[]
+  } | null>(null)
+
+  const { game, predictions, trends, injuries } = matchup
+  
+  // Use lazy-loaded data if available, otherwise use initial data
+  const bettingData = detailedData?.bettingData || matchup.bettingData
+  const keyPlayers = detailedData?.keyPlayers || matchup.keyPlayers || []
+  const matchupAnalysis = detailedData?.matchupAnalysis || matchup.matchupAnalysis
+  const headToHead = detailedData?.headToHead || matchup.headToHead || []
+  const teamStats = detailedData?.teamStats || matchup.teamStats
+
+  const loadDetailedData = async () => {
+    if (detailedData || isLoadingDetails) return // Already loaded or loading
+    
+    setIsLoadingDetails(true)
+    try {
+      const url = new URL(`/api/matchups/${game.id}/details`, window.location.origin)
+      if (game.homeTeam.id && game.awayTeam.id) {
+        url.searchParams.set('homeTeamId', game.homeTeam.id)
+        url.searchParams.set('awayTeamId', game.awayTeam.id)
+      }
+      
+      const response = await fetch(url.toString())
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success) {
+          setDetailedData(result.data)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load detailed data:', error)
+    } finally {
+      setIsLoadingDetails(false)
+    }
+  }
+
+  const handleToggleExpanded = () => {
+    setIsExpanded(!isExpanded)
+    if (!isExpanded && !detailedData) {
+      // Load detailed data when expanding for the first time
+      loadDetailedData()
+    }
+  }
 
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 0.8) return 'text-green-600 dark:text-green-400'
@@ -196,11 +245,16 @@ export function MatchupCard({ matchup }: MatchupCardProps) {
       {/* Expandable Details */}
       <div className="px-6 py-4">
         <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+          onClick={handleToggleExpanded}
+          disabled={isLoadingDetails}
+          className="w-full flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50"
         >
-          <span>Detailed Analysis</span>
-          {isExpanded ? (
+          <span>
+            {isLoadingDetails ? 'Loading Detailed Analysis...' : 'Detailed Analysis'}
+          </span>
+          {isLoadingDetails ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 dark:border-white"></div>
+          ) : isExpanded ? (
             <ChevronUpIcon className="h-4 w-4" />
           ) : (
             <ChevronDownIcon className="h-4 w-4" />

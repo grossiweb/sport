@@ -13,7 +13,7 @@ class TheRundownAPI {
 
   private async makeRequest(endpoint: string, params?: Record<string, any>) {
     try {
-      console.log('Making request to:', `${this.baseUrl}${endpoint}`, 'with params:', params)
+      // console.log('Making request to:', `${this.baseUrl}${endpoint}`, 'with params:', params)
       const response = await axios.get(`${this.baseUrl}${endpoint}`, {
         headers: {
           'X-RapidAPI-Key': this.apiKey,
@@ -21,14 +21,14 @@ class TheRundownAPI {
         },
         params
       })
-      console.log('Response status:', response.status)
-      console.log('Response data keys:', Object.keys(response.data))
+      // console.log('Response status:', response.status)
+      // console.log('Response data keys:', Object.keys(response.data))
       return response.data
     } catch (error) {
-      console.error('TheRundown API error:', error)
+      // console.error('TheRundown API error:', error)
       if (axios.isAxiosError(error)) {
-        console.error('Error response:', error.response?.data)
-        console.error('Error status:', error.response?.status)
+        // console.error('Error response:', error.response?.data)
+        // console.error('Error status:', error.response?.status)
       }
       throw error
     }
@@ -46,31 +46,31 @@ class TheRundownAPI {
     // Make the API request
     const data = await this.makeRequest(endpoint, params)
   
-    console.log('✅ Raw API response:', data)
+         // console.log('✅ Raw API response:', data)
   
     // Extract schedules safely
     const events = Array.isArray(data?.schedules) ? data.schedules : []
   
-    console.log(`📌 Total events found: ${events.length}`)
+         // console.log(`📌 Total events found: ${events.length}`)
     if (events.length > 0) {
-      console.log('📄 First event structure:', Object.keys(events[0]))
+             // console.log('📄 First event structure:', Object.keys(events[0]))
     }
   
     // If no events found, return an empty array
     if (events.length === 0) {
-      console.warn('⚠️ No events found for date:', fromDate)
+             // console.warn('⚠️ No events found for date:', fromDate)
       return []
     }
   
     // Map response into your Game[] structure
     return events.map((event: any) => {
-      console.log('⚡ Processing event:', {
-        id: event.event_id,
-        home: event.home_team,
-        away: event.away_team,
-        date: event.date_event,
-        status: event.event_status
-      })
+             // console.log('⚡ Processing event:', {
+       //   id: event.event_id,
+       //   home: event.home_team,
+       //   away: event.away_team,
+       //   date: event.date_event,
+       //   status: event.event_status
+       // })
   
       return {
         id: event.event_id,
@@ -620,7 +620,7 @@ export class SportsAPI {
   private theRundown: TheRundownAPI
 
   constructor() {
-    this.theRundown = new TheRundownAPI(process.env.THERUNDOWN_API_KEY || '')
+    this.theRundown = new TheRundownAPI(process.env.THERUNDOWN_API_KEY || 'daebc01578mshf1b6929ad17a9f8p19c30bjsn5ab4b86b16e7')
   }
 
   // Games and schedules

@@ -95,102 +95,28 @@ export async function GET(request: NextRequest) {
     
           // Get college football games only
       const games = await sportsAPI.getGames(date)
-      console.log('Games fetched for date:', date, 'Total games:', games.length)
-    // Generate matchup data for each game
-    const matchups: Matchup[] = await Promise.all(
-      games.map(async (game) => {
-        try {
-          // Generate AI predictions
-          const predictions = generateAIPrediction(game)
-          
-          // Get betting data
-          let bettingData = null
-          try {
-            bettingData = await sportsAPI.getBettingData(game.id)
-          } catch (error) {
-            console.error(`Error fetching betting data for game ${game.id}:`, error)
-          }
-
-          // Generate trends and injury data
-          const trends = generateTrends(game.id)
-          const injuries = generateInjuries(game.id)
-          
-          // Get enhanced matchup analysis
-          let matchupAnalysis = null
-          try {
-            matchupAnalysis = await sportsAPI.getMatchupAnalysis(game.homeTeam.id, game.awayTeam.id)
-          } catch (error) {
-            console.error(`Error fetching matchup analysis for game ${game.id}:`, error)
-          }
-
-          // Get head-to-head history
-          let headToHead = []
-          try {
-            headToHead = await sportsAPI.getHeadToHeadHistory(game.homeTeam.id, game.awayTeam.id)
-          } catch (error) {
-            console.error(`Error fetching H2H history for game ${game.id}:`, error)
-          }
-
-          // Get key players for both teams
-          let keyPlayers = []
-          try {
-            const [homePlayers, awayPlayers] = await Promise.allSettled([
-              sportsAPI.getPlayers(game.homeTeam.id),
-              sportsAPI.getPlayers(game.awayTeam.id)
-            ])
-            
-            const homePlayerList = homePlayers.status === 'fulfilled' ? homePlayers.value.slice(0, 2) : []
-            const awayPlayerList = awayPlayers.status === 'fulfilled' ? awayPlayers.value.slice(0, 2) : []
-            
-            keyPlayers = [...homePlayerList, ...awayPlayerList]
-          } catch (error) {
-            console.error(`Error fetching players for game ${game.id}:`, error)
-          }
-
-          // Get team season stats for both teams
-          let teamStats = null
-          try {
-            const [homeStats, awayStats] = await Promise.allSettled([
-              sportsAPI.getTeamSeasonStats(game.homeTeam.id),
-              sportsAPI.getTeamSeasonStats(game.awayTeam.id)
-            ])
-            
-            teamStats = {
-              home: homeStats.status === 'fulfilled' ? homeStats.value : null,
-              away: awayStats.status === 'fulfilled' ? awayStats.value : null
-            }
-          } catch (error) {
-            console.error(`Error fetching team stats for game ${game.id}:`, error)
-          }
-
-          return {
-            game,
-            predictions,
-            bettingData,
-            trends,
-            keyPlayers,
-            injuries,
-            matchupAnalysis,
-            headToHead,
-            teamStats
-          }
-        } catch (error) {
-          console.error(`Error generating matchup for game ${game.id}:`, error)
-          // Return minimal matchup data
-          return {
-            game,
-            predictions: generateAIPrediction(game),
-            bettingData: null,
-            trends: [],
-            keyPlayers: [],
-            injuries: [],
-            matchupAnalysis: null,
-            headToHead: [],
-            teamStats: null
-          }
-        }
-      })
-    )
+      // console.log('Games fetched for date:', date, 'Total games:', games.length)
+    // Generate basic matchup data for each game (no API calls to preserve quota)
+    const matchups: Matchup[] = games.map((game) => {
+      // Generate basic AI predictions (no API calls)
+      const predictions = generateAIPrediction(game)
+      
+      // Generate basic trends and injury data (no API calls)
+      const trends = generateTrends(game.id)
+      const injuries = generateInjuries(game.id)
+      
+      return {
+        game,
+        predictions,
+        bettingData: null, // Will be loaded on demand
+        trends,
+        keyPlayers: [], // Will be loaded on demand
+        injuries,
+        matchupAnalysis: null, // Will be loaded on demand
+        headToHead: [], // Will be loaded on demand
+        teamStats: null // Will be loaded on demand
+      }
+    })
 
     // Sort by game time
     matchups.sort((a, b) => 
