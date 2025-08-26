@@ -25,11 +25,11 @@ import { clsx } from 'clsx'
 const navigation = [
   { name: 'Dashboard', href: '/', icon: HomeIcon },
   { name: 'Team Stats', href: '/teams', icon: UsersIcon },
-  { name: 'Player Stats', href: '/players', icon: UserCircleIcon },
+  //{ name: 'Player Stats', href: '/players', icon: UserCircleIcon },
   { name: 'Daily Matchups', href: '/matchups', icon: TrophyIcon },
-  { name: 'Predictions', href: '/predictions', icon: PresentationChartLineIcon },
-  { name: 'Trends', href: '/trends', icon: ChartBarIcon },
-  { name: 'Money Data', href: '/betting', icon: CurrencyDollarIcon },
+  //{ name: 'Predictions', href: '/predictions', icon: PresentationChartLineIcon },
+  //{ name: 'Trends', href: '/trends', icon: ChartBarIcon },
+  //{ name: 'Money Data', href: '/betting', icon: CurrencyDollarIcon },
 ]
 
 export function Navigation() {
@@ -109,13 +109,14 @@ export function Navigation() {
                       {user.subscriptionStatus === 'active' ? 'Pro' : 
                        user.subscriptionStatus === 'trial' ? 'Trial' : 'Inactive'}
                     </span>
+                    {/*}
                     <Link
                       href="/settings"
                       className="p-1 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                       title="Settings"
                     >
                       <Cog6ToothIcon className="h-5 w-5" />
-                    </Link>
+                    </Link>*/}
                     <button
                       onClick={logout}
                       className="p-1 rounded-lg text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors duration-200"
@@ -134,11 +135,12 @@ export function Navigation() {
                 >
                   Sign in
                 </Link>
+
                 <Link
-                  href="/subscribe"
+                  href="/register"
                   className="btn-primary text-sm"
                 >
-                  Subscribe
+                  Sign Up
                 </Link>
               </div>
             )}
