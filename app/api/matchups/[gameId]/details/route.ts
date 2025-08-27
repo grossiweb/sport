@@ -108,6 +108,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { gameId: string } }
 ) {
+  let sport: string | undefined
   try {
     const { searchParams } = new URL(request.url)
     const sport = searchParams.get('sport')?.toUpperCase() || 'CFB'
