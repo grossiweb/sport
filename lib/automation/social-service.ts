@@ -12,7 +12,7 @@ export class SocialService {
       
       // Get CFB games for today
       try {
-        const games = await sportsAPI.getGames(today)
+        const games = await sportsAPI.getGames('CFB',today)
         allGames.push(...games.slice(0, 2)) // Top 2 games
       } catch (error) {
         console.error('Error fetching CFB games:', error)
