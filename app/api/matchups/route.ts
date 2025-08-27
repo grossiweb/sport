@@ -90,6 +90,7 @@ function generateInjuries(gameId: string): InjuryReport[] {
 }
 
 export async function GET(request: NextRequest) {
+  let sport: string | undefined
   try {
     const { searchParams } = new URL(request.url)
     const sport = searchParams.get('sport')?.toUpperCase() || 'CFB'
