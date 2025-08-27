@@ -80,34 +80,34 @@ export function QuickAccess() {
     link.title === 'Team Stats' || link.title === 'Daily Matchups'
   )
 
+  function QuickAccessCard({ link }: { link: typeof quickLinks[0] }) {
+    return (
+      <Link
+        href={link.href}
+        className="group block stat-card hover:scale-105 transform transition-all duration-200"
+      >
+        <div className="flex items-start space-x-3">
+          <div className={`flex-shrink-0 p-3 rounded-lg ${link.color}`}>
+            <link.icon className="h-6 w-6 text-white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
+              {link.title}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {link.description}
+            </p>
+          </div>
+        </div>
+      </Link>
+    )
+  }
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {filteredLinks.map((link) => (
         <QuickAccessCard key={link.href} link={link} />
       ))}
     </div>
-  )
-}
-
-function QuickAccessCard({ link }: { link: typeof quickLinks[0] }) {
-  return (
-    <Link
-      href={link.href}
-      className="group block stat-card hover:scale-105 transform transition-all duration-200"
-    >
-      <div className="flex items-start space-x-3">
-        <div className={`flex-shrink-0 p-3 rounded-lg ${link.color}`}>
-          <link.icon className="h-6 w-6 text-white" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
-            {link.title}
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {link.description}
-          </p>
-        </div>
-      </div>
-    </Link>
   )
 }
