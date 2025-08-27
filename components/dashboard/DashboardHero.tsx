@@ -1,11 +1,13 @@
 'use client'
 
 import { useAuth } from '@/hooks/useAuth'
+import { useSport } from '@/contexts/SportContext'
 import { CalendarIcon, ChartBarIcon, TrophyIcon } from '@heroicons/react/24/outline'
 import { format } from 'date-fns'
 
 export function DashboardHero() {
   const { user } = useAuth()
+  const { currentSportData } = useSport()
   const today = new Date()
 
   return (
@@ -16,7 +18,7 @@ export function DashboardHero() {
             Welcome back{user?.name ? `, ${user.name}` : ''}!
           </h1>
           <p className="text-primary-100 text-lg mb-4">
-            Professional sports analytics at your fingertips
+            Professional {currentSportData.displayName} analytics at your fingertips
           </p>
           <div className="flex items-center space-x-6 text-primary-200">
             <div className="flex items-center space-x-2">
@@ -25,7 +27,7 @@ export function DashboardHero() {
             </div>
             <div className="flex items-center space-x-2">
               <TrophyIcon className="h-5 w-5" />
-              <span>5 Sports Covered</span>
+              <span>Currently viewing {currentSportData.shortName}</span>
             </div>
           </div>
         </div>

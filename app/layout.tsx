@@ -5,6 +5,7 @@ import { Providers } from './providers'
 import { Navigation } from '@/components/layout/Navigation'
 import { AuthProvider } from '@/components/auth/AuthProvider'
 import { SessionDebug } from '@/components/auth/SessionDebug'
+import { SportSelectionWrapper } from '@/components/sport/SportSelectionWrapper'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -30,6 +31,7 @@ export default function RootLayout({
                 {children}
               </main>
               <SessionDebug />
+              <SportSelectionWrapper />
             </div>
           </AuthProvider>
         </Providers>

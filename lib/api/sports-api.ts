@@ -1,14 +1,15 @@
 import axios from 'axios'
 import { Game, Team, Player, TeamStats, PlayerStats, BettingData, SportType } from '@/types'
 
-// TheRundown.io API client for College Football
+// TheRundown.io API client for Multiple Sports
 class TheRundownAPI {
   private apiKey: string
   private baseUrl = 'https://therundown-therundown-v1.p.rapidapi.com'
-  private sportId = '1' // College Football sport ID
+  private sportId: string
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, sportId: string = '1') {
     this.apiKey = apiKey
+    this.sportId = sportId
   }
 
   private async makeRequest(endpoint: string, params?: Record<string, any>) {
@@ -615,77 +616,105 @@ class TheRundownAPI {
 
 
 
-// College Football API service using only TheRundown
+// Multi-Sport API service using TheRundown
 export class SportsAPI {
-  private theRundown: TheRundownAPI
+  private theRundownCFB: TheRundownAPI
+  private theRundownNFL: TheRundownAPI
 
   constructor() {
-    this.theRundown = new TheRundownAPI(process.env.THERUNDOWN_API_KEY || 'daebc01578mshf1b6929ad17a9f8p19c30bjsn5ab4b86b16e7')
+    const apiKey = process.env.THERUNDOWN_API_KEY || 'daebc01578mshf1b6929ad17a9f8p19c30bjsn5ab4b86b16e7'
+    this.theRundownCFB = new TheRundownAPI(apiKey, '1') // College Football
+    this.theRundownNFL = new TheRundownAPI(apiKey, '2') // NFL
+  }
+
+  private getAPIClient(sport: SportType): TheRundownAPI {
+    switch (sport) {
+      case 'CFB':
+        return this.theRundownCFB
+      case 'NFL':
+        return this.theRundownNFL
+      default:
+        return this.theRundownCFB
+    }
   }
 
   // Games and schedules
-  async getGames(date?: string, limit?: number): Promise<Game[]> {
-    return this.theRundown.getGames(date, limit)
+  async getGames(sport: SportType = 'CFB', date?: string, limit?: number): Promise<Game[]> {
+    const client = this.getAPIClient(sport)
+    return client.getGames(date, limit)
   }
 
   // Betting data
-  async getBettingData(eventId: string): Promise<BettingData | null> {
-    return this.theRundown.getBettingData(eventId)
+  async getBettingData(sport: SportType = 'CFB', eventId: string): Promise<BettingData | null> {
+    const client = this.getAPIClient(sport)
+    return client.getBettingData(eventId)
   }
 
   // Teams
-  async getTeams(): Promise<Team[]> {
-    return this.theRundown.getTeams()
+  async getTeams(sport: SportType = 'CFB'): Promise<Team[]> {
+    const client = this.getAPIClient(sport)
+    return client.getTeams()
   }
 
   // Team statistics
-  async getTeamStats(): Promise<TeamStats[]> {
-    return this.theRundown.getTeamStats()
+  async getTeamStats(sport: SportType = 'CFB'): Promise<TeamStats[]> {
+    const client = this.getAPIClient(sport)
+    return client.getTeamStats()
   }
 
   // Individual team statistics by team ID
-  async getTeamStatsByTeamId(teamId: string): Promise<TeamStats | null> {
-    return this.theRundown.getTeamStatsByTeamId(teamId)
+  async getTeamStatsByTeamId(sport: SportType = 'CFB', teamId: string): Promise<TeamStats | null> {
+    const client = this.getAPIClient(sport)
+    return client.getTeamStatsByTeamId(teamId)
   }
 
   // Players
-  async getPlayers(teamId?: string): Promise<Player[]> {
-    return this.theRundown.getPlayers(teamId)
+  async getPlayers(sport: SportType = 'CFB', teamId?: string): Promise<Player[]> {
+    const client = this.getAPIClient(sport)
+    return client.getPlayers(teamId)
   }
 
   // Player statistics
-  async getPlayerStats(teamId?: string, playerId?: string): Promise<PlayerStats[]> {
-    return this.theRundown.getPlayerStats(teamId, playerId)
+  async getPlayerStats(sport: SportType = 'CFB', teamId?: string, playerId?: string): Promise<PlayerStats[]> {
+    const client = this.getAPIClient(sport)
+    return client.getPlayerStats(teamId, playerId)
   }
 
   // Predictions
-  async getPredictions(date?: string): Promise<any[]> {
-    return this.theRundown.getPredictions(date)
+  async getPredictions(sport: SportType = 'CFB', date?: string): Promise<any[]> {
+    const client = this.getAPIClient(sport)
+    return client.getPredictions(date)
   }
 
   // Enhanced analytics and matchup data
-  async getPlayerGameStats(eventId: string): Promise<any> {
-    return this.theRundown.getPlayerGameStats(eventId)
+  async getPlayerGameStats(sport: SportType = 'CFB', eventId: string): Promise<any> {
+    const client = this.getAPIClient(sport)
+    return client.getPlayerGameStats(eventId)
   }
 
-  async getTeamGameStats(eventId: string): Promise<any> {
-    return this.theRundown.getTeamGameStats(eventId)
+  async getTeamGameStats(sport: SportType = 'CFB', eventId: string): Promise<any> {
+    const client = this.getAPIClient(sport)
+    return client.getTeamGameStats(eventId)
   }
 
-  async getTeamSeasonStats(teamId: string): Promise<any> {
-    return this.theRundown.getTeamSeasonStats(teamId)
+  async getTeamSeasonStats(sport: SportType = 'CFB', teamId: string): Promise<any> {
+    const client = this.getAPIClient(sport)
+    return client.getTeamSeasonStats(teamId)
   }
 
-  async getPlayerSeasonStats(teamId: string): Promise<any> {
-    return this.theRundown.getPlayerSeasonStats(teamId)
+  async getPlayerSeasonStats(sport: SportType = 'CFB', teamId: string): Promise<any> {
+    const client = this.getAPIClient(sport)
+    return client.getPlayerSeasonStats(teamId)
   }
 
-  async getHeadToHeadHistory(team1Id: string, team2Id: string): Promise<any[]> {
-    return this.theRundown.getHeadToHeadHistory(team1Id, team2Id)
+  async getHeadToHeadHistory(sport: SportType = 'CFB', team1Id: string, team2Id: string): Promise<any[]> {
+    const client = this.getAPIClient(sport)
+    return client.getHeadToHeadHistory(team1Id, team2Id)
   }
 
-  async getMatchupAnalysis(homeTeamId: string, awayTeamId: string): Promise<any> {
-    return this.theRundown.getMatchupAnalysis(homeTeamId, awayTeamId)
+  async getMatchupAnalysis(sport: SportType = 'CFB', homeTeamId: string, awayTeamId: string): Promise<any> {
+    const client = this.getAPIClient(sport)
+    return client.getMatchupAnalysis(homeTeamId, awayTeamId)
   }
 }
 

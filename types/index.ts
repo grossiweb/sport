@@ -14,8 +14,16 @@ export interface AuthState {
   isAuthenticated: boolean
 }
 
-// Sports and League Types - College Football Only
-export type SportType = 'CFB'
+// Sports and League Types - Multi-sport support
+export type SportType = 'CFB' | 'NFL'
+
+export interface Sport {
+  id: string
+  name: string
+  displayName: string
+  shortName: string
+  apiId: number // TheRundown API sport ID (1 for CFB, 2 for NFL)
+}
 
 export interface League {
   id: string

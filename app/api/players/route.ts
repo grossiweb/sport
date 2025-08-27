@@ -1,14 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sportsAPI } from '@/lib/api/sports-api'
+import { SportType } from '@/types'
+import { isValidSportType } from '@/lib/constants/sports'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
+    const sport = searchParams.get('sport')?.toUpperCase() || 'CFB'
     const team = searchParams.get('team')
     
-    console.log('Players API called with team:', team)
+    if (!isValidSportType(sport)) {
+      return NextResponse.json(
+        { error: 'Invalid sport parameter' },
+        { status: 400 }
+      )
+    }
     
-    const players = await sportsAPI.getPlayers(team || undefined)
+    console.log(`${sport} Players API called with team:`, team)
+    
+    const players = await sportsAPI.getPlayers(sport as SportType, team || undefined)
 
     console.log('Players found:', players.length)
     
@@ -30,9 +40,10 @@ export async function GET(request: NextRequest) {
       data: players
     })
   } catch (error) {
-    console.error('College Football Players API error:', error)
+    const sport = new URL(request.url).searchParams.get('sport')?.toUpperCase() || 'CFB'
+    console.error(`${sport} Players API error:`, error)
     return NextResponse.json(
-      { error: 'Failed to fetch college football players' },
+      { error: `Failed to fetch ${sport} players` },
       { status: 500 }
     )
   }

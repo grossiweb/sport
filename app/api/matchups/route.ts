@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sportsAPI } from '@/lib/api/sports-api'
-import { Matchup, GamePrediction, TrendData, InjuryReport } from '@/types'
+import { Matchup, GamePrediction, TrendData, InjuryReport, SportType } from '@/types'
+import { isValidSportType } from '@/lib/constants/sports'
 import { format } from 'date-fns'
 
 // Mock AI prediction service - in production, this would be a real ML model
@@ -91,10 +92,18 @@ function generateInjuries(gameId: string): InjuryReport[] {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
+    const sport = searchParams.get('sport')?.toUpperCase() || 'CFB'
     const date = searchParams.get('date') || format(new Date(), 'yyyy-MM-dd')
     
-          // Get college football games only
-      const games = await sportsAPI.getGames(date)
+    if (!isValidSportType(sport)) {
+      return NextResponse.json(
+        { error: 'Invalid sport parameter' },
+        { status: 400 }
+      )
+    }
+    
+    // Get games for the specified sport
+    const games = await sportsAPI.getGames(sport as SportType, date)
       // console.log('Games fetched for date:', date, 'Total games:', games.length)
     // Generate basic matchup data for each game (no API calls to preserve quota)
     const matchups: Matchup[] = games.map((game) => {
@@ -128,7 +137,7 @@ export async function GET(request: NextRequest) {
       data: matchups,
       meta: {
         date,
-        sport: 'CFB',
+        sport,
         totalGames: matchups.length,
         highConfidenceGames: matchups.filter(m => m.predictions.confidence >= 0.8).length
       }

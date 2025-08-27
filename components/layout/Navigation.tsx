@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
+import { useSport } from '@/contexts/SportContext'
+import { SportSelector } from '@/components/sport/SportSelector'
 import {
   Bars3Icon,
   XMarkIcon,
@@ -22,18 +24,19 @@ import {
 import { useAuth } from '@/hooks/useAuth'
 import { clsx } from 'clsx'
 
-const navigation = [
-  { name: 'Dashboard', href: '/', icon: HomeIcon },
-  { name: 'Team Stats', href: '/teams', icon: UsersIcon },
-  //{ name: 'Player Stats', href: '/players', icon: UserCircleIcon },
-  { name: 'Daily Matchups', href: '/matchups', icon: TrophyIcon },
-  //{ name: 'Predictions', href: '/predictions', icon: PresentationChartLineIcon },
-  //{ name: 'Trends', href: '/trends', icon: ChartBarIcon },
-  //{ name: 'Money Data', href: '/betting', icon: CurrencyDollarIcon },
-]
-
 export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { currentSport } = useSport()
+  
+  const navigation = [
+    { name: 'Dashboard', href: '/', icon: HomeIcon },
+    { name: 'Team Stats', href: `/sport/${currentSport.toLowerCase()}/teams`, icon: UsersIcon },
+    //{ name: 'Player Stats', href: `/sport/${currentSport.toLowerCase()}/players`, icon: UserCircleIcon },
+    { name: 'Daily Matchups', href: `/sport/${currentSport.toLowerCase()}/matchups`, icon: TrophyIcon },
+    //{ name: 'Predictions', href: `/sport/${currentSport.toLowerCase()}/predictions`, icon: PresentationChartLineIcon },
+    //{ name: 'Trends', href: `/sport/${currentSport.toLowerCase()}/trends`, icon: ChartBarIcon },
+    //{ name: 'Money Data', href: `/sport/${currentSport.toLowerCase()}/betting`, icon: CurrencyDollarIcon },
+  ]
   const { theme, setTheme } = useTheme()
   const { user, logout } = useAuth()
   const pathname = usePathname()
@@ -76,8 +79,11 @@ export function Navigation() {
             </div>
           </div>
 
-          {/* User menu and theme toggle */}
+          {/* Sport selector, user menu and theme toggle */}
           <div className="flex items-center space-x-4">
+            {/* Sport selector */}
+            <SportSelector />
+            
             {/* Theme toggle */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -189,6 +195,14 @@ export function Navigation() {
                 </Link>
               )
             })}
+            
+            {/* Mobile sport selector */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 pb-3">
+              <div className="px-4">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Select Sport</p>
+                <SportSelector />
+              </div>
+            </div>
             
             {/* Mobile user menu */}
             {user && (

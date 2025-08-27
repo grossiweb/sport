@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useSport } from '@/contexts/SportContext'
 import {
   UsersIcon,
   UserCircleIcon,
@@ -12,66 +13,68 @@ import {
   Cog6ToothIcon
 } from '@heroicons/react/24/outline'
 
-const quickLinks = [
-  {
-    title: 'Team Stats',
-    description: 'Advanced team analytics and performance metrics',
-    href: '/teams',
-    icon: UsersIcon,
-    color: 'bg-blue-500'
-  },
-  {
-    title: 'Player Stats',
-    description: 'Individual player performance and trends',
-    href: '/players',
-    icon: UserCircleIcon,
-    color: 'bg-green-500'
-  },
-  {
-    title: 'Daily Matchups',
-    description: 'Today\'s games with AI-powered insights',
-    href: '/matchups',
-    icon: TrophyIcon,
-    color: 'bg-purple-500'
-  },
-  {
-    title: 'Predictions',
-    description: 'AI-generated game predictions and analysis',
-    href: '/predictions',
-    icon: PresentationChartLineIcon,
-    color: 'bg-red-500'
-  },
-  {
-    title: 'Trends',
-    description: 'Market trends and performance patterns',
-    href: '/trends',
-    icon: ChartBarIcon,
-    color: 'bg-yellow-500'
-  },
-  {
-    title: 'Betting Data',
-    description: 'Money lines, spreads, and public betting info',
-    href: '/betting',
-    icon: CurrencyDollarIcon,
-    color: 'bg-indigo-500'
-  },
-  {
-    title: 'Bullpen Report',
-    description: 'CFB defense efficiency and analysis',
-    href: '/bullpen',
-    icon: DocumentTextIcon,
-    color: 'bg-pink-500'
-  },
-  {
-    title: 'Settings',
-    description: 'Account settings and subscription management',
-    href: '/settings',
-    icon: Cog6ToothIcon,
-    color: 'bg-gray-500'
-  }
-]
-
 export function QuickAccess() {
+  const { currentSport, currentSportData } = useSport()
+  
+  const quickLinks = [
+    {
+      title: 'Team Stats',
+      description: 'Advanced team analytics and performance metrics',
+      href: `/sport/${currentSport.toLowerCase()}/teams`,
+      icon: UsersIcon,
+      color: 'bg-blue-500'
+    },
+    {
+      title: 'Player Stats',
+      description: 'Individual player performance and trends',
+      href: `/sport/${currentSport.toLowerCase()}/players`,
+      icon: UserCircleIcon,
+      color: 'bg-green-500'
+    },
+    {
+      title: 'Daily Matchups',
+      description: 'Today\'s games with AI-powered insights',
+      href: `/sport/${currentSport.toLowerCase()}/matchups`,
+      icon: TrophyIcon,
+      color: 'bg-purple-500'
+    },
+    {
+      title: 'Predictions',
+      description: 'AI-generated game predictions and analysis',
+      href: `/sport/${currentSport.toLowerCase()}/predictions`,
+      icon: PresentationChartLineIcon,
+      color: 'bg-red-500'
+    },
+    {
+      title: 'Trends',
+      description: 'Market trends and performance patterns',
+      href: `/sport/${currentSport.toLowerCase()}/trends`,
+      icon: ChartBarIcon,
+      color: 'bg-yellow-500'
+    },
+    {
+      title: 'Betting Data',
+      description: 'Money lines, spreads, and public betting info',
+      href: `/sport/${currentSport.toLowerCase()}/betting`,
+      icon: CurrencyDollarIcon,
+      color: 'bg-indigo-500'
+    },
+    {
+      title: `${currentSportData.shortName} Report`,
+      description: `${currentSportData.shortName} analytics and insights`,
+      href: `/sport/${currentSport.toLowerCase()}/analysis`,
+      icon: DocumentTextIcon,
+      color: 'bg-pink-500'
+    },
+    {
+      title: 'Settings',
+      description: 'Account settings and subscription management',
+      href: '/settings',
+      icon: Cog6ToothIcon,
+      color: 'bg-gray-500'
+    }
+  ]
+
   // Filter to show only Team Stats & Daily Matchups
   const filteredLinks = quickLinks.filter(link =>
     link.title === 'Team Stats' || link.title === 'Daily Matchups'
