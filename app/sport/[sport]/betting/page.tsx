@@ -33,41 +33,44 @@ export default function SportBettingPage() {
   }, [params.sport])
 
   const fetchBettingData = async () => {
-    if (!validSport) return
-
+    if (!validSport) return;
+  
     try {
-      setIsLoading(true)
-      setError(null)
-      
-      // Fetch games for the selected date
-      const gamesData = await sportsAPI.getGames(validSport, selectedDate, 10)
-      
-      // Fetch betting data for each game
-      const gamesWithBetting = await Promise.allSettled(
-        gamesData.map(async (game) => {
-          try {
-            const bettingData = await sportsAPI.getBettingData(validSport, game.id)
-            return { ...game, bettingData }
-          } catch (error) {
-            console.warn(`Failed to fetch betting data for game ${game.id}:`, error)
-            return { ...game, bettingData: null }
-          }
-        })
-      )
-
+      setIsLoading(true);
+      setError(null);
+  
+      // ✅ Fetch games for the selected date
+      const gamesData = await sportsAPI.getGames(validSport, selectedDate, 10);
+  
+      // ✅ Properly type the result of Promise.allSettled
+      const gamesWithBetting: PromiseSettledResult<GameWithBetting>[] =
+        await Promise.allSettled(
+          gamesData.map(async (game) => {
+            try {
+              const bettingData = await sportsAPI.getBettingData(validSport, game.id);
+              return { ...game, bettingData };
+            } catch (error) {
+              console.warn(`Failed to fetch betting data for game ${game.id}:`, error);
+              return { ...game, bettingData: null };
+            }
+          })
+        );
+  
+      // ✅ Filter only fulfilled promises safely
       const validGames = gamesWithBetting
-        .filter((result): result is PromiseFulfilledResult<GameWithBetting> => 
-          result.status === 'fulfilled'
+        .filter(
+          (result): result is PromiseFulfilledResult<GameWithBetting> =>
+            result.status === 'fulfilled'
         )
-        .map(result => result.value)
-        .filter(game => game.bettingData !== null) // Only show games with betting data
-
-      setGames(validGames)
+        .map((result) => result.value)
+        .filter((game) => game.bettingData !== null); // ✅ Only show games with betting data
+  
+      setGames(validGames);
     } catch (error) {
-      console.error('Error fetching betting data:', error)
-      setError('Failed to load betting data. Please try again.')
+      console.error('Error fetching betting data:', error);
+      setError('Failed to load betting data. Please try again.');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -125,7 +128,7 @@ export default function SportBettingPage() {
 
       {/* Filters */}
       <BettingFilters
-        selectedSport={validSport}
+        selectedSport={validSport === "CFB" ? "CFB" : "ALL"}
         selectedDate={selectedDate}
         showOnlyRLM={showOnlyRLM}
         onSportChange={() => {}} // Sport is fixed based on URL
