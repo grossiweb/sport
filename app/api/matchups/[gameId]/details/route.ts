@@ -139,11 +139,19 @@ export async function GET(
     const detailedPredictions = generateDetailedAIPrediction(gameId)
     const detailedTrends = generateDetailedTrends(gameId)
     const detailedInjuries = generateDetailedInjuries(gameId)
+    
+    // Fetch real betting data using the game ID
+    let bettingData = null
+    try {
+      bettingData = await sportsAPI.getBettingData(sport as SportType, gameId)
+    } catch (error) {
+      console.warn(`Failed to fetch betting data for game ${gameId}:`, error)
+    }
 
     const detailedMatchup: Matchup = {
       game,
       predictions: detailedPredictions,
-      bettingData: null, // Would fetch real betting data
+      bettingData,
       trends: detailedTrends,
       keyPlayers: [], // Would fetch key players
       injuries: detailedInjuries,

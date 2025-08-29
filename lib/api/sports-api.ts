@@ -102,50 +102,147 @@ class TheRundownAPI {
   }
   
 
+  async getAllBettingLines(eventId: string): Promise<any[]> {
+    try {
+      const eventData = await this.makeRequest(`/events/${eventId}?include=scores%2Call_periods`)
+      
+      if (!eventData || !eventData.lines) {
+        return []
+      }
+
+      const allLines = []
+      for (const [affiliateId, lineData] of Object.entries(eventData.lines)) {
+        const line = lineData as any
+        if (line.spread && line.moneyline && line.total && line.affiliate) {
+          allLines.push({
+            sportsbook: line.affiliate.affiliate_name,
+            url: line.affiliate.affiliate_url,
+            affiliateId: affiliateId,
+            spread: {
+              home: line.spread.point_spread_home_delta || 0,
+              away: line.spread.point_spread_away_delta || 0,
+              homeOdds: line.spread.point_spread_home_money_delta || -110,
+              awayOdds: line.spread.point_spread_away_money_delta || -110
+            },
+            moneyline: {
+              home: line.moneyline.moneyline_home_delta || 0,
+              away: line.moneyline.moneyline_away_delta || 0
+            },
+            total: {
+              points: Math.abs(line.total.total_over_delta || 50),
+              over: line.total.total_over_money_delta || -110,
+              under: line.total.total_under_money_delta || -110
+            },
+            lastUpdated: line.spread.date_updated || line.moneyline.date_updated || line.total.date_updated
+          })
+        }
+      }
+
+      return allLines.sort((a, b) => {
+        // Sort by sportsbook priority
+        const priority = ['BetMGM', 'Fanduel', 'Draftkings', 'Pinnacle', 'Bovada']
+        const aIndex = priority.indexOf(a.sportsbook)
+        const bIndex = priority.indexOf(b.sportsbook)
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex
+        if (aIndex !== -1) return -1
+        if (bIndex !== -1) return 1
+        return a.sportsbook.localeCompare(b.sportsbook)
+      })
+    } catch (error) {
+      console.error('Error fetching all betting lines:', error)
+      return []
+    }
+  }
+
   async getBettingData(eventId: string): Promise<BettingData | null> {
     try {
-      // Get the line ID from the event first
-      const eventData = await this.makeRequest(`/events/${eventId}/?include=scores`)
-      const lineId = eventData?.lines?.[0]?.line_id
+      // Fetch event data with lines included
+      const eventData = await this.makeRequest(`/events/${eventId}?include=scores%2Call_periods`)
       
-      if (!lineId) return null
+      if (!eventData || !eventData.lines) {
+        console.log('No betting lines found for event:', eventId)
+        return null
+      }
 
-      // Fetch spread, moneyline, and totals in parallel
-      const [spreadData, moneylineData, totalData] = await Promise.allSettled([
-        this.makeRequest(`/lines/${lineId}/spread?include=all_periods`),
-        this.makeRequest(`/lines/${lineId}/moneyline?include=all_periods`), 
-        this.makeRequest(`/lines/${lineId}/total?include=all_periods`)
-      ])
+      // Get the first available sportsbook line (prioritize major books)
+      const prioritySportsbooks = ['22', '23', '19', '3', '2'] // BetMGM, FanDuel, DraftKings, Pinnacle, Bovada
+      let selectedLine = null
+      
+      // Try to find a line from priority sportsbooks first
+      for (const bookId of prioritySportsbooks) {
+        if (eventData.lines[bookId]) {
+          selectedLine = eventData.lines[bookId]
+          break
+        }
+      }
+      
+      // If no priority book found, use the first available line
+      if (!selectedLine) {
+        const firstLineKey = Object.keys(eventData.lines)[0]
+        selectedLine = eventData.lines[firstLineKey]
+      }
 
-      const spread = spreadData.status === 'fulfilled' ? spreadData.value : null
-      const moneyline = moneylineData.status === 'fulfilled' ? moneylineData.value : null
-      const total = totalData.status === 'fulfilled' ? totalData.value : null
+      if (!selectedLine) {
+        console.log('No valid betting line found for event:', eventId)
+        return null
+      }
+
+      // Extract betting data from the selected line
+      const spread = selectedLine.spread || {}
+      const moneyline = selectedLine.moneyline || {}
+      const total = selectedLine.total || {}
+      const affiliate = selectedLine.affiliate || {}
+
+      // Parse actual betting values from delta fields
+      // Looking at the API response, delta fields contain the actual betting values
+      const parseValue = (deltaValue: number, defaultValue: number = 0) => {
+        if (deltaValue === 0.0001 || deltaValue === 0) return defaultValue
+        return deltaValue
+      }
+
+      // For spread - home team gets negative spread, away team gets positive
+      const homeSpread = parseValue(spread.point_spread_home_delta || 0)
+      const awaySpread = parseValue(spread.point_spread_away_delta || 0)
+      
+      // For moneyline - values can be positive (underdog) or negative (favorite)
+      const homeMoneyline = parseValue(moneyline.moneyline_home_delta || 0)
+      const awayMoneyline = parseValue(moneyline.moneyline_away_delta || 0)
+      
+      // For totals - the total points line
+      const totalPoints = Math.abs(parseValue(total.total_over_delta || 0, 50)) // Use absolute value for total points
+      const overMoney = parseValue(total.total_over_money_delta || -110, -110)
+      const underMoney = parseValue(total.total_under_money_delta || -110, -110)
 
       return {
         gameId: eventId,
         spread: {
-          home: spread?.point_spread_home || 0,
-          away: spread?.point_spread_away || 0,
-          juice: spread?.point_spread_home_money || 0
+          home: homeSpread,
+          away: awaySpread,
+          juice: parseValue(spread.point_spread_home_money_delta || -110, -110)
         },
         moneyLine: {
-          home: moneyline?.moneyline_home || 0,
-          away: moneyline?.moneyline_away || 0
+          home: homeMoneyline,
+          away: awayMoneyline
         },
         total: {
-          over: total?.total_over || 0,
-          under: total?.total_under || 0,
-          points: total?.total_over_money || 0
+          over: overMoney,
+          under: underMoney,
+          points: totalPoints
         },
         publicBets: {
-          homePercentage: 50,
+          homePercentage: 50, // API doesn't provide public betting percentages
           awayPercentage: 50
         },
         handle: {
-          homePercentage: 50,
+          homePercentage: 50, // API doesn't provide handle percentages
           awayPercentage: 50
         },
-        reverseLineMovement: false
+        reverseLineMovement: false, // Would need historical data to determine this
+        sportsbook: {
+          name: affiliate.affiliate_name || 'Unknown',
+          url: affiliate.affiliate_url || '',
+          affiliateId: selectedLine.affiliate_id || ''
+        }
       }
     } catch (error) {
       console.error('Error fetching betting data:', error)
@@ -648,6 +745,12 @@ export class SportsAPI {
   async getBettingData(sport: SportType = 'CFB', eventId: string): Promise<BettingData | null> {
     const client = this.getAPIClient(sport)
     return client.getBettingData(eventId)
+  }
+
+  // Get all sportsbook lines for comparison
+  async getAllBettingLines(sport: SportType = 'CFB', eventId: string): Promise<any[]> {
+    const client = this.getAPIClient(sport)
+    return client.getAllBettingLines(eventId)
   }
 
   // Teams

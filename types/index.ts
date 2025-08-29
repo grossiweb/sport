@@ -246,6 +246,11 @@ export interface BettingData {
     awayPercentage: number
   }
   reverseLineMovement: boolean
+  sportsbook?: {
+    name: string
+    url: string
+    affiliateId: string
+  }
 }
 
 export interface TrendData {

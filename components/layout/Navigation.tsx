@@ -35,7 +35,7 @@ export function Navigation() {
     { name: 'Daily Matchups', href: `/sport/${currentSport.toLowerCase()}/matchups`, icon: TrophyIcon },
     //{ name: 'Predictions', href: `/sport/${currentSport.toLowerCase()}/predictions`, icon: PresentationChartLineIcon },
     //{ name: 'Trends', href: `/sport/${currentSport.toLowerCase()}/trends`, icon: ChartBarIcon },
-    //{ name: 'Money Data', href: `/sport/${currentSport.toLowerCase()}/betting`, icon: CurrencyDollarIcon },
+    //{ name: 'Betting Data', href: `/sport/${currentSport.toLowerCase()}/betting`, icon: CurrencyDollarIcon },
   ]
   const { theme, setTheme } = useTheme()
   const { user, logout } = useAuth()

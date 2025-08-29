@@ -2,14 +2,26 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { SportType } from '@/types'
+import { SportType, Game, BettingData } from '@/types'
 import { isValidSportType } from '@/lib/constants/sports'
 import { useSport } from '@/contexts/SportContext'
+import { sportsAPI } from '@/lib/api/sports-api'
+import { BettingCard } from '@/components/betting/BettingCard'
+import { BettingFilters } from '@/components/betting/BettingFilters'
+
+interface GameWithBetting extends Game {
+  bettingData?: BettingData | null
+}
 
 export default function SportBettingPage() {
   const params = useParams()
   const { currentSport, currentSportData, isLoading: contextLoading } = useSport()
   const [validSport, setValidSport] = useState<SportType | null>(null)
+  const [games, setGames] = useState<GameWithBetting[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  const [showOnlyRLM, setShowOnlyRLM] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const sportParam = params.sport as string
@@ -19,6 +31,60 @@ export default function SportBettingPage() {
       setValidSport(sportType)
     }
   }, [params.sport])
+
+  const fetchBettingData = async () => {
+    if (!validSport) return
+
+    try {
+      setIsLoading(true)
+      setError(null)
+      
+      // Fetch games for the selected date
+      const gamesData = await sportsAPI.getGames(validSport, selectedDate, 10)
+      
+      // Fetch betting data for each game
+      const gamesWithBetting = await Promise.allSettled(
+        gamesData.map(async (game) => {
+          try {
+            const bettingData = await sportsAPI.getBettingData(validSport, game.id)
+            return { ...game, bettingData }
+          } catch (error) {
+            console.warn(`Failed to fetch betting data for game ${game.id}:`, error)
+            return { ...game, bettingData: null }
+          }
+        })
+      )
+
+      const validGames = gamesWithBetting
+        .filter((result): result is PromiseFulfilledResult<GameWithBetting> => 
+          result.status === 'fulfilled'
+        )
+        .map(result => result.value)
+        .filter(game => game.bettingData !== null) // Only show games with betting data
+
+      setGames(validGames)
+    } catch (error) {
+      console.error('Error fetching betting data:', error)
+      setError('Failed to load betting data. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (validSport) {
+      fetchBettingData()
+    }
+  }, [validSport, selectedDate])
+
+  const filteredGames = games.filter(game => {
+    if (showOnlyRLM) {
+      return game.bettingData?.reverseLineMovement
+    }
+    return true
+  })
+
+  const rlmGames = games.filter(game => game.bettingData?.reverseLineMovement).length
 
   if (contextLoading) {
     return (
@@ -57,23 +123,72 @@ export default function SportBettingPage() {
         </p>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          Betting Data Coming Soon
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
-          We're working on bringing you comprehensive betting analytics for {currentSportData.displayName}.
-        </p>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          Features will include:
-          <ul className="mt-2 space-y-1">
-            <li>• Live betting lines and odds</li>
-            <li>• Public betting percentages</li>
-            <li>• Line movement tracking</li>
-            <li>• Sharp vs. public money indicators</li>
-            <li>• Historical betting trends</li>
-          </ul>
-        </div>
+      {/* Filters */}
+      <BettingFilters
+        selectedSport={validSport}
+        selectedDate={selectedDate}
+        showOnlyRLM={showOnlyRLM}
+        onSportChange={() => {}} // Sport is fixed based on URL
+        onDateChange={setSelectedDate}
+        onRLMToggle={setShowOnlyRLM}
+        onRefresh={fetchBettingData}
+        totalGames={games.length}
+        rlmGames={rlmGames}
+      />
+
+      {/* Content */}
+      <div className="mt-8">
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
+            <p className="text-red-800 dark:text-red-400">{error}</p>
+            <button 
+              onClick={fetchBettingData}
+              className="mt-2 text-sm text-red-600 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300"
+            >
+              Try again
+            </button>
+          </div>
+        )}
+
+        {isLoading ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-64"></div>
+              </div>
+            ))}
+          </div>
+        ) : filteredGames.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredGames.map((game) => (
+              game.bettingData && (
+                <BettingCard 
+                  key={game.id} 
+                  bettingData={game.bettingData}
+                  game={game}
+                />
+              )
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              No Betting Data Available
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              {showOnlyRLM 
+                ? "No games with reverse line movement found for the selected date."
+                : "No games with betting lines found for the selected date."
+              }
+            </p>
+            <button 
+              onClick={fetchBettingData}
+              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            >
+              Refresh Data
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

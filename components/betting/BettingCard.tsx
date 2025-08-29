@@ -1,6 +1,6 @@
 'use client'
 
-import { BettingData } from '@/types'
+import { BettingData, Game } from '@/types'
 import { 
   ExclamationTriangleIcon,
   ArrowTrendingUpIcon as TrendingUpIcon,
@@ -12,15 +12,24 @@ import { clsx } from 'clsx'
 
 interface BettingCardProps {
   bettingData: BettingData
+  game?: Game
 }
 
-export function BettingCard({ bettingData }: BettingCardProps) {
-  // Mock game data - in real app this would come from joining with game data
-  const mockGame = {
+export function BettingCard({ bettingData, game }: BettingCardProps) {
+  // Use real game data if provided, otherwise fall back to mock data
+  const gameData = game || {
     homeTeam: { name: 'Home Team', city: 'City', abbreviation: 'HOM' },
     awayTeam: { name: 'Away Team', city: 'City', abbreviation: 'AWY' },
-    gameTime: '8:00 PM',
-    status: 'scheduled'
+    gameDate: new Date(),
+    status: 'scheduled' as const
+  }
+
+  const formatGameTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    })
   }
 
   const getPublicSentiment = () => {
@@ -59,10 +68,10 @@ export function BettingCard({ bettingData }: BettingCardProps) {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {mockGame.awayTeam.city} @ {mockGame.homeTeam.city}
+              {gameData.awayTeam.name} @ {gameData.homeTeam.name}
             </h3>
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              {mockGame.gameTime} • {mockGame.status}
+              {formatGameTime(gameData.gameDate)} • {gameData.status}
             </div>
           </div>
           
@@ -133,7 +142,7 @@ export function BettingCard({ bettingData }: BettingCardProps) {
             <div>
               <div className="flex justify-between items-center mb-1">
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {mockGame.homeTeam.abbreviation} (Home)
+                  {gameData.homeTeam.abbreviation} (Home)
                 </span>
                 <span className="text-sm font-medium">
                   {bettingData.publicBets.homePercentage}%
@@ -150,7 +159,7 @@ export function BettingCard({ bettingData }: BettingCardProps) {
             <div>
               <div className="flex justify-between items-center mb-1">
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {mockGame.awayTeam.abbreviation} (Away)
+                  {gameData.awayTeam.abbreviation} (Away)
                 </span>
                 <span className="text-sm font-medium">
                   {bettingData.publicBets.awayPercentage}%
@@ -228,6 +237,29 @@ export function BettingCard({ bettingData }: BettingCardProps) {
             <p className="text-sm text-green-700 dark:text-green-300 mt-1">
               Sharp money and public betting are moving in opposite directions.
             </p>
+          </div>
+        )}
+
+        {/* Sportsbook Information */}
+        {bettingData.sportsbook && (
+          <div className="mt-6 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-md">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  Lines from: {bettingData.sportsbook.name}
+                </span>
+              </div>
+              {bettingData.sportsbook.url && (
+                <a 
+                  href={bettingData.sportsbook.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
+                >
+                  Visit Sportsbook
+                </a>
+              )}
+            </div>
           </div>
         )}
 

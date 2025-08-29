@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useQuery } from 'react-query'
 import { SportType, Matchup } from '@/types'
+import { sportsAPI } from '@/lib/api/sports-api'
 import { isValidSportType } from '@/lib/constants/sports'
 import { useSport } from '@/contexts/SportContext'
 import { format } from 'date-fns'
@@ -13,9 +14,11 @@ import {
   TrophyIcon,
   ChartBarIcon,
   ExclamationTriangleIcon,
-  ArrowLeftIcon
+  ArrowLeftIcon,
+  CurrencyDollarIcon
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
+import { BettingCard } from '@/components/betting/BettingCard'
 
 const fetchMatchupDetails = async (sport: SportType, gameId: string): Promise<Matchup> => {
   const response = await fetch(`/api/matchups/${gameId}/details?sport=${sport}`)
@@ -28,6 +31,9 @@ export default function MatchupDetailsPage() {
   const params = useParams()
   const { currentSport, currentSportData, isLoading: contextLoading } = useSport()
   const [validSport, setValidSport] = useState<SportType | null>(null)
+  const [showAllLines, setShowAllLines] = useState(false)
+  const [allBettingLines, setAllBettingLines] = useState<any[]>([])
+  const [loadingAllLines, setLoadingAllLines] = useState(false)
   const gameId = params.gameId as string
 
   useEffect(() => {
@@ -46,6 +52,21 @@ export default function MatchupDetailsPage() {
     () => fetchMatchupDetails(sport, gameId),
     { enabled: !!sport && !!gameId }
   )
+
+  const fetchAllBettingLines = async () => {
+    if (!sport || !gameId || loadingAllLines) return
+    
+    try {
+      setLoadingAllLines(true)
+      const lines = await sportsAPI.getAllBettingLines(sport, gameId)
+      setAllBettingLines(lines)
+      setShowAllLines(true)
+    } catch (error) {
+      console.error('Failed to fetch all betting lines:', error)
+    } finally {
+      setLoadingAllLines(false)
+    }
+  }
 
   if (contextLoading || isLoading) {
     return (
@@ -250,6 +271,169 @@ export default function MatchupDetailsPage() {
                   <p className="text-gray-900 dark:text-white">
                     {predictions.aiAnalysis}
                   </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Betting Data Card */}
+          {matchup.bettingData && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="flex items-center mb-4">
+                <CurrencyDollarIcon className="h-6 w-6 text-green-600 dark:text-green-400 mr-3" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Betting Lines
+                </h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                {/* Spread */}
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Point Spread</div>
+                  <div className="font-bold text-lg text-gray-900 dark:text-white">
+                    {matchup.bettingData.spread.home > 0 ? '+' : ''}{matchup.bettingData.spread.home}
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    ({matchup.bettingData.spread.juice > 0 ? '+' : ''}{matchup.bettingData.spread.juice})
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {game.homeTeam.abbreviation}
+                  </div>
+                </div>
+
+                {/* Total */}
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Points</div>
+                  <div className="font-bold text-lg text-gray-900 dark:text-white">
+                    {matchup.bettingData.total.points}
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    O {matchup.bettingData.total.over} / U {matchup.bettingData.total.under}
+                  </div>
+                </div>
+
+                {/* Money Line */}
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Money Line</div>
+                  <div className="space-y-1">
+                    <div className="text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">{game.homeTeam.abbreviation}:</span>
+                      <span className="ml-1 font-semibold text-gray-900 dark:text-white">
+                        {matchup.bettingData.moneyLine.home > 0 ? '+' : ''}{matchup.bettingData.moneyLine.home}
+                      </span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">{game.awayTeam.abbreviation}:</span>
+                      <span className="ml-1 font-semibold text-gray-900 dark:text-white">
+                        {matchup.bettingData.moneyLine.away > 0 ? '+' : ''}{matchup.bettingData.moneyLine.away}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sportsbook Info and Actions */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm">
+                    {matchup.bettingData.sportsbook ? (
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Lines from: <span className="font-medium text-gray-900 dark:text-white">{matchup.bettingData.sportsbook.name}</span>
+                      </span>
+                    ) : (
+                      <span className="text-gray-600 dark:text-gray-400">Betting lines available</span>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    {matchup.bettingData.sportsbook?.url && (
+                      <a 
+                        href={matchup.bettingData.sportsbook.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
+                      >
+                        Visit Sportsbook →
+                      </a>
+                    )}
+                    <button
+                      onClick={showAllLines ? () => setShowAllLines(false) : fetchAllBettingLines}
+                      disabled={loadingAllLines}
+                      className="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors disabled:opacity-50"
+                    >
+                      {loadingAllLines ? 'Loading...' : showAllLines ? 'Show Less' : 'Compare All Books'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* RLM Alert */}
+              {matchup.bettingData.reverseLineMovement && (
+                <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                  <div className="flex items-center space-x-2">
+                    <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+                    <span className="text-sm font-medium text-red-800 dark:text-red-400">
+                      Reverse Line Movement Detected
+                    </span>
+                  </div>
+                  <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+                    The betting line has moved against the public betting percentage, indicating sharp money action.
+                  </p>
+                </div>
+              )}
+
+              {/* All Sportsbook Lines */}
+              {showAllLines && allBettingLines.length > 0 && (
+                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
+                    All Sportsbook Lines
+                  </h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-gray-200 dark:border-gray-700">
+                          <th className="text-left py-2 font-medium text-gray-900 dark:text-white">Sportsbook</th>
+                          <th className="text-center py-2 font-medium text-gray-900 dark:text-white">Spread</th>
+                          <th className="text-center py-2 font-medium text-gray-900 dark:text-white">Total</th>
+                          <th className="text-center py-2 font-medium text-gray-900 dark:text-white">Moneyline</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {allBettingLines.map((line, index) => (
+                          <tr key={index} className="border-b border-gray-100 dark:border-gray-700/50">
+                            <td className="py-3">
+                              <div className="font-medium text-gray-900 dark:text-white">
+                                {line.sportsbook}
+                              </div>
+                            </td>
+                            <td className="py-3 text-center">
+                              <div className="space-y-1">
+                                <div className="font-medium">
+                                  {game.homeTeam.abbreviation} {line.spread.home > 0 ? '+' : ''}{line.spread.home}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  ({line.spread.homeOdds > 0 ? '+' : ''}{line.spread.homeOdds})
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3 text-center">
+                              <div className="space-y-1">
+                                <div className="font-medium">{line.total.points}</div>
+                                <div className="text-xs text-gray-500">
+                                  O{line.total.over} / U{line.total.under}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3 text-center">
+                              <div className="space-y-1 text-xs">
+                                <div>{game.homeTeam.abbreviation}: {line.moneyline.home > 0 ? '+' : ''}{line.moneyline.home}</div>
+                                <div>{game.awayTeam.abbreviation}: {line.moneyline.away > 0 ? '+' : ''}{line.moneyline.away}</div>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>
