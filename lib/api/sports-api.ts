@@ -683,30 +683,36 @@ class TheRundownAPI {
     })) || []
   }
 
-  private mapEventStatus(status: string): Game['status'] {
+  private mapEventStatus(status?: string): Game['status'] {
+    if (!status) {
+      console.warn('⚠️ Missing status in API response, defaulting to scheduled');
+      return 'scheduled';
+    }
+  
     switch (status.toLowerCase()) {
       case 'status_scheduled':
       case 'scheduled':
       case 'upcoming':
-        return 'scheduled'
+        return 'scheduled';
       case 'status_inprogress':
       case 'status_live':
       case 'inprogress':
       case 'live':
-        return 'live'
+        return 'live';
       case 'status_final':
       case 'status_completed':
       case 'final':
       case 'completed':
-        return 'final'
+        return 'final';
       case 'status_postponed':
       case 'postponed':
-        return 'postponed'
+        return 'postponed';
       case 'status_cancelled':
       case 'cancelled':
-        return 'cancelled'
+        return 'cancelled';
       default:
-        return 'scheduled'
+        //console.warn(`⚠️ Unknown status: ${status}, defaulting to scheduled`);
+        return 'scheduled';
     }
   }
 }
@@ -719,7 +725,7 @@ export class SportsAPI {
   private theRundownNFL: TheRundownAPI
 
   constructor() {
-    const apiKey = process.env.THERUNDOWN_API_KEY || 'KWd8aR0FJnmshi7jaaIQtYfYmboUp1miUKOjsnrig5JdKP74mY'
+    const apiKey = process.env.THERUNDOWN_API_KEY || 'daebc01578mshf1b6929ad17a9f8p19c30bjsn5ab4b86b16e7'
     this.theRundownCFB = new TheRundownAPI(apiKey, '1') // College Football
     this.theRundownNFL = new TheRundownAPI(apiKey, '2') // NFL
   }

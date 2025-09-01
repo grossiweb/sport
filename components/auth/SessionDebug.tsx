@@ -55,7 +55,7 @@ export function SessionDebug() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 bg-gray-800 text-white p-3 rounded-lg text-xs max-w-xs z-50">
+    <div className="hidden fixed bottom-4 right-4 bg-gray-800 text-white p-3 rounded-lg text-xs max-w-xs z-50">
       <div className="font-bold mb-2">Session Debug</div>
       <div className="space-y-1">
         <div>🔑 Token: {sessionInfo.hasToken ? '✅' : '❌'}</div>
