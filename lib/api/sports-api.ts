@@ -719,7 +719,7 @@ export class SportsAPI {
   private theRundownNFL: TheRundownAPI
 
   constructor() {
-    const apiKey = process.env.THERUNDOWN_API_KEY || 'daebc01578mshf1b6929ad17a9f8p19c30bjsn5ab4b86b16e7'
+    const apiKey = process.env.THERUNDOWN_API_KEY || 'KWd8aR0FJnmshi7jaaIQtYfYmboUp1miUKOjsnrig5JdKP74mY'
     this.theRundownCFB = new TheRundownAPI(apiKey, '1') // College Football
     this.theRundownNFL = new TheRundownAPI(apiKey, '2') // NFL
   }
