@@ -162,7 +162,7 @@ async function createOrUpdateSubscription(subscription: Stripe.Subscription, use
       subscription_plan: planType,
       stripe_subscription_id: subscription.id,
       subscription_start_date: new Date(subscription.start_date * 1000).toISOString(),
-      subscription_end_date: new Date((subscription as any).current_period_end * 1000).toISOString(),
+      subscription_end_date: new Date(subscription.current_period_end * 1000).toISOString(),
     })
 
     console.log(`Updated user ${userId} subscription: ${planType} (${subscription.status}) with role: ${role}`)

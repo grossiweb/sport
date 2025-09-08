@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe/config'
+import Stripe from 'stripe'
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,15 +16,15 @@ export async function POST(request: NextRequest) {
     // Cancel the subscription at period end
     const subscription = await stripe.subscriptions.update(subscriptionId, {
       cancel_at_period_end: true,
-    })
+    }) as Stripe.Subscription
 
     return NextResponse.json({
       success: true,
       subscription: {
         id: subscription.id,
         status: subscription.status,
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        currentPeriodEnd: subscription.current_period_end,
+        cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
+        currentPeriodEnd: (subscription as any).current_period_end,
       },
     })
   } catch (error: any) {
