@@ -278,6 +278,7 @@ function PackageForm({ plan, onSave, onCancel }: PackageFormProps) {
     
     const planData = {
       ...formData,
+      name: formData.planName, // Add the required 'name' property
       features: formData.features.split('\n').filter(f => f.trim()),
       ...(plan?.id && { id: plan.id })
     }
