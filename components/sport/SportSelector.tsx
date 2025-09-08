@@ -5,6 +5,19 @@ import { Menu, Transition } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import { useSport } from '@/contexts/SportContext'
 import { SportType } from '@/types'
+import Image from 'next/image'
+
+// Helper function to get sport icon
+const getSportIcon = (sportType: SportType) => {
+  switch (sportType) {
+    case 'CFB':
+      return '/ncaaf.svg'
+    case 'NFL':
+      return '/nfl.svg'
+    default:
+      return null
+  }
+}
 
 export function SportSelector() {
   const { currentSport, currentSportData, availableSports, changeSport } = useSport()
@@ -17,7 +30,16 @@ export function SportSelector() {
     <Menu as="div" className="relative inline-block text-left">
       <div>
         <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-          <span className="flex items-center">
+          <span className="flex items-center gap-x-2">
+            {getSportIcon(currentSport) && (
+              <Image
+                src={getSportIcon(currentSport)!}
+                alt={`${currentSportData.displayName} icon`}
+                width={20}
+                height={20}
+                className="flex-shrink-0"
+              />
+            )}
             <span className="hidden sm:inline">{currentSportData.displayName}</span>
             <span className="sm:hidden">{currentSportData.shortName}</span>
           </span>
@@ -52,9 +74,20 @@ export function SportSelector() {
                     } group flex w-full items-center px-4 py-2 text-sm`}
                   >
                     <div className="flex items-center justify-between w-full">
-                      <div>
-                        <div className="font-medium">{sport.displayName}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{sport.shortName}</div>
+                      <div className="flex items-center gap-x-3">
+                        {getSportIcon(sport.id.toUpperCase() as SportType) && (
+                          <Image
+                            src={getSportIcon(sport.id.toUpperCase() as SportType)!}
+                            alt={`${sport.displayName} icon`}
+                            width={20}
+                            height={20}
+                            className="flex-shrink-0"
+                          />
+                        )}
+                        <div>
+                          <div className="font-medium">{sport.displayName}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{sport.shortName}</div>
+                        </div>
                       </div>
                       {currentSport === sport.shortName && (
                         <div className="w-2 h-2 bg-primary-500 rounded-full"></div>

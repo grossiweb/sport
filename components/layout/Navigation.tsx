@@ -22,6 +22,7 @@ import {
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline'
 import { useAuth } from '@/hooks/useAuth'
+import { useSubscription, getSubscriptionDisplayName, getSubscriptionColorClass } from '@/hooks/useSubscription'
 import { clsx } from 'clsx'
 
 export function Navigation() {
@@ -39,6 +40,7 @@ export function Navigation() {
   ]
   const { theme, setTheme } = useTheme()
   const { user, logout } = useAuth()
+  const { plan, status, loading } = useSubscription()
   const pathname = usePathname()
 
   return (
@@ -106,23 +108,18 @@ export function Navigation() {
                   <div className="flex items-center space-x-2">
                     <span className={clsx(
                       'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-                      user.subscriptionStatus === 'active'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                        : user.subscriptionStatus === 'trial'
-                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                      loading ? 'animate-pulse bg-gray-100 dark:bg-gray-700' : getSubscriptionColorClass(status)
                     )}>
-                      {user.subscriptionStatus === 'active' ? 'Pro' : 
-                       user.subscriptionStatus === 'trial' ? 'Trial' : 'Inactive'}
+                      {loading ? '...' : getSubscriptionDisplayName(plan, status)}
                     </span>
-                    {/*}
+                    
                     <Link
                       href="/settings"
                       className="p-1 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                       title="Settings"
                     >
                       <Cog6ToothIcon className="h-5 w-5" />
-                    </Link>*/}
+                    </Link>
                     <button
                       onClick={logout}
                       className="p-1 rounded-lg text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors duration-200"

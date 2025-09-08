@@ -4,8 +4,8 @@ export const SPORTS: Record<SportType, Sport> = {
   CFB: {
     id: 'cfb',
     name: 'College Football',
-    displayName: 'College Football',
-    shortName: 'CFB',
+    displayName: 'NCAAF',
+    shortName: 'NCAAF',
     apiId: 1
   },
   NFL: {

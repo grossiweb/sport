@@ -5,6 +5,19 @@ import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { SportType } from '@/types'
 import { useSport } from '@/contexts/SportContext'
+import Image from 'next/image'
+
+// Helper function to get sport icon
+const getSportIcon = (sportType: SportType) => {
+  switch (sportType) {
+    case 'CFB':
+      return '/ncaaf.svg'
+    case 'NFL':
+      return '/nfl.svg'
+    default:
+      return null
+  }
+}
 
 interface SportSelectionModalProps {
   isOpen: boolean
@@ -79,13 +92,24 @@ export function SportSelectionModal({
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">
-                            {sport.displayName}
-                          </h4>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {sport.shortName}
-                          </p>
+                        <div className="flex items-center gap-x-4">
+                          {getSportIcon(sport.id.toUpperCase() as SportType) && (
+                            <Image
+                              src={getSportIcon(sport.id.toUpperCase() as SportType)!}
+                              alt={`${sport.displayName} icon`}
+                              width={32}
+                              height={32}
+                              className="flex-shrink-0"
+                            />
+                          )}
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">
+                              {sport.displayName}
+                            </h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {sport.shortName}
+                            </p>
+                          </div>
                         </div>
                         {currentSport === sport.shortName && (
                           <div className="flex-shrink-0">

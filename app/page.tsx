@@ -1,6 +1,7 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { DashboardHero } from '@/components/dashboard/DashboardHero'
 import { TodaysGames } from '@/components/dashboard/TodaysGames'
 import { KeyStats } from '@/components/dashboard/KeyStats'
@@ -8,9 +9,27 @@ import { QuickAccess } from '@/components/dashboard/QuickAccess'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { DailyMatchups } from '@/components/dashboard/DailyMatchups'
 import { useSport } from '@/contexts/SportContext'
+import toast from 'react-hot-toast'
 
 export default function HomePage() {
   const { currentSportData } = useSport()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const success = searchParams.get('success')
+    const sessionId = searchParams.get('session_id')
+    
+    if (success === 'true' && sessionId) {
+      toast.success('🎉 Subscription activated successfully! Welcome to the Pro plan!')
+      
+      // Clean up URL parameters
+      const url = new URL(window.location.href)
+      url.searchParams.delete('success')
+      url.searchParams.delete('session_id')
+      window.history.replaceState({}, '', url.toString())
+    }
+  }, [searchParams])
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* Hero Section */}
