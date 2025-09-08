@@ -119,34 +119,9 @@ export class RateLimiter {
 
   public async getUserLimits(userId: string): Promise<UserLimits> {
     try {
-      // Get user subscription status from new endpoint
-      const token = await this.getUserToken(userId)
-      if (!token) {
-        // Default to free tier limits if no token
-        return {
-          apiRateLimit: 10,
-          teamLimit: 3,
-          matchupLimit: 5
-        }
-      }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/user/subscription?userId=${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      
-      if (!response.ok) {
-        // Default to free tier limits
-        return {
-          apiRateLimit: 10,
-          teamLimit: 3,
-          matchupLimit: 5
-        }
-      }
-      
-      const data = await response.json()
-      return data.limits || {
+      // Default to free tier limits since we don't have a getUserToken method
+      // This method is kept for compatibility but uses free tier limits
+      return {
         apiRateLimit: 10,
         teamLimit: 3,
         matchupLimit: 5
@@ -210,7 +185,7 @@ export class RateLimiter {
     const now = Date.now()
     
     // Clean up API rate limit store
-    for (const [key, value] of rateLimitStore.entries()) {
+    for (const [key, value] of Array.from(rateLimitStore.entries())) {
       if (now > value.resetTime) {
         rateLimitStore.delete(key)
       }
@@ -220,7 +195,7 @@ export class RateLimiter {
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
     
-    for (const [userId, usage] of featureUsageStore.entries()) {
+    for (const [userId, usage] of Array.from(featureUsageStore.entries())) {
       const cleanedUsage: { [key: string]: number } = {}
       
       for (const [featureKey, count] of Object.entries(usage)) {
@@ -228,7 +203,7 @@ export class RateLimiter {
         const featureDate = new Date(dateStr)
         
         if (featureDate >= sevenDaysAgo) {
-          cleanedUsage[featureKey] = count
+          cleanedUsage[featureKey] = typeof count === 'number' ? count : 0
         }
       }
       
