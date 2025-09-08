@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     }
 
     const client = new GraphQLClient(
-      process.env.WORDPRESS_API_URL || 'https://bpheadlessb852.wpenginepowered.com/graphql'
+      process.env.WORDPRESS_API_URL || 'http://headless.grossiweb.com/graphql'
     )
 
     try {
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       if (refreshData.refreshJwtAuthToken?.authToken) {
         // Get user data with the new token
         const userClient = new GraphQLClient(
-          process.env.WORDPRESS_API_URL || 'https://bpheadlessb852.wpenginepowered.com/graphql',
+          process.env.WORDPRESS_API_URL || 'http://headless.grossiweb.com/graphql',
           {
             headers: {
               Authorization: `Bearer ${refreshData.refreshJwtAuthToken.authToken}`,
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       // Fallback: try to validate the refresh token directly
       try {
         const userClient = new GraphQLClient(
-          process.env.WORDPRESS_API_URL || 'https://bpheadlessb852.wpenginepowered.com/graphql',
+          process.env.WORDPRESS_API_URL || 'http://headless.grossiweb.com/graphql',
           {
             headers: {
               Authorization: `Bearer ${refreshToken}`,

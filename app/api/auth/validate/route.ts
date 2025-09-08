@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     // Create GraphQL client with the token
     const client = new GraphQLClient(
-      process.env.WORDPRESS_API_URL || 'https://bpheadlessb852.wpenginepowered.com/graphql',
+      process.env.WORDPRESS_API_URL || 'http://headless.grossiweb.com/graphql',
       {
         headers: {
           Authorization: `Bearer ${token}`,
