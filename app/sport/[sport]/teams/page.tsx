@@ -9,6 +9,16 @@ import { useSport } from '@/contexts/SportContext'
 import { TeamStatsTable } from '@/components/teams/TeamStatsTable'
 import { TeamStatsFilters } from '@/components/teams/TeamStatsFilters'
 
+interface TeamFiltersState {
+  division?: string
+  conference?: string
+}
+
+interface SortOptions {
+  field: string
+  direction: 'asc' | 'desc'
+}
+
 const fetchTeams = async (sport: SportType): Promise<Team[]> => {
   const response = await fetch(`/api/teams?sport=${sport}`)
   if (!response.ok) throw new Error('Failed to fetch teams')
@@ -27,10 +37,10 @@ export default function SportTeamsPage() {
   const params = useParams()
   const { currentSport, currentSportData, isLoading: contextLoading } = useSport()
   const [validSport, setValidSport] = useState<SportType | null>(null)
-  const [filters, setFilters] = useState({})
-  const [sortOptions, setSortOptions] = useState({
+  const [filters, setFilters] = useState<TeamFiltersState>({})
+  const [sortOptions, setSortOptions] = useState<SortOptions>({
     field: 'winPercentage',
-    direction: 'desc' as const
+    direction: 'desc'
   })
 
   useEffect(() => {
