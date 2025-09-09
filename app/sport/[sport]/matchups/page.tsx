@@ -10,6 +10,12 @@ import { useSport } from '@/contexts/SportContext'
 import { MatchupCard } from '@/components/matchups/MatchupCard'
 import { MatchupFilters } from '@/components/matchups/MatchupFilters'
 
+interface MatchupFiltersState {
+  status?: string
+  confidence?: string
+  division?: string
+}
+
 const fetchMatchups = async (sport: SportType, date?: string): Promise<Matchup[]> => {
   const params = new URLSearchParams()
   params.append('sport', sport)
@@ -28,7 +34,7 @@ export default function SportMatchupsPage() {
   const [selectedDate, setSelectedDate] = useState<string>(
     format(new Date(), 'yyyy-MM-dd')
   )
-  const [filters, setFilters] = useState({})
+  const [filters, setFilters] = useState<MatchupFiltersState>({})
 
   useEffect(() => {
     const sportParam = params.sport as string
