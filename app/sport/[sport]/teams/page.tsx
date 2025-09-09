@@ -58,6 +58,21 @@ export default function SportTeamsPage() {
 
   const isLoading = contextLoading || teamsLoading || statsLoading
 
+  // Filter teams based on division and conference
+  const filteredTeams = teams?.filter(team => {
+    // Division filter
+    if (filters.division && team.division?.name !== filters.division) {
+      return false
+    }
+    
+    // Conference filter  
+    if (filters.conference && team.conference?.name !== filters.conference) {
+      return false
+    }
+    
+    return true
+  }) || []
+
   if (contextLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -108,7 +123,7 @@ export default function SportTeamsPage() {
 
       {/* Stats Table */}
       <TeamStatsTable
-        teams={teams || []}
+        teams={filteredTeams}
         teamStats={teamStats || []}
         isLoading={isLoading}
         sport={sport}

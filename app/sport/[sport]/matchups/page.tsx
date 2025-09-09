@@ -52,6 +52,57 @@ export default function SportMatchupsPage() {
 
   const isLoading = contextLoading || matchupsLoading
 
+  // Apply filters to matchups
+  const filteredMatchups = matchups?.filter(matchup => {
+    // Debug: log team division data for first matchup
+    if (matchups?.indexOf(matchup) === 0 && sport === 'CFB') {
+      console.log('First matchup team divisions:', {
+        homeTeam: matchup.game.homeTeam.name,
+        homeTeamDivision: matchup.game.homeTeam.division?.name,
+        awayTeam: matchup.game.awayTeam.name,
+        awayTeamDivision: matchup.game.awayTeam.division?.name,
+        selectedDivision: filters.division
+      })
+    }
+    // Status filter
+    if (filters.status && matchup.game.status !== filters.status) {
+      return false
+    }
+    
+    // Confidence filter
+    if (filters.confidence) {
+      const confidence = matchup.predictions?.confidence || 0
+      switch (filters.confidence) {
+        case 'high':
+          if (confidence < 0.8) return false
+          break
+        case 'medium':
+          if (confidence < 0.6 || confidence >= 0.8) return false
+          break
+        case 'low':
+          if (confidence >= 0.6) return false
+          break
+      }
+    }
+    
+    // Division filter (CFB only)
+    if (sport === 'CFB' && filters.division) {
+      const homeTeamDivision = matchup.game.homeTeam.division?.name
+      const awayTeamDivision = matchup.game.awayTeam.division?.name
+      
+      // Show matchup if either team is in the selected division
+      const homeMatches = homeTeamDivision === filters.division
+      const awayMatches = awayTeamDivision === filters.division
+      
+      // If neither team matches the selected division, filter out
+      if (!homeMatches && !awayMatches) {
+        return false
+      }
+    }
+    
+    return true
+  }) || []
+
   if (contextLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -122,15 +173,24 @@ export default function SportMatchupsPage() {
             Failed to load matchups. Please try again.
           </p>
         </div>
-      ) : matchups && matchups.length > 0 ? (
+      ) : filteredMatchups && filteredMatchups.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {matchups.map((matchup) => (
+          {filteredMatchups.map((matchup) => (
             <MatchupCard
               key={matchup.game.id}
               matchup={matchup}
               sport={sport}
             />
           ))}
+        </div>
+      ) : matchups && matchups.length > 0 ? (
+        <div className="text-center py-12">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            No games match your filters
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            Try adjusting your filters to see more games.
+          </p>
         </div>
       ) : (
         <div className="text-center py-12">

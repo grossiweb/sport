@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useQuery } from 'react-query'
-import { SportType, Matchup } from '@/types'
+import { SportType, Matchup, DetailedTeamStat } from '@/types'
 import { sportsAPI } from '@/lib/api/sports-api'
 import { isValidSportType } from '@/lib/constants/sports'
 import { useSport } from '@/contexts/SportContext'
@@ -19,10 +19,18 @@ import {
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { BettingCard } from '@/components/betting/BettingCard'
+import { TeamDetailedStats } from '@/components/teams/TeamDetailedStats'
 
 const fetchMatchupDetails = async (sport: SportType, gameId: string): Promise<Matchup> => {
   const response = await fetch(`/api/matchups/${gameId}/details?sport=${sport}`)
   if (!response.ok) throw new Error('Failed to fetch matchup details')
+  const result = await response.json()
+  return result.data
+}
+
+const fetchTeamDetailedStats = async (sport: SportType, teamId: string): Promise<DetailedTeamStat[]> => {
+  const response = await fetch(`/api/teams/${teamId}/stats?sport=${sport}`)
+  if (!response.ok) throw new Error('Failed to fetch team detailed stats')
   const result = await response.json()
   return result.data
 }
@@ -34,6 +42,7 @@ export default function MatchupDetailsPage() {
   const [showAllLines, setShowAllLines] = useState(false)
   const [allBettingLines, setAllBettingLines] = useState<any[]>([])
   const [loadingAllLines, setLoadingAllLines] = useState(false)
+  const [showTeamStats, setShowTeamStats] = useState(false)
   const gameId = params.gameId as string
 
   useEffect(() => {
@@ -51,6 +60,25 @@ export default function MatchupDetailsPage() {
     ['matchupDetails', sport, gameId],
     () => fetchMatchupDetails(sport, gameId),
     { enabled: !!sport && !!gameId }
+  )
+
+  // Fetch team stats for CFB teams (only FBS and FCS have detailed stats)
+  const { data: homeTeamStats, isLoading: homeStatsLoading } = useQuery(
+    ['teamStats', sport, matchup?.game.homeTeam.id],
+    () => fetchTeamDetailedStats(sport, matchup!.game.homeTeam.id),
+    { 
+      enabled: !!sport && !!matchup && sport === 'CFB' && showTeamStats,
+      retry: false
+    }
+  )
+
+  const { data: awayTeamStats, isLoading: awayStatsLoading } = useQuery(
+    ['teamStats', sport, matchup?.game.awayTeam.id],
+    () => fetchTeamDetailedStats(sport, matchup!.game.awayTeam.id),
+    { 
+      enabled: !!sport && !!matchup && sport === 'CFB' && showTeamStats,
+      retry: false
+    }
   )
 
   const fetchAllBettingLines = async () => {
@@ -438,6 +466,17 @@ export default function MatchupDetailsPage() {
               )}
             </div>
           )}
+
+          {/* Team Statistics Section */}
+          {showTeamStats && sport === 'CFB' && (
+            <TeamDetailedStats
+              homeTeamStats={homeTeamStats || []}
+              awayTeamStats={awayTeamStats || []}
+              homeTeamName={game.homeTeam.name}
+              awayTeamName={game.awayTeam.name}
+              isLoading={homeStatsLoading || awayStatsLoading}
+            />
+          )}
         </div>
 
         {/* Sidebar */}
@@ -493,6 +532,25 @@ export default function MatchupDetailsPage() {
                   </span>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Team Stats Toggle (CFB only) */}
+          {sport === 'CFB' && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Team Statistics
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                View detailed season statistics for both teams. Available for FBS (I-A) and FCS (I-AA) teams only.
+              </p>
+              <button
+                onClick={() => setShowTeamStats(!showTeamStats)}
+                className="w-full inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+              >
+                <ChartBarIcon className="h-4 w-4 mr-2" />
+                {showTeamStats ? 'Hide Team Stats' : 'Show Team Stats'}
+              </button>
             </div>
           )}
 

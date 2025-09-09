@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Game, Team, Player, TeamStats, PlayerStats, BettingData, SportType } from '@/types'
+import { Game, Team, Player, TeamStats, PlayerStats, BettingData, SportType, DetailedTeamStat } from '@/types'
 
 // TheRundown.io API client for Multiple Sports
 class TheRundownAPI {
@@ -41,7 +41,7 @@ class TheRundownAPI {
     const endpoint = `/sports/${this.sportId}/schedule`
     const params = {
       from: fromDate,
-      limit: limit || 10
+      limit: limit || 100
     }
   
     // Make the API request
@@ -255,14 +255,27 @@ class TheRundownAPI {
     const data = await this.makeRequest(endpoint)
     
     return data.teams?.map((team: any) => ({
-      id: team.team_id,
+      id: team.team_id?.toString() || team.team_id,
       name: team.name,
       city: team.mascot || '',
       abbreviation: team.abbreviation,
-      league: 'CFB' as SportType,
+      league: this.sportId === '1' ? 'CFB' as SportType : 'NFL' as SportType,
       logoUrl: team.logo_url,
       primaryColor: team.primary_color,
-      secondaryColor: team.secondary_color
+      secondaryColor: team.secondary_color,
+      mascot: team.mascot,
+      record: team.record,
+      conference: team.conference ? {
+        conference_id: team.conference.conference_id,
+        division_id: team.conference.division_id,
+        sport_id: team.conference.sport_id,
+        name: team.conference.name
+      } : undefined,
+      division: team.division ? {
+        division_id: team.division.division_id,
+        sport_id: team.division.sport_id,
+        name: team.division.name
+      } : undefined
     })) || []
   }
 
@@ -368,6 +381,49 @@ class TheRundownAPI {
     } catch (error) {
       console.error(`Failed to get stats for team ${teamId}:`, error)
       return null
+    }
+  }
+
+  async getDetailedTeamStats(teamId: string): Promise<DetailedTeamStat[]> {
+    try {
+      const endpoint = `/v2/teams/${teamId}/stats`
+      const data = await this.makeRequest(endpoint)
+      
+      if (data && Array.isArray(data)) {
+        // The API returns an array of detailed stats
+        return data.filter((stat: any) => 
+          stat.team_id && 
+          stat.stat && 
+          stat.value !== undefined && 
+          stat.display_value
+        ).map((stat: any) => ({
+          team_id: stat.team_id,
+          stat_id: stat.stat_id,
+          stat: {
+            id: stat.stat.id,
+            name: stat.stat.name,
+            category: stat.stat.category,
+            display_name: stat.stat.display_name,
+            abbreviation: stat.stat.abbreviation,
+            description: stat.stat.description,
+            sport_id: stat.stat.sport_id
+          },
+          season_year: stat.season_year,
+          season_type: stat.season_type,
+          season_type_name: stat.season_type_name,
+          value: stat.value,
+          display_value: stat.display_value,
+          per_game_value: stat.per_game_value,
+          per_game_display_value: stat.per_game_display_value,
+          rank: stat.rank,
+          rank_display_value: stat.rank_display_value,
+          updated_at: stat.updated_at
+        }))
+      }
+      return []
+    } catch (error) {
+      console.error(`Failed to get detailed stats for team ${teamId}:`, error)
+      return []
     }
   }
 
@@ -775,6 +831,12 @@ export class SportsAPI {
   async getTeamStatsByTeamId(sport: SportType = 'CFB', teamId: string): Promise<TeamStats | null> {
     const client = this.getAPIClient(sport)
     return client.getTeamStatsByTeamId(teamId)
+  }
+
+  // Detailed team statistics by team ID
+  async getDetailedTeamStats(sport: SportType = 'CFB', teamId: string): Promise<DetailedTeamStat[]> {
+    const client = this.getAPIClient(sport)
+    return client.getDetailedTeamStats(teamId)
   }
 
   // Players

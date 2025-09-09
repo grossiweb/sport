@@ -135,6 +135,32 @@ export async function GET(
       )
     }
 
+    // Get teams data to enrich game teams with division information
+    const teams = await sportsAPI.getTeams(sport as SportType)
+    const teamsMap = new Map(teams.map(team => [team.id, team]))
+    
+    // Enrich game with team division data
+    const homeTeam = teamsMap.get(game.homeTeam.id)
+    const awayTeam = teamsMap.get(game.awayTeam.id)
+    
+    const enrichedGame = {
+      ...game,
+      homeTeam: {
+        ...game.homeTeam,
+        division: homeTeam?.division,
+        conference: homeTeam?.conference,
+        mascot: homeTeam?.mascot,
+        record: homeTeam?.record
+      },
+      awayTeam: {
+        ...game.awayTeam,
+        division: awayTeam?.division,
+        conference: awayTeam?.conference,
+        mascot: awayTeam?.mascot,
+        record: awayTeam?.record
+      }
+    }
+
     // Generate detailed matchup analysis
     const detailedPredictions = generateDetailedAIPrediction(gameId)
     const detailedTrends = generateDetailedTrends(gameId)
@@ -149,7 +175,7 @@ export async function GET(
     }
 
     const detailedMatchup: Matchup = {
-      game,
+      game: enrichedGame,
       predictions: detailedPredictions,
       bettingData,
       trends: detailedTrends,

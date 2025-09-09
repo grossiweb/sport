@@ -24,7 +24,7 @@ export function MatchupFilters({
         Filters
       </h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Date Selector */}
         <div>
           <label htmlFor="gameDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -57,6 +57,27 @@ export function MatchupFilters({
             <option value="postponed">Postponed</option>
           </select>
         </div>
+
+        {/* Division Filter (CFB only) */}
+        {sport === 'CFB' && (
+          <div>
+            <label htmlFor="division" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Division
+            </label>
+            <select
+              id="division"
+              value={filters.division || ''}
+              onChange={(e) => onFiltersChange({ ...filters, division: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">All Divisions</option>
+              <option value="FBS (I-A)">FBS (I-A)</option>
+              <option value="FCS (I-AA)">FCS (I-AA)</option>
+              <option value="NCAA Division II">NCAA Division II</option>
+              <option value="NCAA Division III">NCAA Division III</option>
+            </select>
+          </div>
+        )}
 
         {/* Confidence Filter */}
         <div>

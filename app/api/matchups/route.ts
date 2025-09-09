@@ -106,8 +106,37 @@ export async function GET(request: NextRequest) {
     // Get games for the specified sport
     const games = await sportsAPI.getGames(sport as SportType, date)
       // console.log('Games fetched for date:', date, 'Total games:', games.length)
+    
+    // Get teams data to enrich game teams with division information
+    const teams = await sportsAPI.getTeams(sport as SportType)
+    const teamsMap = new Map(teams.map(team => [team.id, team]))
+    
+    // Enrich games with team division data
+    const enrichedGames = games.map(game => {
+      const homeTeam = teamsMap.get(game.homeTeam.id)
+      const awayTeam = teamsMap.get(game.awayTeam.id)
+      
+      return {
+        ...game,
+        homeTeam: {
+          ...game.homeTeam,
+          division: homeTeam?.division,
+          conference: homeTeam?.conference,
+          mascot: homeTeam?.mascot,
+          record: homeTeam?.record
+        },
+        awayTeam: {
+          ...game.awayTeam,
+          division: awayTeam?.division,
+          conference: awayTeam?.conference,
+          mascot: awayTeam?.mascot,
+          record: awayTeam?.record
+        }
+      }
+    })
+    
     // Generate basic matchup data for each game (no API calls to preserve quota)
-    const matchups: Matchup[] = games.map((game) => {
+    const matchups: Matchup[] = enrichedGames.map((game) => {
       // Generate basic AI predictions (no API calls)
       const predictions = generateAIPrediction(game)
       

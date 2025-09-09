@@ -57,6 +57,19 @@ export interface Team {
   logoUrl?: string
   primaryColor?: string
   secondaryColor?: string
+  mascot?: string
+  record?: string
+  conference?: {
+    conference_id: number
+    division_id?: number
+    sport_id: number
+    name: string
+  }
+  division?: {
+    division_id: number
+    sport_id: number
+    name: string
+  }
 }
 
 export interface TeamStats {
@@ -94,6 +107,39 @@ export interface TeamStats {
   fieldGoalPercentage?: number
   threePointPercentage?: number
   freeThrowPercentage?: number
+}
+
+// Detailed Team Stats for comprehensive display
+export interface DetailedTeamStat {
+  team_id: number
+  stat_id: number
+  stat: {
+    id: number
+    name: string
+    category: string
+    display_name: string
+    abbreviation: string
+    description: string
+    sport_id: number
+  }
+  season_year: number
+  season_type: number
+  season_type_name: string
+  value: number
+  display_value: string
+  per_game_value?: number
+  per_game_display_value?: string
+  rank?: number
+  rank_display_value?: string
+  updated_at: string
+}
+
+// Division types for filtering
+export type DivisionType = 'FBS (I-A)' | 'FCS (I-AA)' | 'NCAA Division II' | 'NCAA Division III'
+
+export interface DivisionFilter {
+  division_id: number
+  name: DivisionType
 }
 
 // Player Types
