@@ -22,7 +22,7 @@ interface MatchupCardProps {
 }
 
 export function MatchupCard({ matchup, sport }: MatchupCardProps) {
-  const { game, predictions, trends, injuries } = matchup
+  const { game, predictions, trends, injuries, bettingData } = matchup
   const [showDetails, setShowDetails] = useState(false)
   const confidenceColor = predictions.confidence >= 0.8 ? 'text-green-600' : 
                          predictions.confidence >= 0.6 ? 'text-yellow-600' : 'text-red-600'
@@ -113,6 +113,62 @@ export function MatchupCard({ matchup, sport }: MatchupCardProps) {
             <span className="text-sm text-gray-600 dark:text-gray-400">
               {predictions.predictedScore.away} - {predictions.predictedScore.home}
             </span>
+          </div>
+        </div>
+      )}
+
+      {/* Betting Lines */}
+      {bettingData && (
+        <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+          <div className="flex items-center mb-3">
+            <CurrencyDollarIcon className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
+            <span className="text-sm font-medium text-green-700 dark:text-green-300">
+              Betting Lines
+            </span>
+            {bettingData.sportsbook && (
+              <span className="ml-auto text-xs text-green-600 dark:text-green-400">
+                {bettingData.sportsbook.name}
+              </span>
+            )}
+          </div>
+          
+          <div className="grid grid-cols-3 gap-3 text-xs">
+            {/* Spread */}
+            <div className="text-center">
+              <div className="text-green-600 dark:text-green-400 font-medium mb-1">Spread</div>
+              <div className="text-gray-900 dark:text-white font-semibold">
+                {game.homeTeam.abbreviation} {bettingData.spread.home > 0 ? '+' : ''}{bettingData.spread.home}
+              </div>
+              <div className="text-gray-500 dark:text-gray-400 text-xs">
+                ({bettingData.spread.juice > 0 ? '+' : ''}{bettingData.spread.juice})
+              </div>
+            </div>
+
+            {/* Total */}
+            <div className="text-center">
+              <div className="text-green-600 dark:text-green-400 font-medium mb-1">Total</div>
+              <div className="text-gray-900 dark:text-white font-semibold">
+                {bettingData.total.points}
+              </div>
+              <div className="text-gray-500 dark:text-gray-400 text-xs">
+                O{bettingData.total.over} / U{bettingData.total.under}
+              </div>
+            </div>
+
+            {/* Money Line */}
+            <div className="text-center">
+              <div className="text-green-600 dark:text-green-400 font-medium mb-1">
+                ML
+              </div>
+              <div className="space-y-1 text-xs">
+                <div className="text-gray-900 dark:text-white">
+                  {game.homeTeam.abbreviation}: {bettingData.moneyLine.home > 0 ? '+' : ''}{bettingData.moneyLine.home}
+                </div>
+                <div className="text-gray-900 dark:text-white">
+                  {game.awayTeam.abbreviation}: {bettingData.moneyLine.away > 0 ? '+' : ''}{bettingData.moneyLine.away}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -208,7 +264,7 @@ export function MatchupCard({ matchup, sport }: MatchupCardProps) {
           )}
 
           {/* Betting Insights */}
-          <div>
+          {/* <div>
             <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center">
               <CurrencyDollarIcon className="h-4 w-4 mr-1 text-green-500" />
               Betting Insights
@@ -227,7 +283,7 @@ export function MatchupCard({ matchup, sport }: MatchupCardProps) {
                 </span>
               </div>
             </div>
-          </div>
+          </div>*/}
         </div>
       )}
 

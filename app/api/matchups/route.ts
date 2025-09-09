@@ -135,27 +135,37 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    // Generate basic matchup data for each game (no API calls to preserve quota)
-    const matchups: Matchup[] = enrichedGames.map((game) => {
-      // Generate basic AI predictions (no API calls)
-      const predictions = generateAIPrediction(game)
-      
-      // Generate basic trends and injury data (no API calls)
-      const trends = generateTrends(game.id)
-      const injuries = generateInjuries(game.id)
-      
-      return {
-        game,
-        predictions,
-        bettingData: null, // Will be loaded on demand
-        trends,
-        keyPlayers: [], // Will be loaded on demand
-        injuries,
-        matchupAnalysis: null, // Will be loaded on demand
-        headToHead: [], // Will be loaded on demand
-        teamStats: null // Will be loaded on demand
-      }
-    })
+    // Generate matchup data for each game with real betting data
+    const matchups: Matchup[] = await Promise.all(
+      enrichedGames.map(async (game) => {
+        // Generate basic AI predictions (no API calls)
+        const predictions = generateAIPrediction(game)
+        
+        // Generate basic trends and injury data (no API calls)
+        const trends = generateTrends(game.id)
+        const injuries = generateInjuries(game.id)
+        
+        // Fetch real betting data
+        let bettingData = null
+        try {
+          bettingData = await sportsAPI.getBettingData(sport as SportType, game.id)
+        } catch (error) {
+          console.warn(`Failed to fetch betting data for game ${game.id}:`, error)
+        }
+        
+        return {
+          game,
+          predictions,
+          bettingData,
+          trends,
+          keyPlayers: [], // Will be loaded on demand
+          injuries,
+          matchupAnalysis: null, // Will be loaded on demand
+          headToHead: [], // Will be loaded on demand
+          teamStats: null // Will be loaded on demand
+        }
+      })
+    )
 
     // Sort by game time
     matchups.sort((a, b) => 
