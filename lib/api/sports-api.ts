@@ -41,7 +41,7 @@ class TheRundownAPI {
     const endpoint = `/sports/${this.sportId}/schedule`
     const params = {
       from: fromDate,
-      limit: limit || 100
+      limit: limit || 5
     }
   
     // Make the API request
