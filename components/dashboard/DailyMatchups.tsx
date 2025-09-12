@@ -5,9 +5,10 @@ import { TrophyIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { useSport } from '@/contexts/SportContext'
 import { useFeaturedMatchups } from '@/hooks/useOptimizedMatchups'
+import { format } from 'date-fns'
 
 export function DailyMatchups() {
-  const { currentSport } = useSport()
+  const { currentSport, currentSportData } = useSport()
 
   const { data: matchups, isLoading } = useFeaturedMatchups(currentSport, 3)
   const games = matchups?.map((matchup: any) => matchup.game) || []

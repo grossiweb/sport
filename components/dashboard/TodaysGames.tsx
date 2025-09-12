@@ -4,6 +4,7 @@ import { Game } from '@/types'
 import { TrophyIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { useBackgroundMatchups } from '@/hooks/useOptimizedMatchups'
+import { format } from 'date-fns'
 
 export function TodaysGames() {
   // Use CFB as default sport for today's games, or make this configurable
@@ -53,7 +54,7 @@ export function TodaysGames() {
           Unable to load games
         </h3>
         <p className="mt-1 text-sm text-red-600 dark:text-red-300">
-          {error}
+          {String(error)}
         </p>
         <button
           onClick={() => window.location.reload()}
