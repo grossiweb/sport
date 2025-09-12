@@ -42,15 +42,6 @@ export default function HomePage() {
         </Suspense>
       </section>
 
-      {/* Key Statistics */}
-      <section>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          Key Statistics
-        </h2>
-        <Suspense fallback={<LoadingSpinner />}>
-          <KeyStats />
-        </Suspense>
-      </section>
 
       {/* Quick Access Links */}
       <section>

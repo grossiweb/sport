@@ -78,27 +78,7 @@ export function TeamStatsFilters({
 
         {/* Division filtering is now automatic for CFB - only shows FBS and FCS teams */}
 
-        {/* Conference Filter (CFB specific) */}
-        {sport === 'CFB' && (
-          <div>
-            <label htmlFor="conference" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Conference
-            </label>
-            <select
-              id="conference"
-              value={filters.conference || ''}
-              onChange={(e) => onFiltersChange({ ...filters, conference: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">All Conferences</option>
-              <option value="SEC">SEC</option>
-              <option value="Big 12">Big 12</option>
-              <option value="ACC">ACC</option>
-              <option value="Big Ten">Big Ten</option>
-              <option value="Pac-12">Pac-12</option>
-            </select>
-          </div>
-        )}
+        
 
         {/* Division Filter (NFL specific) */}
         {sport === 'NFL' && (
