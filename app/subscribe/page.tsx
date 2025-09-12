@@ -71,7 +71,7 @@ export default function SubscribePage() {
           name: 'Pro',
           price: 29.99,
           interval: 'month',
-          priceId: 'price_1S3DSRGRLsNELyji8NFmz2k3',
+          priceId: 'price_1S6Z5AGvrsxygb8jFBqyViDi',
           popular: true,
           features: [
             'Unlimited team pages',
@@ -93,7 +93,7 @@ export default function SubscribePage() {
           name: 'Enterprise',
           price: 99.99,
           interval: 'month',
-          priceId: 'price_1S3DSxGRLsNELyji4cmzzijM',
+          priceId: 'price_1S6Z5pGvrsxygb8jBKesWPko',
           features: [
             'Everything in Pro',
             '5,000 API requests per hour',

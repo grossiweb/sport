@@ -71,9 +71,9 @@ export async function GET(request: NextRequest) {
           
           // Determine plan based on price ID
           const priceId = activeSubscription.items.data[0]?.price.id
-          if (priceId === 'price_1S3DSRGRLsNELyji8NFmz2k3') {
+          if (priceId === 'price_1S6Z5AGvrsxygb8jFBqyViDi') {
             subscriptionPlan = 'pro'
-          } else if (priceId === 'price_1S3DSxGRLsNELyji4cmzzijM') {
+          } else if (priceId === 'price_1S6Z5pGvrsxygb8jBKesWPko') {
             subscriptionPlan = 'enterprise'
           }
         }

@@ -1,14 +1,14 @@
 import Stripe from 'stripe'
 
 // Initialize Stripe with correct API version
-export const stripe = new Stripe('sk_test_51S3DOjGRLsNELyji1XUHvdt01cDdlEjyQdX5NG02otpHrogApMDAVf8pNGvdRt9OvGbxMvG7eQMMAGhjjlczPBxU00uAXHLu2f'!, {
+export const stripe = new Stripe('sk_test_51S6KgJGvrsxygb8jMDqvR5au47FoVNqMTvmEMAJM1CtUBA2KSqFcoxGtxCtYXi6I1RUMYeVqijWAi2wpnZPDTXLX00vCWN9W3s'!, {
   apiVersion: '2023-10-16',
 } as any)
 
 // Stripe configuration
 export const stripeConfig = {
-  publishableKey: 'pk_test_51S3DOjGRLsNELyjiKiw8u7aGEwBf2UXS8Ki09TcGAhlx1suYXaCENqLigmdIc2B80VrQsFr1zPfFXxvkotyFa8aF00vVaYrLh0'!,
-  secretKey: 'sk_test_51S3DOjGRLsNELyji1XUHvdt01cDdlEjyQdX5NG02otpHrogApMDAVf8pNGvdRt9OvGbxMvG7eQMMAGhjjlczPBxU00uAXHLu2f'!,
+  publishableKey: 'pk_test_51S6KgJGvrsxygb8jOS1jaSno3dOzkGH3OMPOVeBwpm2VVZy9S3ngikyUXAOaKV1DZ1MRXsFYbv3DZz2Hp5NiiYKF00KghpkSXX'!,
+  secretKey: 'sk_test_51S6KgJGvrsxygb8jMDqvR5au47FoVNqMTvmEMAJM1CtUBA2KSqFcoxGtxCtYXi6I1RUMYeVqijWAi2wpnZPDTXLX00vCWN9W3s'!,
   webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
   currency: 'usd',
 }
