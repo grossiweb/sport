@@ -4,6 +4,7 @@ export interface User {
   email: string
   name: string
   subscriptionStatus: 'active' | 'inactive' | 'trial'
+  subscriptionTier?: 'free' | 'pro' | 'enterprise' | 'trial' | 'unknown'
   subscriptionExpiry?: Date
   role: 'user' | 'admin'
 }

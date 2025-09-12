@@ -1,5 +1,6 @@
 import { GraphQLClient } from 'graphql-request'
 import { WordPressPost, EmailContent, SocialPost, User } from '@/types'
+import { determineSubscriptionStatus, getSubscriptionExpiry, getSubscriptionTier } from '@/lib/subscription-utils'
 
 const client = new GraphQLClient(process.env.WORDPRESS_API_URL || 'http://headless.grossiweb.com/graphql')
 
@@ -427,33 +428,14 @@ export class WordPressClient {
       id: wpUser.id,
       email: wpUser.email,
       name: `${wpUser.firstName} ${wpUser.lastName}`.trim() || wpUser.nicename || wpUser.username,
-      subscriptionStatus: this.determineSubscriptionStatus(wpUser.roles?.nodes || []),
-      subscriptionExpiry: this.getSubscriptionExpiry(wpUser.roles?.nodes || []),
+      subscriptionStatus: determineSubscriptionStatus(wpUser.roles?.nodes || []),
+      subscriptionTier: getSubscriptionTier(wpUser.roles?.nodes || []),
+      subscriptionExpiry: getSubscriptionExpiry(wpUser.roles?.nodes || []),
       role: wpUser.roles?.nodes?.some((role: any) => role.name === 'administrator') ? 'admin' : 'user'
     }
   }
 
-  private determineSubscriptionStatus(roles: any[]): 'active' | 'inactive' | 'trial' {
-    const roleNames = roles.map(role => role.name.toLowerCase())
-    
-    if (roleNames.includes('premium_member') || roleNames.includes('subscriber')) {
-      return 'active'
-    } else if (roleNames.includes('trial_member')) {
-      return 'trial'
-    }
-    
-    return 'inactive'
-  }
-
-  private getSubscriptionExpiry(roles: any[]): Date | undefined {
-    const roleNames = roles.map(role => role.name.toLowerCase())
-    
-    if (roleNames.includes('trial_member')) {
-      return this.getTrialExpiry()
-    }
-    
-    return undefined
-  }
+  // Subscription helper methods moved to centralized subscription-utils.ts
 
   private getTrialExpiry(): Date {
     const expiry = new Date()

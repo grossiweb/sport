@@ -20,7 +20,11 @@ const VALIDATE_TOKEN_QUERY = `
   }
 `
 
-export async function GET(request: NextRequest) {
+/**
+ * API endpoint to sync user subscription status with WordPress
+ * This can be called periodically or when subscription status needs to be refreshed
+ */
+export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     
@@ -43,25 +47,25 @@ export async function GET(request: NextRequest) {
       }
     )
 
+    console.log('Syncing subscription status with WordPress...')
     const data = await client.request(VALIDATE_TOKEN_QUERY) as any
-    console.log('Validation response:', JSON.stringify(data, null, 2))
-    
-    // Debug: Log user roles for troubleshooting
-    if (data && data.viewer && data.viewer.roles) {
-      console.log('User roles:', data.viewer.roles.nodes.map((role: any) => role.name))
-    }
 
     if (data && data.viewer) {
       const user = data.viewer
       
-      // Map WordPress user to your User type
+      // Debug: Log user roles for troubleshooting
+      if (user.roles) {
+        console.log('Sync - User roles:', user.roles.nodes.map((role: any) => role.name))
+      }
+      
+      // Map WordPress user to your User type with fresh subscription data
       const subscriptionStatus = determineSubscriptionStatus(user.roles?.nodes || [])
       const subscriptionExpiry = getSubscriptionExpiry(user.roles?.nodes || [])
       const subscriptionTier = getSubscriptionTier(user.roles?.nodes || [])
       
-      console.log('Mapped subscription status:', subscriptionStatus)
-      console.log('Mapped subscription tier:', subscriptionTier)
-      console.log('Mapped subscription expiry:', subscriptionExpiry)
+      console.log('Sync - Updated subscription status:', subscriptionStatus)
+      console.log('Sync - Updated subscription tier:', subscriptionTier)
+      console.log('Sync - Updated subscription expiry:', subscriptionExpiry)
       
       const mappedUser = {
         id: user.id,
@@ -75,22 +79,30 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        user: mappedUser
+        user: mappedUser,
+        syncedAt: new Date().toISOString()
       })
     } else {
       return NextResponse.json(
-        { error: 'Invalid token' },
+        { error: 'Invalid token or user not found' },
         { status: 401 }
       )
     }
   } catch (error: any) {
-    console.error('Token validation error:', error)
+    console.error('Subscription sync error:', error)
+    
+    // Check if it's a GraphQL error
+    if (error.response?.errors) {
+      const errorMessage = error.response.errors[0]?.message || 'Subscription sync failed'
+      return NextResponse.json(
+        { error: errorMessage },
+        { status: 401 }
+      )
+    }
     
     return NextResponse.json(
-      { error: 'Token validation failed' },
-      { status: 401 }
+      { error: 'Internal server error' },
+      { status: 500 }
     )
   }
 }
-
-// Helper functions moved to centralized subscription-utils.ts

@@ -11,7 +11,7 @@ export async function GET(
   try {
     const { searchParams } = new URL(request.url)
     const sport = searchParams.get('sport')?.toUpperCase() || 'CFB'
-    const teamId = params.teamId
+    const { teamId } = params
 
     if (!isValidSportType(sport)) {
       return NextResponse.json(
@@ -27,20 +27,23 @@ export async function GET(
       )
     }
 
-    console.log(`${sport} Team ${teamId} detailed stats API called`)
+    console.log(`${sport} individual team stats API called for team ${teamId}`)
+    
+    // Get detailed team stats
     const detailedStats = await sportsAPI.getDetailedTeamStats(sport as SportType, teamId)
-    console.log(`${sport} Team ${teamId} detailed stats API returning ${detailedStats.length} stats`)
+    
+    // Also get basic team stats
+    const basicStats = await sportsAPI.getTeamStatsByTeamId(sport as SportType, teamId)
 
     return NextResponse.json({
       success: true,
-      data: detailedStats
+      data: detailedStats  // Return detailed stats directly for the component
     })
   } catch (error) {
     const sport = new URL(request.url).searchParams.get('sport')?.toUpperCase() || 'CFB'
-    const teamId = params?.teamId || 'unknown'
-    console.error(`${sport} Team ${teamId} detailed stats API error:`, error)
+    console.error(`${sport} Individual team stats API error:`, error)
     return NextResponse.json(
-      { error: `Failed to fetch ${sport} team ${teamId} detailed stats` },
+      { error: `Failed to fetch ${sport} team stats for team ${params.teamId}` },
       { status: 500 }
     )
   }

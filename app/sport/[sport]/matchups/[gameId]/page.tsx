@@ -59,27 +59,41 @@ export default function MatchupDetailsPage() {
   const { data: matchup, isLoading, error } = useQuery(
     ['matchupDetails', sport, gameId],
     () => fetchMatchupDetails(sport, gameId),
-    { enabled: !!sport && !!gameId }
-  )
-
-  // Fetch team stats for CFB teams (only FBS and FCS have detailed stats)
-  const { data: homeTeamStats, isLoading: homeStatsLoading } = useQuery(
-    ['teamStats', sport, matchup?.game.homeTeam.id],
-    () => fetchTeamDetailedStats(sport, matchup!.game.homeTeam.id),
     { 
-      enabled: !!sport && !!matchup && sport === 'CFB' && showTeamStats,
-      retry: false
+      enabled: !!sport && !!gameId,
+      staleTime: 2 * 60 * 1000, // 2 minutes for matchup details
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+      refetchInterval: false, // Don't auto-refresh on details page
+      refetchOnWindowFocus: false
     }
   )
 
-  const { data: awayTeamStats, isLoading: awayStatsLoading } = useQuery(
-    ['teamStats', sport, matchup?.game.awayTeam.id],
-    () => fetchTeamDetailedStats(sport, matchup!.game.awayTeam.id),
+  // Fetch team stats for both teams in a single optimized query
+  const { data: teamStats, isLoading: teamStatsLoading } = useQuery(
+    ['teamStats', sport, matchup?.game.homeTeam.id, matchup?.game.awayTeam.id],
+    async () => {
+      if (!matchup) return { home: [], away: [] }
+      
+      // Fetch both team stats in parallel instead of separate calls
+      const [homeStats, awayStats] = await Promise.all([
+        fetchTeamDetailedStats(sport, matchup.game.homeTeam.id).catch(() => []),
+        fetchTeamDetailedStats(sport, matchup.game.awayTeam.id).catch(() => [])
+      ])
+      
+      return { home: homeStats, away: awayStats }
+    },
     { 
-      enabled: !!sport && !!matchup && sport === 'CFB' && showTeamStats,
-      retry: false
+      enabled: !!sport && !!matchup && (sport === 'CFB' || sport === 'NFL') && showTeamStats,
+      staleTime: 15 * 60 * 1000, // 15 minutes - team stats don't change frequently
+      cacheTime: 30 * 60 * 1000, // 30 minutes
+      retry: 1
     }
   )
+
+  const homeTeamStats = teamStats?.home || []
+  const awayTeamStats = teamStats?.away || []
+  const homeStatsLoading = teamStatsLoading
+  const awayStatsLoading = teamStatsLoading
 
   const fetchAllBettingLines = async () => {
     if (!sport || !gameId || loadingAllLines) return
@@ -468,13 +482,14 @@ export default function MatchupDetailsPage() {
           )}
 
           {/* Team Statistics Section */}
-          {showTeamStats && sport === 'CFB' && (
+          {showTeamStats && (sport === 'CFB' || sport === 'NFL') && (
             <TeamDetailedStats
               homeTeamStats={homeTeamStats || []}
               awayTeamStats={awayTeamStats || []}
               homeTeamName={game.homeTeam.name}
               awayTeamName={game.awayTeam.name}
               isLoading={homeStatsLoading || awayStatsLoading}
+              sport={sport}
             />
           )}
         </div>
@@ -535,14 +550,15 @@ export default function MatchupDetailsPage() {
             </div>
           )}
 
-          {/* Team Stats Toggle (CFB only) */}
-          {sport === 'CFB' && (
+          {/* Team Stats Toggle (CFB and NFL) */}
+          {(sport === 'CFB' || sport === 'NFL') && (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Team Statistics
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                View detailed season statistics for both teams. Available for FBS (I-A) and FCS (I-AA) teams only.
+                View detailed season statistics for both teams.
+                {sport === 'CFB' ? ' Available for FBS (I-A) and FCS (I-AA) teams only.' : ''}
               </p>
               <button
                 onClick={() => setShowTeamStats(!showTeamStats)}

@@ -3,6 +3,7 @@ import { sportsAPI } from '@/lib/api/sports-api'
 import { Matchup, GamePrediction, TrendData, InjuryReport, SportType } from '@/types'
 import { isValidSportType } from '@/lib/constants/sports'
 import { format } from 'date-fns'
+import { apiCache, cacheKeys, cacheTTL } from '@/lib/cache'
 
 // Mock AI prediction service - in production, this would be a real ML model
 function generateAIPrediction(game: any): GamePrediction {
@@ -102,6 +103,21 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Check cache first
+    const cacheKey = cacheKeys.matchups(sport, date)
+    const cachedData = apiCache.get<any>(cacheKey)
+    
+    if (cachedData) {
+      console.log(`Cache hit for matchups: ${cacheKey}`)
+      return NextResponse.json({
+        ...cachedData,
+        cached: true,
+        cacheTimestamp: new Date().toISOString()
+      })
+    }
+
+    console.log(`Cache miss for matchups: ${cacheKey}, fetching fresh data...`)
     
     // Get games for the specified sport
     const games = await sportsAPI.getGames(sport as SportType, date)
@@ -172,7 +188,7 @@ export async function GET(request: NextRequest) {
       new Date(a.game.gameDate).getTime() - new Date(b.game.gameDate).getTime()
     )
 
-    return NextResponse.json({
+    const response = {
       success: true,
       data: matchups,
       meta: {
@@ -180,8 +196,16 @@ export async function GET(request: NextRequest) {
         sport,
         totalGames: matchups.length,
         highConfidenceGames: matchups.filter(m => m.predictions.confidence >= 0.8).length
-      }
-    })
+      },
+      cached: false,
+      timestamp: new Date().toISOString()
+    }
+
+    // Cache the results
+    apiCache.set(cacheKey, response, cacheTTL.matchups)
+    console.log(`Cached matchups data: ${cacheKey} (${matchups.length} items)`)
+
+    return NextResponse.json(response)
   } catch (error) {
     console.error('Matchups API error:', error)
     return NextResponse.json(

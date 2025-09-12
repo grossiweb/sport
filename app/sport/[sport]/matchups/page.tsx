@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { useQuery } from 'react-query'
 import { format } from 'date-fns'
 import { SportType, Matchup } from '@/types'
 import { isValidSportType } from '@/lib/constants/sports'
 import { useSport } from '@/contexts/SportContext'
 import { MatchupCard } from '@/components/matchups/MatchupCard'
 import { MatchupFilters } from '@/components/matchups/MatchupFilters'
+import { useMatchupsPage } from '@/hooks/useOptimizedMatchups'
 
 interface MatchupFiltersState {
   status?: string
@@ -16,16 +16,7 @@ interface MatchupFiltersState {
   division?: string
 }
 
-const fetchMatchups = async (sport: SportType, date?: string): Promise<Matchup[]> => {
-  const params = new URLSearchParams()
-  params.append('sport', sport)
-  if (date) params.append('date', date)
-  
-  const response = await fetch(`/api/matchups?${params.toString()}`)
-  if (!response.ok) throw new Error('Failed to fetch matchups')
-  const result = await response.json()
-  return result.data
-}
+// Removed fetchMatchups - now using optimized hook
 
 export default function SportMatchupsPage() {
   const params = useParams()
@@ -47,13 +38,9 @@ export default function SportMatchupsPage() {
 
   const sport = validSport || currentSport
 
-  const { data: matchups, isLoading: matchupsLoading, error } = useQuery(
-    ['matchups', sport, selectedDate],
-    () => fetchMatchups(sport, selectedDate),
-    { 
-      enabled: !!sport,
-      refetchInterval: 60000 // Refetch every minute for live updates
-    }
+  const { data: matchups, isLoading: matchupsLoading, error } = useMatchupsPage(
+    sport,
+    selectedDate
   )
 
   const isLoading = contextLoading || matchupsLoading

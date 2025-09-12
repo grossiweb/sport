@@ -3,12 +3,14 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { User, AuthState } from '@/types'
+import { hasActiveSubscription } from '@/lib/subscription-utils'
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>
   logout: () => Promise<void>
   register: (email: string, password: string, name: string) => Promise<boolean>
   checkSubscription: () => boolean
+  syncSubscription: () => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -38,17 +40,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
       refreshSession()
     }, 30 * 60 * 1000) // 30 minutes
 
-    return () => clearInterval(refreshInterval)
+    // Set up subscription sync every 5 minutes to ensure real-time sync
+    const syncInterval = setInterval(() => {
+      syncSubscriptionStatus()
+    }, 5 * 60 * 1000) // 5 minutes
+
+    return () => {
+      clearInterval(refreshInterval)
+      clearInterval(syncInterval)
+    }
   }, [])
 
   useEffect(() => {
     // Redirect logic based on auth state and current route
     if (!authState.isLoading) {
       const isPublicRoute = publicRoutes.includes(pathname)
+      const hasValidSubscription = checkSubscription()
+      
+      console.log('AuthProvider redirect check:', {
+        isAuthenticated: authState.isAuthenticated,
+        isPublicRoute,
+        hasValidSubscription,
+        pathname,
+        user: authState.user ? {
+          subscriptionStatus: authState.user.subscriptionStatus,
+          subscriptionExpiry: authState.user.subscriptionExpiry
+        } : null
+      })
       
       if (!authState.isAuthenticated && !isPublicRoute) {
+        console.log('Redirecting to login: not authenticated')
         router.push('/login')
-      } else if (authState.isAuthenticated && !checkSubscription() && pathname !== '/subscribe') {
+      } else if (authState.isAuthenticated && !hasValidSubscription && pathname !== '/subscribe') {
+        console.log('Redirecting to subscribe: no valid subscription')
         router.push('/subscribe')
       }
     }
@@ -166,6 +190,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  const syncSubscriptionStatus = async () => {
+    const token = localStorage.getItem('authToken')
+    
+    if (authState.isAuthenticated && token) {
+      try {
+        console.log('Syncing subscription status with WordPress...')
+        const response = await fetch('/api/sync-subscription', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.user) {
+            console.log('Subscription status synced successfully:', data.user.subscriptionStatus)
+            // Update the user state with fresh subscription data
+            setAuthState(prev => ({
+              ...prev,
+              user: data.user
+            }))
+          }
+        } else {
+          console.warn('Failed to sync subscription status:', response.status)
+        }
+      } catch (error) {
+        console.error('Subscription sync error:', error)
+      }
+    }
+  }
+
   const clearAuthData = () => {
     localStorage.removeItem('authToken')
     localStorage.removeItem('loginTime')
@@ -199,6 +256,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
           isLoading: false,
           isAuthenticated: true,
         })
+        
+        // Perform immediate subscription sync after successful login
+        setTimeout(() => {
+          syncSubscriptionStatus()
+        }, 1000) // Small delay to ensure state is set
+        
         return true
       }
       return false
@@ -266,21 +329,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     const { subscriptionStatus, subscriptionExpiry } = authState.user
     
-    if (subscriptionStatus === 'active') {
-      if (subscriptionExpiry) {
-        return new Date() < new Date(subscriptionExpiry)
-      }
-      return true
-    }
-    
-    if (subscriptionStatus === 'trial') {
-      if (subscriptionExpiry) {
-        return new Date() < new Date(subscriptionExpiry)
-      }
-      return true
-    }
-    
-    return false
+    // Use centralized subscription checking logic
+    return hasActiveSubscription(subscriptionStatus, subscriptionExpiry)
   }
 
   const value: AuthContextType = {
@@ -289,6 +339,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     logout,
     register,
     checkSubscription,
+    syncSubscription: syncSubscriptionStatus,
   }
 
   return (

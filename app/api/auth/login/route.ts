@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GraphQLClient } from 'graphql-request'
+import { determineSubscriptionStatus, getSubscriptionExpiry, getSubscriptionTier } from '@/lib/subscription-utils'
 
 const client = new GraphQLClient(process.env.WORDPRESS_API_URL || 'http://headless.grossiweb.com/graphql')
 
@@ -49,15 +50,29 @@ export async function POST(request: NextRequest) {
     if (data.login?.authToken && data.login?.user) {
       const user = data.login.user
       
-              // Map WordPress user to your User type
-        const mappedUser = {
-          id: user.id,
-          email: user.email,
-          name: `${user.firstName} ${user.lastName}`.trim() || user.nicename || user.username,
-          subscriptionStatus: determineSubscriptionStatus(user.roles?.nodes || []),
-          subscriptionExpiry: getSubscriptionExpiry(user.roles?.nodes || []),
-          role: user.roles?.nodes?.some((role: any) => role.name === 'administrator') ? 'admin' : 'user'
-        }
+      // Debug: Log user roles for troubleshooting
+      if (user.roles) {
+        console.log('Login - User roles:', user.roles.nodes.map((role: any) => role.name))
+      }
+      
+      // Map WordPress user to your User type
+      const subscriptionStatus = determineSubscriptionStatus(user.roles?.nodes || [])
+      const subscriptionExpiry = getSubscriptionExpiry(user.roles?.nodes || [])
+      const subscriptionTier = getSubscriptionTier(user.roles?.nodes || [])
+      
+      console.log('Login - Mapped subscription status:', subscriptionStatus)
+      console.log('Login - Mapped subscription tier:', subscriptionTier)
+      console.log('Login - Mapped subscription expiry:', subscriptionExpiry)
+      
+      const mappedUser = {
+        id: user.id,
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`.trim() || user.nicename || user.username,
+        subscriptionStatus,
+        subscriptionTier,
+        subscriptionExpiry,
+        role: user.roles?.nodes?.some((role: any) => role.name === 'administrator') ? 'admin' : 'user'
+      }
 
       return NextResponse.json({
         success: true,
@@ -90,30 +105,4 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper function to determine subscription status based on WordPress roles
-function determineSubscriptionStatus(roles: any[]): 'active' | 'inactive' | 'trial' {
-  const roleNames = roles.map(role => role.name.toLowerCase())
-  
-  if (roleNames.includes('premium_member') || roleNames.includes('subscriber')) {
-    return 'active'
-  } else if (roleNames.includes('trial_member')) {
-    return 'trial'
-  }
-  
-  return 'inactive'
-}
-
-// Helper function to get subscription expiry
-function getSubscriptionExpiry(roles: any[]): Date | undefined {
-  // You can implement custom logic here based on your WordPress user meta
-  // For now, return a default trial period
-  const roleNames = roles.map(role => role.name.toLowerCase())
-  
-  if (roleNames.includes('trial_member')) {
-    const expiry = new Date()
-    expiry.setDate(expiry.getDate() + 14) // 14 day trial
-    return expiry
-  }
-  
-  return undefined
-}
+// Helper functions moved to centralized subscription-utils.ts

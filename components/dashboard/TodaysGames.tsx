@@ -1,50 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { Game } from '@/types'
-import { format } from 'date-fns'
 import { TrophyIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
+import { useBackgroundMatchups } from '@/hooks/useOptimizedMatchups'
 
 export function TodaysGames() {
-  const [games, setGames] = useState<Game[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const fetchTodaysGames = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-        
-        // Use your optimized matchups API endpoint with today's date
-        const today = format(new Date(), 'yyyy-MM-dd')
-        const response = await fetch(`/api/matchups?date=${today}`)
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch games: ${response.status}`)
-        }
-        
-        const result = await response.json()
-        
-        if (result.success && result.data) {
-          // Extract game data from matchups (each matchup contains a game object)
-          const todaysGames = result.data.map((matchup: any) => matchup.game)
-          setGames(todaysGames)
-        } else {
-          throw new Error(result.error || 'Failed to load games')
-        }
-      } catch (err) {
-        console.error('Error fetching today\'s games:', err)
-        setError(err instanceof Error ? err.message : 'Failed to load games')
-        setGames([]) // Set empty array on error
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchTodaysGames()
-  }, [])
+  // Use CFB as default sport for today's games, or make this configurable
+  const { data: matchups, isLoading, error } = useBackgroundMatchups('CFB')
+  const games = matchups?.map((matchup: any) => matchup.game) || []
 
   if (isLoading) {
     return (

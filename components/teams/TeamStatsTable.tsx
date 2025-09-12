@@ -79,11 +79,9 @@ export function TeamStatsTable({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Team
               </th>
-              {sport === "CFB" && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Division
-                </th>
-              )}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                {sport === "CFB" ? "Division" : "Division"}
+              </th>
               <th
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
                 onClick={() => handleSort("wins")}
@@ -154,18 +152,16 @@ export function TeamStatsTable({
                   </div>
                 </td>
 
-                {sport === "CFB" && (
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">
-                      {team.division?.name || "N/A"}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900 dark:text-white">
+                    {team.division?.name || "N/A"}
+                  </div>
+                  {team.conference && (
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {team.conference.name}
                     </div>
-                    {team.conference && (
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {team.conference.name}
-                      </div>
-                    )}
-                  </td>
-                )}
+                  )}
+                </td>
 
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                   {stats?.wins ?? 0}
@@ -186,19 +182,20 @@ export function TeamStatsTable({
                   {stats?.yardsFor ?? 0}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  {sport === "CFB" &&
-                  (team.division?.name === "FBS (I-A)" || team.division?.name === "FCS (I-AA)") ? (
+                  {(sport === "CFB" &&
+                    (team.division?.name === "FBS (I-A)" || team.division?.name === "FCS (I-AA)")) ||
+                   sport === "NFL" ? (
                     <button
                       onClick={() => {
                         window.open(`/api/teams/${team.id}/stats?sport=${sport}`, "_blank");
                       }}
                       className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
                     >
-                      View Details
+                      Show Team Stats
                     </button>
                   ) : (
                     <span className="text-gray-400 dark:text-gray-500 text-xs">
-                      {sport === "CFB" ? "No detailed stats" : "View Details"}
+                      No detailed stats
                     </span>
                   )}
                 </td>

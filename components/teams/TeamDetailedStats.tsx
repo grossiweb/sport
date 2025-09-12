@@ -10,6 +10,7 @@ interface TeamDetailedStatsProps {
   homeTeamName: string
   awayTeamName: string
   isLoading?: boolean
+  sport?: 'CFB' | 'NFL'
 }
 
 // Define the exact order and ONLY allowed stats for CFB matchup detail pages
@@ -26,41 +27,95 @@ const PREFERRED_STAT_ORDER = [
   'TP/G', 'PAT'
 ]
 
+// Define preferred NFL stats to show (most relevant for matchup analysis)
+const NFL_PREFERRED_STATS = [
+  'PTS', 'YDS', 'PYDS', 'RYDS', 'TO', 'SACKS', 'INT', 'FUM', 'TD', 'FGM', 'FGA',
+  '3RDC', '3RDA', '3RDC%', 'RZ%', 'TPEN', 'TPY', 'POSS', 'DIFF'
+]
+
 export function TeamDetailedStats({ 
   homeTeamStats, 
   awayTeamStats, 
   homeTeamName, 
   awayTeamName, 
-  isLoading 
+  isLoading,
+  sport = 'CFB'
 }: TeamDetailedStatsProps) {
   const [activeTab, setActiveTab] = useState<'home' | 'away'>('home')
 
   // Function to sort stats based on preferred order from Excel file
   const sortStatsByPreferredOrder = (stats: DetailedTeamStat[]) => {
     return stats.sort((a, b) => {
-      const aIndex = PREFERRED_STAT_ORDER.indexOf(a.stat.abbreviation)
-      const bIndex = PREFERRED_STAT_ORDER.indexOf(b.stat.abbreviation)
-      
-      // If both stats are in preferred order, sort by their order
-      if (aIndex !== -1 && bIndex !== -1) {
-        return aIndex - bIndex
+      if (sport === 'NFL') {
+        // For NFL, prioritize by NFL_PREFERRED_STATS order
+        const aIndex = NFL_PREFERRED_STATS.indexOf(a.stat.abbreviation)
+        const bIndex = NFL_PREFERRED_STATS.indexOf(b.stat.abbreviation)
+        
+        // If both stats are in preferred order, sort by their order
+        if (aIndex !== -1 && bIndex !== -1) {
+          return aIndex - bIndex
+        }
+        
+        // If only one is in preferred order, prioritize it
+        if (aIndex !== -1) return -1
+        if (bIndex !== -1) return 1
+        
+        // If neither is in preferred order, sort alphabetically by display name
+        return a.stat.display_name.localeCompare(b.stat.display_name)
+      } else {
+        // For CFB, use the existing logic
+        const aIndex = PREFERRED_STAT_ORDER.indexOf(a.stat.abbreviation)
+        const bIndex = PREFERRED_STAT_ORDER.indexOf(b.stat.abbreviation)
+        
+        // If both stats are in preferred order, sort by their order
+        if (aIndex !== -1 && bIndex !== -1) {
+          return aIndex - bIndex
+        }
+        
+        // If only one is in preferred order, prioritize it
+        if (aIndex !== -1) return -1
+        if (bIndex !== -1) return 1
+        
+        // If neither is in preferred order, sort by stat_id
+        return a.stat_id - b.stat_id
       }
-      
-      // If only one is in preferred order, prioritize it
-      if (aIndex !== -1) return -1
-      if (bIndex !== -1) return 1
-      
-      // If neither is in preferred order, sort by stat_id
-      return a.stat_id - b.stat_id
     })
   }
 
-  // Function to filter stats - ONLY show stats that are in the specified list
+  // Function to deduplicate stats by multiple criteria, keeping the first occurrence
+  const deduplicateStats = (stats: DetailedTeamStat[]) => {
+    const seen = new Set<string>()
+    return stats.filter(stat => {
+      // Create a unique key using both abbreviation and display name to catch different types of duplicates
+      const key = `${stat.stat.abbreviation}|${stat.stat.display_name}|${stat.stat.name}`
+      if (seen.has(key)) {
+        return false
+      }
+      seen.add(key)
+      return true
+    })
+  }
+
+  // Function to filter stats - For CFB, use preferred order; for NFL, show preferred NFL stats (deduplicated)
   const filterStatsFromExcel = (stats: DetailedTeamStat[]) => {
-    return stats.filter(stat => 
-      // ONLY include stats that are in the PREFERRED_STAT_ORDER list
+    if (sport === 'NFL') {
+      // For NFL, show preferred NFL stats but deduplicated
+      const filteredStats = stats.filter(stat => 
+        NFL_PREFERRED_STATS.includes(stat.stat.abbreviation) ||
+        stat.stat.display_name.toLowerCase().includes('points') ||
+        stat.stat.display_name.toLowerCase().includes('yards') ||
+        stat.stat.display_name.toLowerCase().includes('touchdown') ||
+        stat.stat.display_name.toLowerCase().includes('sack') ||
+        stat.stat.display_name.toLowerCase().includes('interception') ||
+        stat.stat.display_name.toLowerCase().includes('fumble')
+      )
+      return deduplicateStats(filteredStats)
+    }
+    // For CFB, ONLY include stats that are in the PREFERRED_STAT_ORDER list (also deduplicated)
+    const filteredStats = stats.filter(stat => 
       PREFERRED_STAT_ORDER.includes(stat.stat.abbreviation)
     )
+    return deduplicateStats(filteredStats)
   }
 
   const getRankColor = (rank?: number) => {
@@ -105,7 +160,9 @@ export function TeamDetailedStats({
             No Detailed Stats Available
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            Detailed statistics are only available for FBS (I-A) and FCS (I-AA) teams.
+            {sport === 'CFB' 
+              ? 'Detailed statistics are only available for FBS (I-A) and FCS (I-AA) teams.'
+              : 'No detailed statistics available for these teams.'}
           </p>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GraphQLClient } from 'graphql-request'
+import { determineSubscriptionStatus, getSubscriptionExpiry } from '@/lib/subscription-utils'
 
 // Type definitions for GraphQL responses
 interface ViewerData {
@@ -180,28 +181,4 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper function to determine subscription status based on WordPress roles
-function determineSubscriptionStatus(roles: any[]): 'active' | 'inactive' | 'trial' {
-  const roleNames = roles.map(role => role.name.toLowerCase())
-  
-  if (roleNames.includes('premium_member') || roleNames.includes('subscriber')) {
-    return 'active'
-  } else if (roleNames.includes('trial_member')) {
-    return 'trial'
-  }
-  
-  return 'trial' // Default new users to trial
-}
-
-// Helper function to get subscription expiry
-function getSubscriptionExpiry(roles: any[]): Date | undefined {
-  const roleNames = roles.map(role => role.name.toLowerCase())
-  
-  if (roleNames.includes('trial_member') || roleNames.includes('subscriber')) {
-    const expiry = new Date()
-    expiry.setDate(expiry.getDate() + 14) // 14 day trial
-    return expiry
-  }
-  
-  return undefined
-}
+// Helper functions moved to centralized subscription-utils.ts

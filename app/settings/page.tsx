@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { SubscriptionManager } from '@/components/subscription/SubscriptionManager'
 import { PackageManager } from '@/components/admin/PackageManager'
+import SubscriptionSyncButton from '@/components/SubscriptionSyncButton'
 import { 
   UserIcon, 
   CreditCardIcon, 
@@ -74,7 +75,12 @@ export default function SettingsPage() {
           {/* Main Content */}
           <div className="flex-1">
             {activeTab === 'profile' && <ProfileSettings />}
-            {activeTab === 'subscription' && <SubscriptionManager />}
+            {activeTab === 'subscription' && (
+              <div className="space-y-6">
+                <SubscriptionSyncButton />
+                <SubscriptionManager />
+              </div>
+            )}
             {activeTab === 'notifications' && <NotificationSettings />}
             {activeTab === 'security' && <SecuritySettings />}
             {activeTab === 'preferences' && <PreferenceSettings />}

@@ -1,39 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { Game } from '@/types'
-import { format } from 'date-fns'
 import { TrophyIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { useSport } from '@/contexts/SportContext'
+import { useFeaturedMatchups } from '@/hooks/useOptimizedMatchups'
 
 export function DailyMatchups() {
-  const [games, setGames] = useState<Game[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const { currentSport, currentSportData } = useSport()
+  const { currentSport } = useSport()
 
-  useEffect(() => {
-    const fetchTodaysGames = async () => {
-      try {
-        const today = format(new Date(), 'yyyy-MM-dd')
-        const response = await fetch(`/api/matchups?sport=${currentSport}&date=${today}`)
-        if (response.ok) {
-          const result = await response.json()
-          if (result.success && result.data) {
-            // Get first 3 games for featured display
-            const featuredGames = result.data.slice(0, 3).map((matchup: any) => matchup.game)
-            setGames(featuredGames)
-          }
-        }
-      } catch (error) {
-        console.error('Failed to fetch daily matchups:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchTodaysGames()
-  }, [currentSport])
+  const { data: matchups, isLoading } = useFeaturedMatchups(currentSport, 3)
+  const games = matchups?.map((matchup: any) => matchup.game) || []
 
   if (isLoading) {
     return (
