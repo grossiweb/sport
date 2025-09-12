@@ -78,20 +78,7 @@ export default function SportMatchupsPage() {
       }
     }
     
-    // Division filter (CFB only)
-    if (sport === 'CFB' && filters.division) {
-      const homeTeamDivision = matchup.game.homeTeam.division?.name
-      const awayTeamDivision = matchup.game.awayTeam.division?.name
-      
-      // Show matchup if either team is in the selected division
-      const homeMatches = homeTeamDivision === filters.division
-      const awayMatches = awayTeamDivision === filters.division
-      
-      // If neither team matches the selected division, filter out
-      if (!homeMatches && !awayMatches) {
-        return false
-      }
-    }
+    // Division filtering is now handled at API level for CFB (only FBS and FCS teams)
     
     return true
   }) || []

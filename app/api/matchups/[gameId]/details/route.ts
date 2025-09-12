@@ -124,41 +124,15 @@ export async function GET(
     // For now, we'll generate mock detailed data since we don't have real detailed endpoints
     // In production, you would fetch from your real API
     
-    // Try to get basic game info
+    // Try to get basic game info (filtering is now handled in sportsAPI.getGames)
     const games = await sportsAPI.getGames(sport as SportType)
-    const game = games.find(g => g.id === gameId)
+    const enrichedGame = games.find(g => g.id === gameId)
     
-    if (!game) {
+    if (!enrichedGame) {
       return NextResponse.json(
         { error: 'Game not found' },
         { status: 404 }
       )
-    }
-
-    // Get teams data to enrich game teams with division information
-    const teams = await sportsAPI.getTeams(sport as SportType)
-    const teamsMap = new Map(teams.map(team => [team.id, team]))
-    
-    // Enrich game with team division data
-    const homeTeam = teamsMap.get(game.homeTeam.id)
-    const awayTeam = teamsMap.get(game.awayTeam.id)
-    
-    const enrichedGame = {
-      ...game,
-      homeTeam: {
-        ...game.homeTeam,
-        division: homeTeam?.division,
-        conference: homeTeam?.conference,
-        mascot: homeTeam?.mascot,
-        record: homeTeam?.record
-      },
-      awayTeam: {
-        ...game.awayTeam,
-        division: awayTeam?.division,
-        conference: awayTeam?.conference,
-        mascot: awayTeam?.mascot,
-        record: awayTeam?.record
-      }
     }
 
     // Generate detailed matchup analysis

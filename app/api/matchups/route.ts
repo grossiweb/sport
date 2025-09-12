@@ -96,6 +96,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const sport = searchParams.get('sport')?.toUpperCase() || 'CFB'
     const date = searchParams.get('date') || format(new Date(), 'yyyy-MM-dd')
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10
     
     if (!isValidSportType(sport)) {
       return NextResponse.json(
@@ -105,7 +106,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check cache first
-    const cacheKey = cacheKeys.matchups(sport, date)
+    const cacheKey = cacheKeys.matchups(sport, date) + (limit !== 10 ? `_limit_${limit}` : '')
     const cachedData = apiCache.get<any>(cacheKey)
     
     if (cachedData) {
@@ -119,41 +120,13 @@ export async function GET(request: NextRequest) {
 
     console.log(`Cache miss for matchups: ${cacheKey}, fetching fresh data...`)
     
-    // Get games for the specified sport
-    const games = await sportsAPI.getGames(sport as SportType, date)
+    // Get games for the specified sport (filtering is now handled in sportsAPI.getGames)
+    const games = await sportsAPI.getGames(sport as SportType, date, limit)
       // console.log('Games fetched for date:', date, 'Total games:', games.length)
-    
-    // Get teams data to enrich game teams with division information
-    const teams = await sportsAPI.getTeams(sport as SportType)
-    const teamsMap = new Map(teams.map(team => [team.id, team]))
-    
-    // Enrich games with team division data
-    const enrichedGames = games.map(game => {
-      const homeTeam = teamsMap.get(game.homeTeam.id)
-      const awayTeam = teamsMap.get(game.awayTeam.id)
-      
-      return {
-        ...game,
-        homeTeam: {
-          ...game.homeTeam,
-          division: homeTeam?.division,
-          conference: homeTeam?.conference,
-          mascot: homeTeam?.mascot,
-          record: homeTeam?.record
-        },
-        awayTeam: {
-          ...game.awayTeam,
-          division: awayTeam?.division,
-          conference: awayTeam?.conference,
-          mascot: awayTeam?.mascot,
-          record: awayTeam?.record
-        }
-      }
-    })
     
     // Generate matchup data for each game with real betting data
     const matchups: Matchup[] = await Promise.all(
-      enrichedGames.map(async (game) => {
+      games.map(async (game) => {
         // Generate basic AI predictions (no API calls)
         const predictions = generateAIPrediction(game)
         

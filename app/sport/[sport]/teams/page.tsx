@@ -10,7 +10,6 @@ import { TeamStatsTable } from '@/components/teams/TeamStatsTable'
 import { TeamStatsFilters } from '@/components/teams/TeamStatsFilters'
 
 interface TeamFiltersState {
-  division?: string
   conference?: string
 }
 
@@ -68,13 +67,8 @@ export default function SportTeamsPage() {
 
   const isLoading = contextLoading || teamsLoading || statsLoading
 
-  // Filter teams based on division and conference
+  // Filter teams based on conference (division filtering now handled at API level for CFB)
   const filteredTeams = teams?.filter(team => {
-    // Division filter
-    if (filters.division && team.division?.name !== filters.division) {
-      return false
-    }
-    
     // Conference filter  
     if (filters.conference && team.conference?.name !== filters.conference) {
       return false

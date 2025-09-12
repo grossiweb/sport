@@ -800,7 +800,57 @@ export class SportsAPI {
   // Games and schedules
   async getGames(sport: SportType = 'CFB', date?: string, limit?: number): Promise<Game[]> {
     const client = this.getAPIClient(sport)
-    return client.getGames(date, limit)
+    
+    // For CFB, we need to fetch more data to ensure we get enough valid games after filtering
+    if (sport === 'CFB' && limit) {
+      // Fetch significantly more games to account for filtering
+      const fetchLimit = Math.max(limit * 3, 50) // Fetch 3x the requested limit or at least 50
+      const allGames = await client.getGames(date, fetchLimit)
+      
+      // Get teams data to check divisions
+      const teams = await this.getTeams(sport) // This will already be filtered to FBS/FCS only
+      const teamsMap = new Map(teams.map(team => [team.id, team]))
+      
+      // Enrich games with team division data and filter
+      const enrichedAndFilteredGames = allGames
+        .map(game => {
+          const homeTeam = teamsMap.get(game.homeTeam.id)
+          const awayTeam = teamsMap.get(game.awayTeam.id)
+          
+          return {
+            ...game,
+            homeTeam: {
+              ...game.homeTeam,
+              division: homeTeam?.division,
+              conference: homeTeam?.conference,
+              mascot: homeTeam?.mascot,
+              record: homeTeam?.record
+            },
+            awayTeam: {
+              ...game.awayTeam,
+              division: awayTeam?.division,
+              conference: awayTeam?.conference,
+              mascot: awayTeam?.mascot,
+              record: awayTeam?.record
+            }
+          }
+        })
+        .filter(game => {
+          const homeTeamDivisionId = game.homeTeam.division?.division_id
+          const awayTeamDivisionId = game.awayTeam.division?.division_id
+          
+          // Only show games where both teams are FBS (1) or FCS (4)
+          const validDivisions = [1, 4]
+          return validDivisions.includes(homeTeamDivisionId) && validDivisions.includes(awayTeamDivisionId)
+        })
+        .slice(0, limit) // Apply the requested limit to filtered results
+      
+      return enrichedAndFilteredGames
+    }
+    
+    // For non-CFB or when no limit specified, use original logic
+    const games = await client.getGames(date, limit)
+    return games
   }
 
   // Betting data
@@ -818,7 +868,17 @@ export class SportsAPI {
   // Teams
   async getTeams(sport: SportType = 'CFB'): Promise<Team[]> {
     const client = this.getAPIClient(sport)
-    return client.getTeams()
+    const teams = await client.getTeams()
+    
+    // Filter CFB teams to only show FBS (division_id: 1) and FCS (division_id: 4)
+    if (sport === 'CFB') {
+      return teams.filter(team => {
+        const divisionId = team.division?.division_id
+        return divisionId === 1 || divisionId === 4
+      })
+    }
+    
+    return teams
   }
 
   // Team statistics
