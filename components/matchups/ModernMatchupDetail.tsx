@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Matchup, SportType } from '@/types'
+import { useState, useEffect } from 'react'
+import { Matchup, SportType, DetailedTeamStat } from '@/types'
 import { format } from 'date-fns'
 import { 
   ClockIcon, 
@@ -19,6 +19,7 @@ import {
 import Link from 'next/link'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 import { BettingCard } from '@/components/betting/BettingCard'
+import { TeamDetailedStats } from '@/components/teams/TeamDetailedStats'
 
 interface ModernMatchupDetailProps {
   matchup: Matchup
@@ -28,6 +29,9 @@ interface ModernMatchupDetailProps {
 export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps) {
   const { game, predictions, trends, injuries, bettingData, teamStats, matchupAnalysis, headToHead } = matchup
   const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'trends' | 'betting'>('overview')
+  const [homeTeamDetailedStats, setHomeTeamDetailedStats] = useState<DetailedTeamStat[]>([])
+  const [awayTeamDetailedStats, setAwayTeamDetailedStats] = useState<DetailedTeamStat[]>([])
+  const [loadingDetailedStats, setLoadingDetailedStats] = useState(false)
 
   const confidenceColor = predictions.confidence >= 0.8 ? 'text-green-600' : 
                          predictions.confidence >= 0.6 ? 'text-amber-600' : 'text-red-600'
@@ -36,6 +40,35 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                        predictions.confidence >= 0.6 ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'
 
   const gameTime = format(new Date(game.gameDate), 'EEEE, MMMM d, yyyy \'at\' h:mm a')
+
+  // Fetch detailed stats when stats tab is active
+  useEffect(() => {
+    const fetchDetailedStats = async () => {
+      if (activeTab === 'stats' && homeTeamDetailedStats.length === 0 && awayTeamDetailedStats.length === 0) {
+        setLoadingDetailedStats(true)
+        try {
+          const [homeResponse, awayResponse] = await Promise.all([
+            fetch(`/api/teams/${game.homeTeam.id}/stats?sport=${sport}`),
+            fetch(`/api/teams/${game.awayTeam.id}/stats?sport=${sport}`)
+          ])
+
+          if (homeResponse.ok && awayResponse.ok) {
+            const homeData = await homeResponse.json()
+            const awayData = await awayResponse.json()
+            
+            setHomeTeamDetailedStats(homeData.data || [])
+            setAwayTeamDetailedStats(awayData.data || [])
+          }
+        } catch (error) {
+          console.error('Failed to fetch detailed team stats:', error)
+        } finally {
+          setLoadingDetailedStats(false)
+        }
+      }
+    }
+
+    fetchDetailedStats()
+  }, [activeTab, game.homeTeam.id, game.awayTeam.id, sport, homeTeamDetailedStats.length, awayTeamDetailedStats.length])
 
   const tabs = [
     { id: 'overview', name: 'Overview', icon: TrophyIcon },
@@ -294,67 +327,31 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
           </div>
         )}
 
-        {activeTab === 'stats' && teamStats && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Home Team Stats */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                <TeamLogo team={game.homeTeam} size="sm" className="mr-2" />
-                {game.homeTeam.name} Stats
-              </h3>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Average Points</span>
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {teamStats.home.averagePoints}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Average Yards</span>
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {teamStats.home.averageYards}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Turnover Differential</span>
-                  <span className={`font-semibold ${
-                    teamStats.home.turnoverDifferential >= 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {teamStats.home.turnoverDifferential >= 0 ? '+' : ''}{teamStats.home.turnoverDifferential}
-                  </span>
+        {activeTab === 'stats' && (
+          <div className="space-y-6">
+            {loadingDetailedStats ? (
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <div className="animate-pulse">
+                  <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-1/4 mb-4"></div>
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Away Team Stats */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                <TeamLogo team={game.awayTeam} size="sm" className="mr-2" />
-                {game.awayTeam.name} Stats
-              </h3>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Average Points</span>
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {teamStats.away.averagePoints}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Average Yards</span>
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {teamStats.away.averageYards}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Turnover Differential</span>
-                  <span className={`font-semibold ${
-                    teamStats.away.turnoverDifferential >= 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {teamStats.away.turnoverDifferential >= 0 ? '+' : ''}{teamStats.away.turnoverDifferential}
-                  </span>
-                </div>
-              </div>
-            </div>
+            ) : (
+              <TeamDetailedStats
+                homeTeamStats={homeTeamDetailedStats}
+                awayTeamStats={awayTeamDetailedStats}
+                homeTeamName={game.homeTeam.name}
+                awayTeamName={game.awayTeam.name}
+                homeTeam={game.homeTeam}
+                awayTeam={game.awayTeam}
+                isLoading={loadingDetailedStats}
+                sport={sport}
+              />
+            )}
           </div>
         )}
 
