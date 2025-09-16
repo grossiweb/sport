@@ -8,8 +8,6 @@ import {
   MapPinIcon, 
   TrophyIcon, 
   ChevronRightIcon,
-  ArrowTrendingUpIcon,
-  ExclamationTriangleIcon,
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
@@ -142,7 +140,6 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
           <div className={`mt-6 p-4 rounded-lg border-2 ${confidenceBg}`}>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center space-x-2">
-                <ArrowTrendingUpIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                   AI Prediction
                 </span>
@@ -230,36 +227,6 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
           </div>
         )}
 
-        {/* Quick Stats */}
-        <div className="mt-6 grid grid-cols-2 gap-4">
-          {trends && trends.length > 0 && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div className="flex items-center mb-2">
-                <ArrowTrendingUpIcon className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-1" />
-                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                  Key Trends
-                </span>
-              </div>
-              <div className="text-xs text-blue-600 dark:text-blue-400">
-                {trends.length} trend{trends.length !== 1 ? 's' : ''} identified
-              </div>
-            </div>
-          )}
-
-          {injuries && injuries.length > 0 && (
-            <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
-              <div className="flex items-center mb-2">
-                <ExclamationTriangleIcon className="h-4 w-4 text-red-600 dark:text-red-400 mr-1" />
-                <span className="text-sm font-medium text-red-700 dark:text-red-300">
-                  Injuries
-                </span>
-              </div>
-              <div className="text-xs text-red-600 dark:text-red-400">
-                {injuries.length} player{injuries.length !== 1 ? 's' : ''} affected
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Action Button */}
         <div className="mt-6">
