@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GraphQLClient } from 'graphql-request'
 
 // Try different possible GraphQL endpoints
-const WORDPRESS_GRAPHQL_URL = process.env.WORDPRESS_API_URL || 'http://headless.grossiweb.com/graphql'
+const WORDPRESS_GRAPHQL_URL = process.env.WORDPRESS_API_URL || 'https://wordpress-1521448-5854014.cloudwaysapps.com/graphql'
 const client = new GraphQLClient(WORDPRESS_GRAPHQL_URL)
 
 // WordPress GraphQL mutation for user registration
@@ -111,9 +111,9 @@ export async function POST(request: NextRequest) {
       
       // Try alternative URLs
       const alternativeUrls = [
-        'http://headless.grossiweb.com/wp-json/graphql',
-        'http://headless.grossiweb.com/index.php?graphql',
-        'http://headless.grossiweb.com/?graphql'
+        'https://wordpress-1521448-5854014.cloudwaysapps.com/wp-json/graphql',
+        'https://wordpress-1521448-5854014.cloudwaysapps.com/index.php?graphql',
+        'https://wordpress-1521448-5854014.cloudwaysapps.com/?graphql'
       ]
       
       let foundWorkingUrl = false

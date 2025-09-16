@@ -6,7 +6,7 @@ export class WordPressAuth {
   
   constructor() {
     this.client = new GraphQLClient(
-      process.env.WORDPRESS_API_URL || 'http://headless.grossiweb.com/graphql'
+      process.env.WORDPRESS_API_URL || 'https://wordpress-1521448-5854014.cloudwaysapps.com/graphql'
     )
   }
 
@@ -109,7 +109,7 @@ export class WordPressAuth {
   async userHasCapability(token: string, capability: string): Promise<boolean> {
     try {
       const client = new GraphQLClient(
-        process.env.WORDPRESS_API_URL || 'http://headless.grossiweb.com/graphql',
+        process.env.WORDPRESS_API_URL || 'https://wordpress-1521448-5854014.cloudwaysapps.com/graphql',
         {
           headers: {
             Authorization: `Bearer ${token}`

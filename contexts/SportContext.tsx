@@ -64,7 +64,7 @@ export function SportProvider({ children }: SportProviderProps) {
     }
   }
 
-  const currentSportData = SPORTS[currentSport]
+  const currentSportData = SPORTS[currentSport] || SPORTS[DEFAULT_SPORT]
   const availableSports = Object.values(SPORTS)
 
   return (

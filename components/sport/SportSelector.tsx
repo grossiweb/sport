@@ -20,10 +20,23 @@ const getSportIcon = (sportType: SportType) => {
 }
 
 export function SportSelector() {
-  const { currentSport, currentSportData, availableSports, changeSport } = useSport()
+  const { currentSport, currentSportData, availableSports, changeSport, isLoading } = useSport()
 
   const handleSportChange = (sport: SportType) => {
     changeSport(sport)
+  }
+
+  // Show loading state or prevent rendering if data isn't ready
+  if (isLoading || !currentSportData) {
+    return (
+      <div className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600">
+        <span className="flex items-center gap-x-2">
+          <div className="w-5 h-5 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+          <span className="hidden sm:inline">Loading...</span>
+          <span className="sm:hidden">...</span>
+        </span>
+      </div>
+    )
   }
 
   return (
@@ -34,14 +47,14 @@ export function SportSelector() {
             {getSportIcon(currentSport) && (
               <Image
                 src={getSportIcon(currentSport)!}
-                alt={`${currentSportData.displayName} icon`}
+                alt={`${currentSportData?.displayName || currentSport} icon`}
                 width={20}
                 height={20}
                 className="flex-shrink-0"
               />
             )}
-            <span className="hidden sm:inline">{currentSportData.displayName}</span>
-            <span className="sm:hidden">{currentSportData.shortName}</span>
+            <span className="hidden sm:inline">{currentSportData?.displayName || currentSport}</span>
+            <span className="sm:hidden">{currentSportData?.shortName || currentSport}</span>
           </span>
           <ChevronDownIcon className="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
         </Menu.Button>
@@ -85,8 +98,8 @@ export function SportSelector() {
                           />
                         )}
                         <div>
-                          <div className="font-medium">{sport.displayName}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">{sport.shortName}</div>
+                          <div className="font-medium text-left">{sport.displayName}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 text-left">{sport.shortName}</div>
                         </div>
                       </div>
                       {currentSport === sport.shortName && (

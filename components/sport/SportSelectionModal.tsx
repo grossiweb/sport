@@ -91,7 +91,7 @@ export function SportSelectionModal({
                           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                       }`}
                     >
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-left">
                         <div className="flex items-center gap-x-4">
                           {getSportIcon(sport.id.toUpperCase() as SportType) && (
                             <Image

@@ -6,7 +6,7 @@ const nextConfig = {
   env: {
     WORDPRESS_API_URL: process.env.WORDPRESS_API_URL || 'http://localhost/statspro/graphql',
     WORDPRESS_REST_URL: process.env.WORDPRESS_REST_URL || 'http://localhost/statspro/wp-json',
-    THERUNDOWN_API_KEY: process.env.THERUNDOWN_API_KEY || '9202f95b0emsha53b5034c7d6b00p116820jsnfda2e0998e27',
+    THERUNDOWN_API_KEY: process.env.THERUNDOWN_API_KEY || 'dd34e4f690msh5538bc3a69f568dp18c3b2jsnfd959acd813c',
     SPORTSDATA_API_KEY: process.env.SPORTSDATA_API_KEY || 'demo-key',
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'Nf+ZTxl2y7r1uZz1U1kKk9+VJc4m7Z5H6oE8mQn1jR8=',
     NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3001',

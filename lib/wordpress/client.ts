@@ -2,7 +2,7 @@ import { GraphQLClient } from 'graphql-request'
 import { WordPressPost, EmailContent, SocialPost, User } from '@/types'
 import { determineSubscriptionStatus, getSubscriptionExpiry, getSubscriptionTier } from '@/lib/subscription-utils'
 
-const client = new GraphQLClient(process.env.WORDPRESS_API_URL || 'http://headless.grossiweb.com/graphql')
+const client = new GraphQLClient(process.env.WORDPRESS_API_URL || 'https://wordpress-1521448-5854014.cloudwaysapps.com/graphql')
 
 // WordPress GraphQL authentication queries and mutations
 const LOGIN_MUTATION = `
@@ -272,7 +272,7 @@ export class WordPressClient {
   async validateToken(token: string): Promise<{ success: boolean, user?: User, error?: string }> {
     try {
       const authenticatedClient = new GraphQLClient(
-        process.env.WORDPRESS_API_URL || 'http://headless.grossiweb.com/graphql',
+        process.env.WORDPRESS_API_URL || 'https://wordpress-1521448-5854014.cloudwaysapps.com/graphql',
         {
           headers: {
             authorization: `Bearer ${token}`,

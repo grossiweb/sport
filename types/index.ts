@@ -352,6 +352,22 @@ export interface PaginatedResponse<T> {
   totalPages: number
 }
 
+// Team Filters Interface
+export interface TeamFiltersState {
+  conference?: string
+  division?: string
+  teamName?: string
+  subdivision?: 'FBS (I-A)' | 'FCS (I-AA)' // For CFB
+}
+
+// Pagination Interface
+export interface PaginationState {
+  page: number
+  pageSize: number
+  total: number
+  totalPages: number
+}
+
 // WordPress CMS Types
 export interface WordPressPost {
   id: string

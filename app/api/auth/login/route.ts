@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GraphQLClient } from 'graphql-request'
 import { determineSubscriptionStatus, getSubscriptionExpiry, getSubscriptionTier } from '@/lib/subscription-utils'
 
-const client = new GraphQLClient(process.env.WORDPRESS_API_URL || 'http://headless.grossiweb.com/graphql')
+const client = new GraphQLClient(process.env.WORDPRESS_API_URL || 'https://wordpress-1521448-5854014.cloudwaysapps.com/graphql')
 
 // WordPress GraphQL mutation for login
 const LOGIN_MUTATION = `

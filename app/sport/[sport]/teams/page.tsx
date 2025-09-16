@@ -3,15 +3,11 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useQuery } from 'react-query'
-import { SportType, Team, TeamStats } from '@/types'
+import { SportType, Team, TeamStats, TeamFiltersState } from '@/types'
 import { isValidSportType } from '@/lib/constants/sports'
 import { useSport } from '@/contexts/SportContext'
 import { TeamStatsTable } from '@/components/teams/TeamStatsTable'
 import { TeamStatsFilters } from '@/components/teams/TeamStatsFilters'
-
-interface TeamFiltersState {
-  conference?: string
-}
 
 interface SortOptions {
   field: string
@@ -67,13 +63,34 @@ export default function SportTeamsPage() {
 
   const isLoading = contextLoading || teamsLoading || statsLoading
 
-  // Filter teams based on conference (division filtering now handled at API level for CFB)
+  // Filter teams based on filters
   const filteredTeams = teams?.filter(team => {
-    // Conference filter  
-    if (filters.conference && team.conference?.name !== filters.conference) {
-      return false
+    // Team name filter
+    if (filters.teamName) {
+      const searchTerm = filters.teamName.toLowerCase()
+      const matchesName = team.name.toLowerCase().includes(searchTerm) ||
+                         team.city.toLowerCase().includes(searchTerm) ||
+                         team.abbreviation.toLowerCase().includes(searchTerm)
+      if (!matchesName) return false
     }
-    
+
+    // Division filter (NFL specific)
+    if (filters.division && sport === 'NFL') {
+      if (team.division?.name !== filters.division) return false
+    }
+
+    // Subdivision filter (CFB specific)
+    if (filters.subdivision && sport === 'CFB') {
+      if (team.division?.name !== filters.subdivision) return false
+    }
+
+    // For CFB, only show FBS (I-A) and FCS (I-AA) teams if no subdivision filter is applied
+    if (sport === 'CFB' && !filters.subdivision) {
+      if (team.division?.name !== 'FBS (I-A)' && team.division?.name !== 'FCS (I-AA)') {
+        return false
+      }
+    }
+
     return true
   }) || []
 
@@ -107,10 +124,10 @@ export default function SportTeamsPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          {currentSportData.displayName} Team Statistics
+          {currentSportData?.displayName || currentSport} Team Statistics
         </h1>
         <p className="text-lg text-gray-600 dark:text-gray-400">
-          Comprehensive team analytics and performance metrics for {currentSportData.displayName}.
+          Comprehensive team analytics and performance metrics for {currentSportData?.displayName || currentSport}.
         </p>
       </div>
 

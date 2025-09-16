@@ -130,9 +130,6 @@ export function TeamStatsTable({
                   Yards <SortIcon field="yardsFor" />
                 </div>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                Actions
-              </th>
             </tr>
           </thead>
 
@@ -181,24 +178,6 @@ export function TeamStatsTable({
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                   {stats?.yardsFor ?? 0}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  {(sport === "CFB" &&
-                    (team.division?.name === "FBS (I-A)" || team.division?.name === "FCS (I-AA)")) ||
-                   sport === "NFL" ? (
-                    <button
-                      onClick={() => {
-                        window.open(`/api/teams/${team.id}/stats?sport=${sport}`, "_blank");
-                      }}
-                      className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
-                    >
-                      Show Team Stats
-                    </button>
-                  ) : (
-                    <span className="text-gray-400 dark:text-gray-500 text-xs">
-                      No detailed stats
-                    </span>
-                  )}
-                </td>
               </tr>
             ))}
           </tbody>
@@ -212,6 +191,7 @@ export function TeamStatsTable({
           </p>
         </div>
       )}
+
     </div>
   );
 }
