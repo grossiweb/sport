@@ -251,9 +251,6 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                         <div className="font-medium text-gray-900 dark:text-white">
                           {injury.injury}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {injury.position}
-                        </div>
                       </div>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         injury.status === 'out' ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400' :
