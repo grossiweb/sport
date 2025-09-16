@@ -4,6 +4,7 @@ import { Game } from '@/types'
 import { TrophyIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { useBackgroundMatchups } from '@/hooks/useOptimizedMatchups'
+import { TeamLogo } from '@/components/ui/TeamLogo'
 import { format } from 'date-fns'
 
 export function TodaysGames() {
@@ -147,14 +148,10 @@ function GameCard({ game }: { game: Game }) {
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
-              <span className="text-xs font-medium">
-                {game.awayTeam.abbreviation}
-              </span>
-            </div>
+          <div className="flex items-center space-x-3">
+            <TeamLogo team={game.awayTeam} size="sm" />
             <span className="font-medium text-gray-900 dark:text-white">
-              {game.awayTeam.city} {game.awayTeam.name}
+              {game.awayTeam.name}
             </span>
           </div>
           {(isFinal || isLive) && game.awayScore !== undefined && (
@@ -167,14 +164,10 @@ function GameCard({ game }: { game: Game }) {
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
-              <span className="text-xs font-medium">
-                {game.homeTeam.abbreviation}
-              </span>
-            </div>
+          <div className="flex items-center space-x-3">
+            <TeamLogo team={game.homeTeam} size="sm" />
             <span className="font-medium text-gray-900 dark:text-white">
-              {game.homeTeam.city} {game.homeTeam.name}
+              {game.homeTeam.name}
             </span>
           </div>
           {(isFinal || isLive) && game.homeScore !== undefined && (

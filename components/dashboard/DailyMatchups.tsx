@@ -5,6 +5,7 @@ import { TrophyIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { useSport } from '@/contexts/SportContext'
 import { useFeaturedMatchups } from '@/hooks/useOptimizedMatchups'
+import { TeamLogo } from '@/components/ui/TeamLogo'
 import { format } from 'date-fns'
 
 export function DailyMatchups() {
@@ -95,13 +96,15 @@ function FeaturedGameCard({ game }: { game: Game }) {
 
       <div className="space-y-4">
         {/* Away Team */}
-        <div className="flex items-center">
+        <div className="flex items-center space-x-3">
+          <TeamLogo team={game.awayTeam} size="md" />
           <div className="flex-1">
             <div className="font-medium text-gray-900 dark:text-white">
               {game.awayTeam.name}
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              {game.awayTeam.city}
+              {game.awayTeam.abbreviation}
+              {game.awayTeam.record && ` (${game.awayTeam.record})`}
             </div>
           </div>
           {game.awayScore !== undefined && (
@@ -118,13 +121,15 @@ function FeaturedGameCard({ game }: { game: Game }) {
         </div>
 
         {/* Home Team */}
-        <div className="flex items-center">
+        <div className="flex items-center space-x-3">
+          <TeamLogo team={game.homeTeam} size="md" />
           <div className="flex-1">
             <div className="font-medium text-gray-900 dark:text-white">
               {game.homeTeam.name}
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              {game.homeTeam.city}
+              {game.homeTeam.abbreviation}
+              {game.homeTeam.record && ` (${game.homeTeam.record})`}
             </div>
           </div>
           {game.homeScore !== undefined && (
