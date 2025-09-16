@@ -24,8 +24,9 @@ export function BettingCard({ bettingData, game }: BettingCardProps) {
     status: 'scheduled' as const
   }
 
-  const formatGameTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', { 
+  const formatGameTime = (date: Date | string) => {
+    const dateObj = date instanceof Date ? date : new Date(date)
+    return dateObj.toLocaleTimeString('en-US', { 
       hour: 'numeric', 
       minute: '2-digit',
       hour12: true 

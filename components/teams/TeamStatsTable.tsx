@@ -1,6 +1,7 @@
 "use client";
 
 import { Team, TeamStats, SportType } from "@/types";
+import { TeamLogo } from "@/components/ui/TeamLogo";
 
 interface TeamStatsTableProps {
   teams: Team[];
@@ -137,7 +138,8 @@ export function TeamStatsTable({
             {sortedData.map(({ team, stats }) => (
               <tr key={team.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
+                  <div className="flex items-center space-x-3">
+                    <TeamLogo team={team} size="md" />
                     <div>
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {team.name}

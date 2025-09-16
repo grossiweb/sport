@@ -80,16 +80,16 @@ class TheRundownAPI {
           name: event.home_team || 'Home Team',
           city: '', // ❌ Not provided in response
           abbreviation: event.home_team?.substring(0, 3).toUpperCase() || 'HOM',
-          league: 'CFB' as SportType
+          league: (this.sportId === '2' ? 'NFL' : 'CFB') as SportType
         },
         awayTeam: {
           id: event.away_team_id?.toString() || event.away_team_id,
           name: event.away_team || 'Away Team',
           city: '', // ❌ Not provided in response
           abbreviation: event.away_team?.substring(0, 3).toUpperCase() || 'AWY',
-          league: 'CFB' as SportType
+          league: (this.sportId === '2' ? 'NFL' : 'CFB') as SportType
         },
-        league: 'CFB' as SportType,
+        league: (this.sportId === '2' ? 'NFL' : 'CFB') as SportType,
         gameDate: new Date(event.date_event),
         status: this.mapEventStatus(event.event_status),
         statusDetail: event.event_status_detail || '', // ✅ Added for better UI
@@ -259,7 +259,7 @@ class TheRundownAPI {
       name: team.name,
       city: team.mascot || '',
       abbreviation: team.abbreviation,
-      league: this.sportId === '1' ? 'CFB' as SportType : 'NFL' as SportType,
+      league: (this.sportId === '2' ? 'NFL' : 'CFB') as SportType,
       logoUrl: team.logo_url,
       primaryColor: team.primary_color,
       secondaryColor: team.secondary_color,

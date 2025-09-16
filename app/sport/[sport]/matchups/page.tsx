@@ -6,7 +6,7 @@ import { format } from 'date-fns'
 import { SportType, Matchup } from '@/types'
 import { isValidSportType } from '@/lib/constants/sports'
 import { useSport } from '@/contexts/SportContext'
-import { MatchupCard } from '@/components/matchups/MatchupCard'
+import { ModernMatchupCard } from '@/components/matchups/ModernMatchupCard'
 import { MatchupFilters } from '@/components/matchups/MatchupFilters'
 import { useMatchupsPage } from '@/hooks/useOptimizedMatchups'
 
@@ -112,10 +112,10 @@ export default function SportMatchupsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">
           {currentSportData.displayName} Matchups
         </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400">
+        <p className="text-xl text-gray-600 dark:text-gray-400 font-medium">
           Daily game insights with AI predictions and betting analysis for {currentSportData.displayName}.
         </p>
       </div>
@@ -156,7 +156,7 @@ export default function SportMatchupsPage() {
       ) : filteredMatchups && filteredMatchups.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredMatchups.map((matchup) => (
-            <MatchupCard
+            <ModernMatchupCard
               key={matchup.game.id}
               matchup={matchup}
               sport={sport}
