@@ -97,6 +97,8 @@ export async function GET(request: NextRequest) {
     const sport = searchParams.get('sport')?.toUpperCase() || 'CFB'
     const date = searchParams.get('date') || format(new Date(), 'yyyy-MM-dd')
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10
+    const status = searchParams.get('status') // New status filter parameter
+    const dateRange = searchParams.get('dateRange') // New date range parameter (past/future)
     
     if (!isValidSportType(sport)) {
       return NextResponse.json(
@@ -105,8 +107,11 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check cache first
-    const cacheKey = cacheKeys.matchups(sport, date) + (limit !== 10 ? `_limit_${limit}` : '')
+    // Check cache first - include status and dateRange in cache key
+    const cacheKey = cacheKeys.matchups(sport, date) + 
+      (limit !== 10 ? `_limit_${limit}` : '') +
+      (status ? `_status_${status}` : '') +
+      (dateRange ? `_range_${dateRange}` : '')
     const cachedData = apiCache.get<any>(cacheKey)
     
     if (cachedData) {
@@ -120,9 +125,23 @@ export async function GET(request: NextRequest) {
 
     console.log(`Cache miss for matchups: ${cacheKey}, fetching fresh data...`)
     
+    // Determine date range for fetching games
+    let fetchDate = date
+    if (dateRange === 'past') {
+      // For recent/past games, fetch from the last few days
+      const pastDate = new Date()
+      pastDate.setDate(pastDate.getDate() - 7) // Last 7 days
+      fetchDate = format(pastDate, 'yyyy-MM-dd')
+    } else if (dateRange === 'future') {
+      // For upcoming games, fetch from tomorrow onwards
+      const futureDate = new Date()
+      futureDate.setDate(futureDate.getDate() + 1) // Starting from tomorrow
+      fetchDate = format(futureDate, 'yyyy-MM-dd')
+    }
+    
     // Get games for the specified sport (filtering is now handled in sportsAPI.getGames)
-    const games = await sportsAPI.getGames(sport as SportType, date, limit)
-      // console.log('Games fetched for date:', date, 'Total games:', games.length)
+    const games = await sportsAPI.getGames(sport as SportType, fetchDate, limit * 3) // Fetch more to filter
+      // console.log('Games fetched for date:', fetchDate, 'Total games:', games.length)
     
     // Generate matchup data for each game with real betting data
     const matchups: Matchup[] = await Promise.all(
@@ -156,19 +175,50 @@ export async function GET(request: NextRequest) {
       })
     )
 
-    // Sort by game time
-    matchups.sort((a, b) => 
-      new Date(a.game.gameDate).getTime() - new Date(b.game.gameDate).getTime()
-    )
+    // Filter by status if specified
+    let filteredMatchups = matchups
+    if (status) {
+      filteredMatchups = matchups.filter(m => m.game.status === status)
+    }
+    
+    // Filter by date range if specified
+    if (dateRange === 'past') {
+      const now = new Date()
+      filteredMatchups = filteredMatchups.filter(m => 
+        new Date(m.game.gameDate) < now && m.game.status === 'final'
+      )
+    } else if (dateRange === 'future') {
+      const today = new Date()
+      today.setHours(23, 59, 59, 999) // End of today
+      filteredMatchups = filteredMatchups.filter(m => 
+        new Date(m.game.gameDate) > today && m.game.status === 'scheduled'
+      )
+    }
+    
+    // Sort by game time (recent games in reverse chronological order, upcoming in chronological order)
+    if (dateRange === 'past') {
+      filteredMatchups.sort((a, b) => 
+        new Date(b.game.gameDate).getTime() - new Date(a.game.gameDate).getTime()
+      )
+    } else {
+      filteredMatchups.sort((a, b) => 
+        new Date(a.game.gameDate).getTime() - new Date(b.game.gameDate).getTime()
+      )
+    }
+    
+    // Apply limit after filtering and sorting
+    filteredMatchups = filteredMatchups.slice(0, limit)
 
     const response = {
       success: true,
-      data: matchups,
+      data: filteredMatchups,
       meta: {
-        date,
+        date: fetchDate,
         sport,
-        totalGames: matchups.length,
-        highConfidenceGames: matchups.filter(m => m.predictions.confidence >= 0.8).length
+        status,
+        dateRange,
+        totalGames: filteredMatchups.length,
+        highConfidenceGames: filteredMatchups.filter(m => m.predictions.confidence >= 0.8).length
       },
       cached: false,
       timestamp: new Date().toISOString()
@@ -176,7 +226,7 @@ export async function GET(request: NextRequest) {
 
     // Cache the results
     apiCache.set(cacheKey, response, cacheTTL.matchups)
-    console.log(`Cached matchups data: ${cacheKey} (${matchups.length} items)`)
+    console.log(`Cached matchups data: ${cacheKey} (${filteredMatchups.length} items)`)
 
     return NextResponse.json(response)
   } catch (error) {

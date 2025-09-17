@@ -13,10 +13,12 @@ interface UseMatchupsOptions {
   refetchInterval?: number | false
 }
 
-const fetchMatchups = async (sport: SportType, date?: string): Promise<Matchup[]> => {
+const fetchMatchups = async (sport: SportType, date?: string, status?: string, dateRange?: string): Promise<Matchup[]> => {
   const params = new URLSearchParams()
   params.append('sport', sport)
   if (date) params.append('date', date)
+  if (status) params.append('status', status)
+  if (dateRange) params.append('dateRange', dateRange)
   
   const response = await fetch(`/api/matchups?${params.toString()}`)
   if (!response.ok) throw new Error('Failed to fetch matchups')
@@ -90,4 +92,79 @@ export function useBackgroundMatchups(sport: SportType, date?: string) {
     staleTime: 15 * 60 * 1000, // 15 minutes
     refetchInterval: false // No auto-refresh for background components
   })
+}
+
+/**
+ * Hook for fetching recent completed matchups
+ */
+export function useRecentMatchups(sport: SportType, limit: number = 3) {
+  return useQuery(
+    ['recentMatchups', sport, limit],
+    () => fetchMatchups(sport, undefined, 'final', 'past'),
+    {
+      enabled: !!sport,
+      staleTime: 10 * 60 * 1000, // 10 minutes
+      cacheTime: 20 * 60 * 1000, // 20 minutes cache
+      refetchInterval: 15 * 60 * 1000, // 15 minutes refresh
+      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: false,
+      retry: 2,
+      select: (data) => data.slice(0, limit)
+    }
+  )
+}
+
+/**
+ * Hook for fetching upcoming matchups (not today)
+ */
+export function useUpcomingMatchups(sport: SportType, limit: number = 3) {
+  return useQuery(
+    ['upcomingMatchups', sport, limit],
+    () => fetchMatchups(sport, undefined, 'scheduled', 'future'),
+    {
+      enabled: !!sport,
+      staleTime: 10 * 60 * 1000, // 10 minutes
+      cacheTime: 20 * 60 * 1000, // 20 minutes cache
+      refetchInterval: 15 * 60 * 1000, // 15 minutes refresh
+      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: false,
+      retry: 2,
+      select: (data) => data.slice(0, limit)
+    }
+  )
+}
+
+/**
+ * Hook for fetching today's matchups only
+ */
+export function useTodaysMatchups(sport: SportType, limit: number = 3) {
+  const today = format(new Date(), 'yyyy-MM-dd')
+  
+  return useQuery(
+    ['todaysMatchups', sport, today, limit],
+    () => fetchMatchups(sport, today),
+    {
+      enabled: !!sport,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      cacheTime: 10 * 60 * 1000, // 10 minutes cache
+      refetchInterval: 10 * 60 * 1000, // 10 minutes refresh
+      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: false,
+      retry: 2,
+      select: (data) => {
+        // Filter to only include games that are actually today
+        const todayStart = new Date()
+        todayStart.setHours(0, 0, 0, 0)
+        const todayEnd = new Date()
+        todayEnd.setHours(23, 59, 59, 999)
+        
+        const todaysGames = data.filter(matchup => {
+          const gameDate = new Date(matchup.game.gameDate)
+          return gameDate >= todayStart && gameDate <= todayEnd
+        })
+        
+        return todaysGames.slice(0, limit)
+      }
+    }
+  )
 }

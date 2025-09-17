@@ -42,15 +42,15 @@ export function TeamLogo({ team, size = 'md', className = '', fallbackText = tru
 
   // Fallback component when image fails to load or doesn't exist
   const FallbackLogo = () => {
-    const initials = team.abbreviation?.substring(0, 2) || team.name?.substring(0, 2) || '??'
+    const initials = team?.abbreviation?.substring(0, 2) || team?.name?.substring(0, 2) || '??'
     
     return (
       <div 
         className={`${fallbackSizeClasses[size]} ${className} bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 rounded-full flex items-center justify-center font-bold text-gray-700 dark:text-gray-200 border-2 border-gray-300 dark:border-gray-600 shadow-sm`}
         style={{ 
-          backgroundColor: team.primaryColor ? `${team.primaryColor}15` : undefined,
-          borderColor: team.primaryColor || undefined,
-          color: team.primaryColor || undefined
+          backgroundColor: team?.primaryColor ? `${team.primaryColor}15` : undefined,
+          borderColor: team?.primaryColor || undefined,
+          color: team?.primaryColor || undefined
         }}
       >
         {fallbackText && (
@@ -63,7 +63,7 @@ export function TeamLogo({ team, size = 'md', className = '', fallbackText = tru
   }
 
   // If we already know the image failed or team doesn't have necessary info
-  if (imageError || !team.id) {
+  if (imageError || !team?.id || team.id === 'unknown') {
     return <FallbackLogo />
   }
 
@@ -73,7 +73,7 @@ console.log(`from: ${logoPath}`)
     <div className={`${sizeClasses[size]} ${className} relative`}>
       <Image
         src={logoPath}
-        alt={`${team.name} logo`}
+        alt={`${team?.name || 'Team'} logo`}
         fill
         className="object-contain rounded"
         onError={(e) => {

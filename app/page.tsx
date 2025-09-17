@@ -8,6 +8,8 @@ import { KeyStats } from '@/components/dashboard/KeyStats'
 import { QuickAccess } from '@/components/dashboard/QuickAccess'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { DailyMatchups } from '@/components/dashboard/DailyMatchups'
+import { RecentMatchups } from '@/components/dashboard/RecentMatchups'
+import { UpcomingMatchups } from '@/components/dashboard/UpcomingMatchups'
 import { useSport } from '@/contexts/SportContext'
 import toast from 'react-hot-toast'
 
@@ -35,13 +37,26 @@ export default function HomePage() {
       {/* Hero Section */}
       <DashboardHero />
 
-      {/* Daily Matchups */}
+      {/* Today's Daily Matchups */}
       <section>
         <Suspense fallback={<LoadingSpinner />}>
           <DailyMatchups />
         </Suspense>
       </section>
 
+      {/* Recent Matchups */}
+      <section>
+        <Suspense fallback={<LoadingSpinner />}>
+          <RecentMatchups />
+        </Suspense>
+      </section>
+
+      {/* Upcoming Matchups */}
+      <section>
+        <Suspense fallback={<LoadingSpinner />}>
+          <UpcomingMatchups />
+        </Suspense>
+      </section>
 
       {/* Quick Access Links */}
       <section>

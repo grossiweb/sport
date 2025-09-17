@@ -4,14 +4,14 @@ import { Game } from '@/types'
 import { TrophyIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { useSport } from '@/contexts/SportContext'
-import { useFeaturedMatchups } from '@/hooks/useOptimizedMatchups'
+import { useTodaysMatchups } from '@/hooks/useOptimizedMatchups'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 import { format } from 'date-fns'
 
 export function DailyMatchups() {
   const { currentSport, currentSportData } = useSport()
 
-  const { data: matchups, isLoading } = useFeaturedMatchups(currentSport, 3)
+  const { data: matchups, isLoading } = useTodaysMatchups(currentSport, 3)
   const games = matchups?.map((matchup: any) => matchup.game) || []
 
   if (isLoading) {
@@ -42,7 +42,7 @@ export function DailyMatchups() {
             Today's Featured {currentSportData.displayName} Matchups
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {games.length} featured games from today's schedule
+            {games.length} games scheduled for {format(new Date(), 'MMMM d, yyyy')}
           </p>
         </div>
         <Link 
