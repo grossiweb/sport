@@ -15,7 +15,7 @@ interface AuthContextType extends AuthState {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-const publicRoutes = ['/login', '/register', '/subscribe', '/']
+const publicRoutes = ['/login', '/register', '/subscribe', '/', '/forgot-password', '/reset-password']
 
 interface AuthProviderProps {
   children: ReactNode
