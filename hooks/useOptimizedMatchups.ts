@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery, UseQueryOptions } from 'react-query'
-import { format } from 'date-fns'
+import { format, subDays, addDays } from 'date-fns'
 import { SportType, Matchup } from '@/types'
 
 interface UseMatchupsOptions {
@@ -178,6 +178,94 @@ export function useTodaysMatchups(sport: SportType, limit: number = 3) {
         })
         
         return todaysGames.slice(0, limit)
+      }
+    }
+  )
+}
+
+/**
+ * Hook for fetching recent matchups from last 7 days using week-based MongoDB logic
+ */
+export function useWeekBasedRecentMatchups(sport: SportType, limit: number = 3) {
+  // Calculate date range for last 7 days
+  const endDate = format(new Date(), 'yyyy-MM-dd')
+  const startDate = format(subDays(new Date(), 7), 'yyyy-MM-dd')
+  
+  return useQuery(
+    ['weekBasedRecentMatchups', sport, startDate, endDate, limit],
+    async () => {
+      const response = await fetch(`/api/matchups?sport=${sport}&date=${startDate}&endDate=${endDate}&limit=50`)
+      if (!response.ok) throw new Error('Failed to fetch recent matchups')
+      const result = await response.json()
+      return result.data || []
+    },
+    {
+      enabled: !!sport,
+      staleTime: 10 * 60 * 1000, // 10 minutes
+      cacheTime: 20 * 60 * 1000, // 20 minutes cache
+      refetchInterval: 15 * 60 * 1000, // 15 minutes refresh
+      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: false,
+      retry: 2,
+      select: (data) => {
+        // Filter to only completed games from the last 7 days and sort by most recent
+        const now = new Date()
+        const sevenDaysAgo = subDays(now, 7)
+        
+        const recentGames = data
+          .filter(matchup => {
+            const gameDate = new Date(matchup.game.gameDate)
+            return matchup.game.status === 'final' && 
+                   gameDate >= sevenDaysAgo && 
+                   gameDate <= now
+          })
+          .sort((a, b) => new Date(b.game.gameDate).getTime() - new Date(a.game.gameDate).getTime())
+        
+        return recentGames.slice(0, limit)
+      }
+    }
+  )
+}
+
+/**
+ * Hook for fetching upcoming matchups from next 7 days using week-based MongoDB logic
+ */
+export function useWeekBasedUpcomingMatchups(sport: SportType, limit: number = 3) {
+  // Calculate date range for next 7 days
+  const startDate = format(addDays(new Date(), 1), 'yyyy-MM-dd') // Start from tomorrow
+  const endDate = format(addDays(new Date(), 7), 'yyyy-MM-dd')
+  
+  return useQuery(
+    ['weekBasedUpcomingMatchups', sport, startDate, endDate, limit],
+    async () => {
+      const response = await fetch(`/api/matchups?sport=${sport}&date=${startDate}&endDate=${endDate}&limit=50`)
+      if (!response.ok) throw new Error('Failed to fetch upcoming matchups')
+      const result = await response.json()
+      return result.data || []
+    },
+    {
+      enabled: !!sport,
+      staleTime: 10 * 60 * 1000, // 10 minutes
+      cacheTime: 20 * 60 * 1000, // 20 minutes cache
+      refetchInterval: 15 * 60 * 1000, // 15 minutes refresh
+      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: false,
+      retry: 2,
+      select: (data) => {
+        // Filter to only scheduled games in the next 7 days and sort by earliest first
+        const now = new Date()
+        const sevenDaysFromNow = addDays(now, 7)
+        
+        const upcomingGames = data
+          .filter(matchup => {
+            const gameDate = new Date(matchup.game.gameDate)
+            return matchup.game.status === 'scheduled' && 
+                   gameDate > now && 
+                   gameDate <= sevenDaysFromNow
+          })
+          .sort((a, b) => new Date(a.game.gameDate).getTime() - new Date(b.game.gameDate).getTime())
+        
+        return upcomingGames.slice(0, limit)
       }
     }
   )

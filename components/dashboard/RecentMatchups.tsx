@@ -4,14 +4,14 @@ import { Game } from '@/types'
 import { TrophyIcon, CalendarIcon, ClockIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { useSport } from '@/contexts/SportContext'
-import { useRecentMatchups } from '@/hooks/useOptimizedMatchups'
+import { useWeekBasedRecentMatchups } from '@/hooks/useOptimizedMatchups'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 import { format } from 'date-fns'
 
 export function RecentMatchups() {
   const { currentSport, currentSportData } = useSport()
 
-  const { data: matchups, isLoading, error } = useRecentMatchups(currentSport, 3)
+  const { data: matchups, isLoading, error } = useWeekBasedRecentMatchups(currentSport, 3)
   const games = matchups?.map((matchup: any) => matchup.game) || []
 
   if (isLoading) {
@@ -64,7 +64,7 @@ export function RecentMatchups() {
             Recent {currentSportData.displayName} Matchups
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Latest completed games with final scores
+            Completed games from the last 7 days
           </p>
         </div>
         <Link 
@@ -89,7 +89,7 @@ export function RecentMatchups() {
             No recent games
           </h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            No recent {currentSportData.displayName} games found.
+            No completed {currentSportData.displayName} games in the last 7 days.
           </p>
         </div>
       )}

@@ -4,14 +4,14 @@ import { Game } from '@/types'
 import { TrophyIcon, CalendarIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { useSport } from '@/contexts/SportContext'
-import { useUpcomingMatchups } from '@/hooks/useOptimizedMatchups'
+import { useWeekBasedUpcomingMatchups } from '@/hooks/useOptimizedMatchups'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 import { format, isToday, isTomorrow } from 'date-fns'
 
 export function UpcomingMatchups() {
   const { currentSport, currentSportData } = useSport()
 
-  const { data: matchups, isLoading, error } = useUpcomingMatchups(currentSport, 3)
+  const { data: matchups, isLoading, error } = useWeekBasedUpcomingMatchups(currentSport, 3)
   const games = matchups?.map((matchup: any) => matchup.game) || []
 
   if (isLoading) {
@@ -64,7 +64,7 @@ export function UpcomingMatchups() {
             Upcoming {currentSportData.displayName} Matchups
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Featured games coming up (beyond today)
+            Scheduled games in the next 7 days
           </p>
         </div>
         <Link 
@@ -89,7 +89,7 @@ export function UpcomingMatchups() {
             No upcoming games
           </h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            No upcoming {currentSportData.displayName} games found.
+            No scheduled {currentSportData.displayName} games in the next 7 days.
           </p>
         </div>
       )}
