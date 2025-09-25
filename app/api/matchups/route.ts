@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sportsAPI } from '@/lib/api/sports-api'
+import { mongoSportsAPI } from '@/lib/api/mongodb-sports-api'
 import { Matchup, GamePrediction, TrendData, InjuryReport, SportType } from '@/types'
 import { isValidSportType } from '@/lib/constants/sports'
 import { format } from 'date-fns'
 import { apiCache, cacheKeys, cacheTTL } from '@/lib/cache'
 
-// Mock AI prediction service - in production, this would be a real ML model
+// AI prediction service - generates basic predictions for demo purposes
+// In production, this would integrate with a real ML model or prediction API
 function generateAIPrediction(game: any): GamePrediction {
   const confidence = Math.random() * 0.4 + 0.6 // Random confidence between 0.6-1.0
-  const homeAdvantage = 2 // Points for home field advantage
+  const homeAdvantage = 3 // Points for home field advantage
   
-  // Simple prediction logic based on team stats (mock)
+  // Basic prediction logic considering home field advantage
   const homePredictedScore = Math.floor(Math.random() * 20) + 20 + homeAdvantage
   const awayPredictedScore = Math.floor(Math.random() * 20) + 18
   
@@ -19,7 +20,7 @@ function generateAIPrediction(game: any): GamePrediction {
     'Recent form',
     'Head-to-head record',
     'Weather conditions',
-    'Injury report'
+    'Team statistics'
   ].slice(0, Math.floor(Math.random() * 3) + 2)
 
   return {
@@ -48,6 +49,7 @@ function generateAIAnalysis(game: any, confidence: number): string {
   return analyses[Math.floor(Math.random() * analyses.length)]
 }
 
+// Demo trend data - in production, this would come from historical analysis
 function generateTrends(gameId: string): TrendData[] {
   const trendTypes = [
     { description: 'Home team is 7-2 ATS in last 9 games', impact: 'high' as const },
@@ -57,37 +59,35 @@ function generateTrends(gameId: string): TrendData[] {
     { description: 'Home team QB has 8 TDs, 1 INT in last 3 home games', impact: 'high' as const }
   ]
   
+  // Return 2-3 trends for consistency
   return trendTypes
-    .sort(() => Math.random() - 0.5)
-    .slice(0, Math.floor(Math.random() * 3) + 2)
+    .slice(0, 3)
     .map((trend, index) => ({
       id: `${gameId}-trend-${index}`,
       gameId,
       type: 'team' as const,
       description: trend.description,
-      value: Math.random() * 100,
+      value: trend.impact === 'high' ? 85 : 65, // More consistent values
       impact: trend.impact,
       timeframe: '15d' as const
     }))
 }
 
+// Demo injury data - in production, this would come from official injury reports
 function generateInjuries(gameId: string): InjuryReport[] {
-  const injuries = []
-  const shouldHaveInjuries = Math.random() > 0.6
+  // Return minimal injury data for demo - most games won't have significant injuries shown
+  const hasInjuries = Math.random() > 0.8 // Only 20% of games show injury reports
   
-  if (shouldHaveInjuries) {
-    const numInjuries = Math.floor(Math.random() * 3) + 1
-    for (let i = 0; i < numInjuries; i++) {
-      injuries.push({
-        playerId: `player-${gameId}-${i}`,
-        status: ['out', 'questionable', 'probable'][Math.floor(Math.random() * 3)] as any,
-        injury: ['Knee', 'Shoulder', 'Ankle', 'Hamstring'][Math.floor(Math.random() * 4)],
-        lastUpdated: new Date()
-      })
-    }
+  if (hasInjuries) {
+    return [{
+      playerId: `player-${gameId}-1`,
+      status: 'questionable' as any,
+      injury: 'Upper body',
+      lastUpdated: new Date()
+    }]
   }
   
-  return injuries
+  return []
 }
 
 export async function GET(request: NextRequest) {
@@ -139,9 +139,9 @@ export async function GET(request: NextRequest) {
       fetchDate = format(futureDate, 'yyyy-MM-dd')
     }
     
-    // Get games for the specified sport (filtering is now handled in sportsAPI.getGames)
-    const games = await sportsAPI.getGames(sport as SportType, fetchDate, limit * 3) // Fetch more to filter
-      // console.log('Games fetched for date:', fetchDate, 'Total games:', games.length)
+    // Get games for the specified sport (division filtering is now handled at API level for CFB)
+    const games = await mongoSportsAPI.getGames(sport as SportType, fetchDate, limit)
+    // console.log('Games fetched for date:', fetchDate, 'Total games:', games.length)
     
     // Generate matchup data for each game with real betting data
     const matchups: Matchup[] = await Promise.all(
@@ -156,7 +156,7 @@ export async function GET(request: NextRequest) {
         // Fetch real betting data
         let bettingData = null
         try {
-          bettingData = await sportsAPI.getBettingData(sport as SportType, game.id)
+          bettingData = await mongoSportsAPI.getBettingData(sport as SportType, game.id)
         } catch (error) {
           console.warn(`Failed to fetch betting data for game ${game.id}:`, error)
         }

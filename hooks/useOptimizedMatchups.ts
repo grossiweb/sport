@@ -100,7 +100,7 @@ export function useBackgroundMatchups(sport: SportType, date?: string) {
 export function useRecentMatchups(sport: SportType, limit: number = 3) {
   return useQuery(
     ['recentMatchups', sport, limit],
-    () => fetchMatchups(sport, undefined, 'final', 'past'),
+    () => fetchMatchups(sport, undefined, undefined, 'past'),
     {
       enabled: !!sport,
       staleTime: 10 * 60 * 1000, // 10 minutes
@@ -109,7 +109,14 @@ export function useRecentMatchups(sport: SportType, limit: number = 3) {
       refetchIntervalInBackground: false,
       refetchOnWindowFocus: false,
       retry: 2,
-      select: (data) => data.slice(0, limit)
+      select: (data) => {
+        // Filter to only completed games and sort by most recent
+        const completedGames = data
+          .filter(matchup => matchup.game.status === 'final')
+          .sort((a, b) => new Date(b.game.gameDate).getTime() - new Date(a.game.gameDate).getTime())
+        
+        return completedGames.slice(0, limit)
+      }
     }
   )
 }
@@ -120,7 +127,7 @@ export function useRecentMatchups(sport: SportType, limit: number = 3) {
 export function useUpcomingMatchups(sport: SportType, limit: number = 3) {
   return useQuery(
     ['upcomingMatchups', sport, limit],
-    () => fetchMatchups(sport, undefined, 'scheduled', 'future'),
+    () => fetchMatchups(sport, undefined, undefined, 'future'),
     {
       enabled: !!sport,
       staleTime: 10 * 60 * 1000, // 10 minutes
@@ -129,7 +136,14 @@ export function useUpcomingMatchups(sport: SportType, limit: number = 3) {
       refetchIntervalInBackground: false,
       refetchOnWindowFocus: false,
       retry: 2,
-      select: (data) => data.slice(0, limit)
+      select: (data) => {
+        // Filter to only scheduled games and sort by earliest first
+        const upcomingGames = data
+          .filter(matchup => matchup.game.status === 'scheduled')
+          .sort((a, b) => new Date(a.game.gameDate).getTime() - new Date(b.game.gameDate).getTime())
+        
+        return upcomingGames.slice(0, limit)
+      }
     }
   )
 }

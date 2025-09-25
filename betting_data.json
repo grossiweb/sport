@@ -1,0 +1,5200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "_id",
+    "createdAt",
+    "event_date",
+    "event_id",
+    "event_uuid",
+    "lines",
+    "meta",
+    "rotation_number_away",
+    "rotation_number_home",
+    "schedule",
+    "score",
+    "sport_id",
+    "teams",
+    "teams_normalized",
+    "updatedAt"
+  ],
+  "properties": {
+    "_id": {
+      "$ref": "#/$defs/ObjectId"
+    },
+    "createdAt": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": [],
+          "properties": {}
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "event_date": {
+      "type": "string"
+    },
+    "event_id": {
+      "type": "string"
+    },
+    "event_uuid": {
+      "type": "string"
+    },
+    "lines": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": [
+            "12",
+            "2"
+          ],
+          "properties": {
+            "2": {
+              "type": "object",
+              "required": [
+                "affiliate",
+                "line_id",
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "properties": {
+                "affiliate": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "affiliate_name",
+                    "affiliate_url"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "affiliate_name": {
+                      "type": "string"
+                    },
+                    "affiliate_url": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "line_id": {
+                  "type": "integer"
+                },
+                "moneyline": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "moneyline_away",
+                    "moneyline_away_delta",
+                    "moneyline_draw",
+                    "moneyline_draw_delta",
+                    "moneyline_home",
+                    "moneyline_home_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "moneyline_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_away_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_draw": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "moneyline_draw_delta": {
+                      "type": "integer"
+                    },
+                    "moneyline_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_home_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "spread": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "point_spread_away",
+                    "point_spread_away_delta",
+                    "point_spread_away_money",
+                    "point_spread_away_money_delta",
+                    "point_spread_home",
+                    "point_spread_home_delta",
+                    "point_spread_home_money",
+                    "point_spread_home_money_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "point_spread_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "sport_id",
+                    "total_over",
+                    "total_over_delta",
+                    "total_over_money",
+                    "total_over_money_delta",
+                    "total_under",
+                    "total_under_delta",
+                    "total_under_money",
+                    "total_under_money_delta"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    },
+                    "total_over": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_over_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "3": {
+              "type": "object",
+              "required": [
+                "affiliate",
+                "line_id",
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "properties": {
+                "affiliate": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "affiliate_name",
+                    "affiliate_url"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "affiliate_name": {
+                      "type": "string"
+                    },
+                    "affiliate_url": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "line_id": {
+                  "type": "integer"
+                },
+                "moneyline": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "moneyline_away",
+                    "moneyline_away_delta",
+                    "moneyline_draw",
+                    "moneyline_draw_delta",
+                    "moneyline_home",
+                    "moneyline_home_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "moneyline_away": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "moneyline_away_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "moneyline_draw": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "moneyline_draw_delta": {
+                      "type": "integer"
+                    },
+                    "moneyline_home": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "moneyline_home_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "spread": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "point_spread_away",
+                    "point_spread_away_delta",
+                    "point_spread_away_money",
+                    "point_spread_away_money_delta",
+                    "point_spread_home",
+                    "point_spread_home_delta",
+                    "point_spread_home_money",
+                    "point_spread_home_money_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "extended_spreads": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "affiliate_id",
+                          "event_id",
+                          "format",
+                          "line_id",
+                          "point_spread_away",
+                          "point_spread_away_delta",
+                          "point_spread_away_money",
+                          "point_spread_away_money_delta",
+                          "point_spread_home",
+                          "point_spread_home_delta",
+                          "point_spread_home_money",
+                          "point_spread_home_money_delta",
+                          "sport_id"
+                        ],
+                        "properties": {
+                          "affiliate_id": {
+                            "type": "integer"
+                          },
+                          "event_id": {
+                            "type": "string"
+                          },
+                          "format": {
+                            "type": "string"
+                          },
+                          "line_id": {
+                            "type": "integer"
+                          },
+                          "point_spread_away": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "$ref": "#/$defs/Double"
+                              }
+                            ]
+                          },
+                          "point_spread_away_delta": {
+                            "type": "integer"
+                          },
+                          "point_spread_away_money": {
+                            "type": "integer"
+                          },
+                          "point_spread_away_money_delta": {
+                            "type": "integer"
+                          },
+                          "point_spread_home": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "$ref": "#/$defs/Double"
+                              }
+                            ]
+                          },
+                          "point_spread_home_delta": {
+                            "type": "integer"
+                          },
+                          "point_spread_home_money": {
+                            "type": "integer"
+                          },
+                          "point_spread_home_money_delta": {
+                            "type": "integer"
+                          },
+                          "sport_id": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "point_spread_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "sport_id",
+                    "total_over",
+                    "total_over_delta",
+                    "total_over_money",
+                    "total_over_money_delta",
+                    "total_under",
+                    "total_under_delta",
+                    "total_under_money",
+                    "total_under_money_delta"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "extended_totals": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "affiliate_id",
+                          "event_id",
+                          "format",
+                          "line_id",
+                          "sport_id",
+                          "total_over",
+                          "total_over_delta",
+                          "total_over_money",
+                          "total_over_money_delta",
+                          "total_under",
+                          "total_under_delta",
+                          "total_under_money",
+                          "total_under_money_delta"
+                        ],
+                        "properties": {
+                          "affiliate_id": {
+                            "type": "integer"
+                          },
+                          "event_id": {
+                            "type": "string"
+                          },
+                          "format": {
+                            "type": "string"
+                          },
+                          "line_id": {
+                            "type": "integer"
+                          },
+                          "sport_id": {
+                            "type": "integer"
+                          },
+                          "total_over": {
+                            "anyOf": [
+                              {
+                                "$ref": "#/$defs/Double"
+                              },
+                              {
+                                "type": "integer"
+                              }
+                            ]
+                          },
+                          "total_over_delta": {
+                            "type": "integer"
+                          },
+                          "total_over_money": {
+                            "type": "integer"
+                          },
+                          "total_over_money_delta": {
+                            "type": "integer"
+                          },
+                          "total_under": {
+                            "anyOf": [
+                              {
+                                "$ref": "#/$defs/Double"
+                              },
+                              {
+                                "type": "integer"
+                              }
+                            ]
+                          },
+                          "total_under_delta": {
+                            "type": "integer"
+                          },
+                          "total_under_money": {
+                            "type": "integer"
+                          },
+                          "total_under_money_delta": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    },
+                    "total_over": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_over_money": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_over_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under_money": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "4": {
+              "type": "object",
+              "required": [
+                "affiliate",
+                "line_id",
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "properties": {
+                "affiliate": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "affiliate_name",
+                    "affiliate_url"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "affiliate_name": {
+                      "type": "string"
+                    },
+                    "affiliate_url": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "line_id": {
+                  "type": "integer"
+                },
+                "moneyline": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "moneyline_away",
+                    "moneyline_away_delta",
+                    "moneyline_draw",
+                    "moneyline_draw_delta",
+                    "moneyline_home",
+                    "moneyline_home_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "moneyline_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_away_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_draw": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "moneyline_draw_delta": {
+                      "type": "integer"
+                    },
+                    "moneyline_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_home_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "spread": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "point_spread_away",
+                    "point_spread_away_delta",
+                    "point_spread_away_money",
+                    "point_spread_away_money_delta",
+                    "point_spread_home",
+                    "point_spread_home_delta",
+                    "point_spread_home_money",
+                    "point_spread_home_money_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "point_spread_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "sport_id",
+                    "total_over",
+                    "total_over_delta",
+                    "total_over_money",
+                    "total_over_money_delta",
+                    "total_under",
+                    "total_under_delta",
+                    "total_under_money",
+                    "total_under_money_delta"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    },
+                    "total_over": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_over_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "6": {
+              "type": "object",
+              "required": [
+                "affiliate",
+                "line_id",
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "properties": {
+                "affiliate": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "affiliate_name",
+                    "affiliate_url"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "affiliate_name": {
+                      "type": "string"
+                    },
+                    "affiliate_url": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "line_id": {
+                  "type": "integer"
+                },
+                "moneyline": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "moneyline_away",
+                    "moneyline_away_delta",
+                    "moneyline_draw",
+                    "moneyline_draw_delta",
+                    "moneyline_home",
+                    "moneyline_home_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "moneyline_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_away_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_draw": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "moneyline_draw_delta": {
+                      "type": "integer"
+                    },
+                    "moneyline_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_home_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "spread": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "point_spread_away",
+                    "point_spread_away_delta",
+                    "point_spread_away_money",
+                    "point_spread_away_money_delta",
+                    "point_spread_home",
+                    "point_spread_home_delta",
+                    "point_spread_home_money",
+                    "point_spread_home_money_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "point_spread_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "sport_id",
+                    "total_over",
+                    "total_over_delta",
+                    "total_over_money",
+                    "total_over_money_delta",
+                    "total_under",
+                    "total_under_delta",
+                    "total_under_money",
+                    "total_under_money_delta"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    },
+                    "total_over": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_over_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "11": {
+              "type": "object",
+              "required": [
+                "affiliate",
+                "line_id",
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "properties": {
+                "affiliate": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "affiliate_name",
+                    "affiliate_url"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "affiliate_name": {
+                      "type": "string"
+                    },
+                    "affiliate_url": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "line_id": {
+                  "type": "integer"
+                },
+                "moneyline": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "moneyline_away",
+                    "moneyline_away_delta",
+                    "moneyline_draw",
+                    "moneyline_draw_delta",
+                    "moneyline_home",
+                    "moneyline_home_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "moneyline_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_away_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_draw": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "moneyline_draw_delta": {
+                      "type": "integer"
+                    },
+                    "moneyline_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_home_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "spread": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "point_spread_away",
+                    "point_spread_away_delta",
+                    "point_spread_away_money",
+                    "point_spread_away_money_delta",
+                    "point_spread_home",
+                    "point_spread_home_delta",
+                    "point_spread_home_money",
+                    "point_spread_home_money_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "point_spread_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "sport_id",
+                    "total_over",
+                    "total_over_delta",
+                    "total_over_money",
+                    "total_over_money_delta",
+                    "total_under",
+                    "total_under_delta",
+                    "total_under_money",
+                    "total_under_money_delta"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    },
+                    "total_over": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_over_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "12": {
+              "type": "object",
+              "required": [
+                "affiliate",
+                "line_id",
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "properties": {
+                "affiliate": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "affiliate_name",
+                    "affiliate_url"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "affiliate_name": {
+                      "type": "string"
+                    },
+                    "affiliate_url": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "line_id": {
+                  "type": "integer"
+                },
+                "moneyline": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "moneyline_away",
+                    "moneyline_away_delta",
+                    "moneyline_draw",
+                    "moneyline_draw_delta",
+                    "moneyline_home",
+                    "moneyline_home_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "moneyline_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_away_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_draw": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "moneyline_draw_delta": {
+                      "type": "integer"
+                    },
+                    "moneyline_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_home_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "spread": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "point_spread_away",
+                    "point_spread_away_delta",
+                    "point_spread_away_money",
+                    "point_spread_away_money_delta",
+                    "point_spread_home",
+                    "point_spread_home_delta",
+                    "point_spread_home_money",
+                    "point_spread_home_money_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "point_spread_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "sport_id",
+                    "total_over",
+                    "total_over_delta",
+                    "total_over_money",
+                    "total_over_money_delta",
+                    "total_under",
+                    "total_under_delta",
+                    "total_under_money",
+                    "total_under_money_delta"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    },
+                    "total_over": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_over_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "14": {
+              "type": "object",
+              "required": [
+                "affiliate",
+                "line_id",
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "properties": {
+                "affiliate": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "affiliate_name",
+                    "affiliate_url"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "affiliate_name": {
+                      "type": "string"
+                    },
+                    "affiliate_url": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "line_id": {
+                  "type": "integer"
+                },
+                "moneyline": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "moneyline_away",
+                    "moneyline_away_delta",
+                    "moneyline_draw",
+                    "moneyline_draw_delta",
+                    "moneyline_home",
+                    "moneyline_home_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "moneyline_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_away_delta": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "moneyline_draw": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "moneyline_draw_delta": {
+                      "type": "integer"
+                    },
+                    "moneyline_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_home_delta": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "spread": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "point_spread_away",
+                    "point_spread_away_delta",
+                    "point_spread_away_money",
+                    "point_spread_away_money_delta",
+                    "point_spread_home",
+                    "point_spread_home_delta",
+                    "point_spread_home_money",
+                    "point_spread_home_money_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "point_spread_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "sport_id",
+                    "total_over",
+                    "total_over_delta",
+                    "total_over_money",
+                    "total_over_money_delta",
+                    "total_under",
+                    "total_under_delta",
+                    "total_under_money",
+                    "total_under_money_delta"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    },
+                    "total_over": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_over_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "16": {
+              "type": "object",
+              "required": [
+                "affiliate",
+                "line_id",
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "properties": {
+                "affiliate": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "affiliate_name",
+                    "affiliate_url"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "affiliate_name": {
+                      "type": "string"
+                    },
+                    "affiliate_url": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "line_id": {
+                  "type": "integer"
+                },
+                "moneyline": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "moneyline_away",
+                    "moneyline_away_delta",
+                    "moneyline_draw",
+                    "moneyline_draw_delta",
+                    "moneyline_home",
+                    "moneyline_home_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "moneyline_away": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "moneyline_away_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "moneyline_draw": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "moneyline_draw_delta": {
+                      "type": "integer"
+                    },
+                    "moneyline_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_home_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "spread": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "point_spread_away",
+                    "point_spread_away_delta",
+                    "point_spread_away_money",
+                    "point_spread_away_money_delta",
+                    "point_spread_home",
+                    "point_spread_home_delta",
+                    "point_spread_home_money",
+                    "point_spread_home_money_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "point_spread_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_delta": {
+                      "type": "integer"
+                    },
+                    "point_spread_away_money": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "point_spread_away_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_delta": {
+                      "type": "integer"
+                    },
+                    "point_spread_home_money": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "point_spread_home_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "sport_id",
+                    "total_over",
+                    "total_over_delta",
+                    "total_over_money",
+                    "total_over_money_delta",
+                    "total_under",
+                    "total_under_delta",
+                    "total_under_money",
+                    "total_under_money_delta"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    },
+                    "total_over": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "total_over_delta": {
+                      "type": "integer"
+                    },
+                    "total_over_money": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "total_over_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "total_under_delta": {
+                      "type": "integer"
+                    },
+                    "total_under_money": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "total_under_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "18": {
+              "type": "object",
+              "required": [
+                "affiliate",
+                "line_id",
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "properties": {
+                "affiliate": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "affiliate_name",
+                    "affiliate_url"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "affiliate_name": {
+                      "type": "string"
+                    },
+                    "affiliate_url": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "line_id": {
+                  "type": "integer"
+                },
+                "moneyline": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "moneyline_away",
+                    "moneyline_away_delta",
+                    "moneyline_draw",
+                    "moneyline_draw_delta",
+                    "moneyline_home",
+                    "moneyline_home_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "moneyline_away": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "moneyline_away_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "moneyline_draw": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "moneyline_draw_delta": {
+                      "type": "integer"
+                    },
+                    "moneyline_home": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "moneyline_home_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "spread": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "point_spread_away",
+                    "point_spread_away_delta",
+                    "point_spread_away_money",
+                    "point_spread_away_money_delta",
+                    "point_spread_home",
+                    "point_spread_home_delta",
+                    "point_spread_home_money",
+                    "point_spread_home_money_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "point_spread_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "sport_id",
+                    "total_over",
+                    "total_over_delta",
+                    "total_over_money",
+                    "total_over_money_delta",
+                    "total_under",
+                    "total_under_delta",
+                    "total_under_money",
+                    "total_under_money_delta"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    },
+                    "total_over": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_money": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_over_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_money": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "19": {
+              "type": "object",
+              "required": [
+                "affiliate",
+                "line_id",
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "properties": {
+                "affiliate": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "affiliate_name",
+                    "affiliate_url"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "affiliate_name": {
+                      "type": "string"
+                    },
+                    "affiliate_url": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "line_id": {
+                  "type": "integer"
+                },
+                "moneyline": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "moneyline_away",
+                    "moneyline_away_delta",
+                    "moneyline_draw",
+                    "moneyline_draw_delta",
+                    "moneyline_home",
+                    "moneyline_home_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "moneyline_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_away_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_draw": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "moneyline_draw_delta": {
+                      "type": "integer"
+                    },
+                    "moneyline_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_home_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "spread": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "point_spread_away",
+                    "point_spread_away_delta",
+                    "point_spread_away_money",
+                    "point_spread_away_money_delta",
+                    "point_spread_home",
+                    "point_spread_home_delta",
+                    "point_spread_home_money",
+                    "point_spread_home_money_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "point_spread_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "sport_id",
+                    "total_over",
+                    "total_over_delta",
+                    "total_over_money",
+                    "total_over_money_delta",
+                    "total_under",
+                    "total_under_delta",
+                    "total_under_money",
+                    "total_under_money_delta"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    },
+                    "total_over": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "total_over_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_over_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "total_under_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "21": {
+              "type": "object",
+              "required": [
+                "affiliate",
+                "line_id",
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "properties": {
+                "affiliate": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "affiliate_name",
+                    "affiliate_url"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "affiliate_name": {
+                      "type": "string"
+                    },
+                    "affiliate_url": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "line_id": {
+                  "type": "integer"
+                },
+                "moneyline": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "moneyline_away",
+                    "moneyline_away_delta",
+                    "moneyline_draw",
+                    "moneyline_draw_delta",
+                    "moneyline_home",
+                    "moneyline_home_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "moneyline_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_away_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_draw": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "moneyline_draw_delta": {
+                      "type": "integer"
+                    },
+                    "moneyline_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_home_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "spread": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "point_spread_away",
+                    "point_spread_away_delta",
+                    "point_spread_away_money",
+                    "point_spread_away_money_delta",
+                    "point_spread_home",
+                    "point_spread_home_delta",
+                    "point_spread_home_money",
+                    "point_spread_home_money_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "point_spread_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "sport_id",
+                    "total_over",
+                    "total_over_delta",
+                    "total_over_money",
+                    "total_over_money_delta",
+                    "total_under",
+                    "total_under_delta",
+                    "total_under_money",
+                    "total_under_money_delta"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    },
+                    "total_over": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_over_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "22": {
+              "type": "object",
+              "required": [
+                "affiliate",
+                "line_id",
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "properties": {
+                "affiliate": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "affiliate_name",
+                    "affiliate_url"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "affiliate_name": {
+                      "type": "string"
+                    },
+                    "affiliate_url": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "line_id": {
+                  "type": "integer"
+                },
+                "moneyline": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "moneyline_away",
+                    "moneyline_away_delta",
+                    "moneyline_draw",
+                    "moneyline_draw_delta",
+                    "moneyline_home",
+                    "moneyline_home_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "moneyline_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_away_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_draw": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "moneyline_draw_delta": {
+                      "type": "integer"
+                    },
+                    "moneyline_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_home_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "spread": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "point_spread_away",
+                    "point_spread_away_delta",
+                    "point_spread_away_money",
+                    "point_spread_away_money_delta",
+                    "point_spread_home",
+                    "point_spread_home_delta",
+                    "point_spread_home_money",
+                    "point_spread_home_money_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "extended_spreads": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "affiliate_id",
+                          "event_id",
+                          "format",
+                          "line_id",
+                          "point_spread_away",
+                          "point_spread_away_delta",
+                          "point_spread_away_money",
+                          "point_spread_away_money_delta",
+                          "point_spread_home",
+                          "point_spread_home_delta",
+                          "point_spread_home_money",
+                          "point_spread_home_money_delta",
+                          "sport_id"
+                        ],
+                        "properties": {
+                          "affiliate_id": {
+                            "type": "integer"
+                          },
+                          "event_id": {
+                            "type": "string"
+                          },
+                          "format": {
+                            "type": "string"
+                          },
+                          "line_id": {
+                            "type": "integer"
+                          },
+                          "point_spread_away": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "$ref": "#/$defs/Double"
+                              }
+                            ]
+                          },
+                          "point_spread_away_delta": {
+                            "type": "integer"
+                          },
+                          "point_spread_away_money": {
+                            "type": "integer"
+                          },
+                          "point_spread_away_money_delta": {
+                            "type": "integer"
+                          },
+                          "point_spread_home": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "$ref": "#/$defs/Double"
+                              }
+                            ]
+                          },
+                          "point_spread_home_delta": {
+                            "type": "integer"
+                          },
+                          "point_spread_home_money": {
+                            "type": "integer"
+                          },
+                          "point_spread_home_money_delta": {
+                            "type": "integer"
+                          },
+                          "sport_id": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "point_spread_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "sport_id",
+                    "total_over",
+                    "total_over_delta",
+                    "total_over_money",
+                    "total_over_money_delta",
+                    "total_under",
+                    "total_under_delta",
+                    "total_under_money",
+                    "total_under_money_delta"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "extended_totals": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "affiliate_id",
+                          "event_id",
+                          "format",
+                          "line_id",
+                          "sport_id",
+                          "total_over",
+                          "total_over_delta",
+                          "total_over_money",
+                          "total_over_money_delta",
+                          "total_under",
+                          "total_under_delta",
+                          "total_under_money",
+                          "total_under_money_delta"
+                        ],
+                        "properties": {
+                          "affiliate_id": {
+                            "type": "integer"
+                          },
+                          "event_id": {
+                            "type": "string"
+                          },
+                          "format": {
+                            "type": "string"
+                          },
+                          "line_id": {
+                            "type": "integer"
+                          },
+                          "sport_id": {
+                            "type": "integer"
+                          },
+                          "total_over": {
+                            "anyOf": [
+                              {
+                                "$ref": "#/$defs/Double"
+                              },
+                              {
+                                "type": "integer"
+                              }
+                            ]
+                          },
+                          "total_over_delta": {
+                            "type": "integer"
+                          },
+                          "total_over_money": {
+                            "type": "integer"
+                          },
+                          "total_over_money_delta": {
+                            "type": "integer"
+                          },
+                          "total_under": {
+                            "anyOf": [
+                              {
+                                "$ref": "#/$defs/Double"
+                              },
+                              {
+                                "type": "integer"
+                              }
+                            ]
+                          },
+                          "total_under_delta": {
+                            "type": "integer"
+                          },
+                          "total_under_money": {
+                            "type": "integer"
+                          },
+                          "total_under_money_delta": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    },
+                    "total_over": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_over_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "23": {
+              "type": "object",
+              "required": [
+                "affiliate",
+                "line_id",
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "properties": {
+                "affiliate": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "affiliate_name",
+                    "affiliate_url"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "affiliate_name": {
+                      "type": "string"
+                    },
+                    "affiliate_url": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "line_id": {
+                  "type": "integer"
+                },
+                "moneyline": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "moneyline_away",
+                    "moneyline_away_delta",
+                    "moneyline_draw",
+                    "moneyline_draw_delta",
+                    "moneyline_home",
+                    "moneyline_home_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "moneyline_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_away_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_draw": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "moneyline_draw_delta": {
+                      "type": "integer"
+                    },
+                    "moneyline_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "moneyline_home_delta": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "spread": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "point_spread_away",
+                    "point_spread_away_delta",
+                    "point_spread_away_money",
+                    "point_spread_away_money_delta",
+                    "point_spread_home",
+                    "point_spread_home_delta",
+                    "point_spread_home_money",
+                    "point_spread_home_money_delta",
+                    "sport_id"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "point_spread_away": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_away_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "point_spread_home_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "total": {
+                  "type": "object",
+                  "required": [
+                    "affiliate_id",
+                    "date_updated",
+                    "event_id",
+                    "format",
+                    "line_id",
+                    "sport_id",
+                    "total_over",
+                    "total_over_delta",
+                    "total_over_money",
+                    "total_over_money_delta",
+                    "total_under",
+                    "total_under_delta",
+                    "total_under_money",
+                    "total_under_money_delta"
+                  ],
+                  "properties": {
+                    "affiliate_id": {
+                      "type": "integer"
+                    },
+                    "date_updated": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "integer"
+                    },
+                    "sport_id": {
+                      "type": "integer"
+                    },
+                    "total_over": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "total_over_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_over_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_over_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under": {
+                      "$ref": "#/$defs/Double"
+                    },
+                    "total_under_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    },
+                    "total_under_money": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Double"
+                        },
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "total_under_money_delta": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "$ref": "#/$defs/Double"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": []
+          }
+        }
+      ]
+    },
+    "meta": {
+      "type": "object",
+      "required": [
+        "fetchedAt",
+        "sourceUrl"
+      ],
+      "properties": {
+        "fetchedAt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "required": [],
+              "properties": {}
+            }
+          ]
+        },
+        "sourceUrl": {
+          "type": "string"
+        }
+      }
+    },
+    "rotation_number_away": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "rotation_number_home": {
+      "type": [
+        "null",
+        "integer"
+      ]
+    },
+    "schedule": {
+      "type": "object",
+      "required": [
+        "attendance",
+        "conference_competition",
+        "event_name",
+        "season_type",
+        "season_year"
+      ],
+      "properties": {
+        "attendance": {
+          "type": "string"
+        },
+        "conference_competition": {
+          "type": "boolean"
+        },
+        "conference_name": {
+          "type": "string"
+        },
+        "event_headline": {
+          "type": "string"
+        },
+        "event_name": {
+          "type": "string"
+        },
+        "league_name": {
+          "type": "string"
+        },
+        "season_type": {
+          "type": "string"
+        },
+        "season_year": {
+          "type": "integer"
+        }
+      }
+    },
+    "score": {
+      "type": "object",
+      "required": [
+        "broadcast",
+        "display_clock",
+        "event_id",
+        "event_status",
+        "event_status_detail",
+        "game_clock",
+        "game_period",
+        "score_away",
+        "score_away_by_period",
+        "score_home",
+        "score_home_by_period",
+        "updated_at",
+        "venue_location",
+        "venue_name",
+        "winner_away",
+        "winner_home"
+      ],
+      "properties": {
+        "broadcast": {
+          "type": "string"
+        },
+        "display_clock": {
+          "type": "string"
+        },
+        "event_id": {
+          "type": "string"
+        },
+        "event_status": {
+          "type": "string"
+        },
+        "event_status_detail": {
+          "type": "string"
+        },
+        "game_clock": {
+          "type": "integer"
+        },
+        "game_period": {
+          "type": "integer"
+        },
+        "score_away": {
+          "type": "integer"
+        },
+        "score_away_by_period": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "score_home": {
+          "type": "integer"
+        },
+        "score_home_by_period": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "team_id_away": {
+          "type": "integer"
+        },
+        "team_id_home": {
+          "type": "integer"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "venue_location": {
+          "type": "string"
+        },
+        "venue_name": {
+          "type": "string"
+        },
+        "winner_away": {
+          "type": "integer"
+        },
+        "winner_home": {
+          "type": "integer"
+        }
+      }
+    },
+    "sport_id": {
+      "type": "integer"
+    },
+    "teams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "is_away",
+          "is_home",
+          "name",
+          "team_id",
+          "team_normalized_id"
+        ],
+        "properties": {
+          "is_away": {
+            "type": "boolean"
+          },
+          "is_home": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "team_id": {
+            "type": "integer"
+          },
+          "team_normalized_id": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "teams_normalized": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "abbreviation",
+          "conference_id",
+          "division_id",
+          "is_away",
+          "is_home",
+          "mascot",
+          "name",
+          "record",
+          "team_id"
+        ],
+        "properties": {
+          "abbreviation": {
+            "type": "string"
+          },
+          "conference": {
+            "type": "object",
+            "required": [
+              "conference_id",
+              "name",
+              "sport_id"
+            ],
+            "properties": {
+              "conference_id": {
+                "type": "integer"
+              },
+              "division_id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "sport_id": {
+                "type": "integer"
+              }
+            }
+          },
+          "conference_id": {
+            "type": "integer"
+          },
+          "division": {
+            "type": "object",
+            "required": [
+              "division_id",
+              "name",
+              "sport_id"
+            ],
+            "properties": {
+              "conference_id": {
+                "type": "integer"
+              },
+              "division_id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "sport_id": {
+                "type": "integer"
+              }
+            }
+          },
+          "division_id": {
+            "type": "integer"
+          },
+          "is_away": {
+            "type": "boolean"
+          },
+          "is_home": {
+            "type": "boolean"
+          },
+          "mascot": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ranking": {
+            "type": "integer"
+          },
+          "record": {
+            "type": "string"
+          },
+          "team_id": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "updatedAt": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "required": [],
+          "properties": {}
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "ObjectId": {
+      "type": "object",
+      "properties": {
+        "$oid": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{24}$"
+        }
+      },
+      "required": [
+        "$oid"
+      ],
+      "additionalProperties": false
+    },
+    "Double": {
+      "oneOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "$numberDouble": {
+              "enum": [
+                "Infinity",
+                "-Infinity",
+                "NaN"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

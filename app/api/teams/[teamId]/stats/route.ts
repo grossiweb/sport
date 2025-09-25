@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sportsAPI } from '@/lib/api/sports-api'
+import { mongoSportsAPI } from '@/lib/api/mongodb-sports-api'
 import { SportType } from '@/types'
 import { isValidSportType } from '@/lib/constants/sports'
 
@@ -30,10 +30,10 @@ export async function GET(
     console.log(`${sport} individual team stats API called for team ${teamId}`)
     
     // Get detailed team stats
-    const detailedStats = await sportsAPI.getDetailedTeamStats(sport as SportType, teamId)
+    const detailedStats = await mongoSportsAPI.getDetailedTeamStats(sport as SportType, teamId)
     
     // Also get basic team stats
-    const basicStats = await sportsAPI.getTeamStatsByTeamId(sport as SportType, teamId)
+    const basicStats = await mongoSportsAPI.getTeamStatsByTeamId(sport as SportType, teamId)
 
     return NextResponse.json({
       success: true,

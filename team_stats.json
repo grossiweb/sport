@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "_id",
+    "count",
+    "createdAt",
+    "meta",
+    "season_type",
+    "season_type_name",
+    "season_year",
+    "stats",
+    "team_id",
+    "updatedAt"
+  ],
+  "properties": {
+    "_id": {
+      "$ref": "#/$defs/ObjectId"
+    },
+    "count": {
+      "type": "integer"
+    },
+    "createdAt": {
+      "type": "object",
+      "required": [],
+      "properties": {}
+    },
+    "meta": {
+      "type": "object",
+      "required": [
+        "fetchedAt",
+        "sourceUrl"
+      ],
+      "properties": {
+        "fetchedAt": {
+          "type": "object",
+          "required": [],
+          "properties": {}
+        },
+        "sourceUrl": {
+          "type": "string"
+        }
+      }
+    },
+    "season_type": {
+      "type": "integer"
+    },
+    "season_type_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "season_year": {
+      "type": "integer"
+    },
+    "stats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "abbreviation",
+          "category",
+          "description",
+          "display_name",
+          "display_value",
+          "name",
+          "per_game_display_value",
+          "per_game_value",
+          "rank",
+          "rank_display_value",
+          "stat_id",
+          "updated_at",
+          "value"
+        ],
+        "properties": {
+          "abbreviation": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "display_value": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "per_game_display_value": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "per_game_value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/$defs/Double"
+              }
+            ]
+          },
+          "rank": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "rank_display_value": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "stat_id": {
+            "type": "integer"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "$ref": "#/$defs/Double"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "team_id": {
+      "type": "integer"
+    },
+    "updatedAt": {
+      "type": "object",
+      "required": [],
+      "properties": {}
+    }
+  },
+  "$defs": {
+    "ObjectId": {
+      "type": "object",
+      "properties": {
+        "$oid": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{24}$"
+        }
+      },
+      "required": [
+        "$oid"
+      ],
+      "additionalProperties": false
+    },
+    "Double": {
+      "oneOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "$numberDouble": {
+              "enum": [
+                "Infinity",
+                "-Infinity",
+                "NaN"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

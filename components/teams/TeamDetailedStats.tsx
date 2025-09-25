@@ -15,6 +15,7 @@ interface TeamDetailedStatsProps {
   awayTeam?: any // Full team object for logo
   isLoading?: boolean
   sport?: 'CFB' | 'NFL'
+  viewMode?: 'comparison' | 'single' // New prop to control view mode
 }
 
 export function TeamDetailedStats({ 
@@ -25,9 +26,12 @@ export function TeamDetailedStats({
   homeTeam,
   awayTeam,
   isLoading,
-  sport = 'CFB'
+  sport = 'CFB',
+  viewMode = 'comparison'
 }: TeamDetailedStatsProps) {
-  const [activeView, setActiveView] = useState<'comparison' | 'home' | 'away'>('comparison')
+  const [activeView, setActiveView] = useState<'comparison' | 'home' | 'away'>(
+    viewMode === 'single' ? 'home' : 'comparison'
+  )
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   if (isLoading) {
@@ -119,31 +123,35 @@ export function TeamDetailedStats({
     }
   }
 
-  const ViewToggle = () => (
-    <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 mb-6">
-      {[
-        { id: 'comparison', name: 'Head-to-Head', icon: ChartBarIcon },
-        { id: 'home', name: homeTeamName, icon: TrophyIcon },
-        { id: 'away', name: awayTeamName, icon: TrophyIcon }
-      ].map((view) => {
-        const Icon = view.icon
-        return (
-          <button
-            key={view.id}
-            onClick={() => setActiveView(view.id as any)}
-            className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeView === view.id
-                ? 'bg-white dark:bg-gray-600 text-blue-700 dark:text-blue-400 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-            }`}
-          >
-            <Icon className="h-4 w-4 mr-2" />
-            {view.name}
-          </button>
-        )
-      })}
-    </div>
-  )
+  const ViewToggle = () => {
+    if (viewMode === 'single') return null
+    
+    return (
+      <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 mb-6">
+        {[
+          { id: 'comparison', name: 'Head-to-Head', icon: ChartBarIcon },
+          { id: 'home', name: homeTeamName, icon: TrophyIcon },
+          { id: 'away', name: awayTeamName, icon: TrophyIcon }
+        ].map((view) => {
+          const Icon = view.icon
+          return (
+            <button
+              key={view.id}
+              onClick={() => setActiveView(view.id as any)}
+              className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                activeView === view.id
+                  ? 'bg-white dark:bg-gray-600 text-blue-700 dark:text-blue-400 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+              }`}
+            >
+              <Icon className="h-4 w-4 mr-2" />
+              {view.name}
+            </button>
+          )
+        })}
+      </div>
+    )
+  }
 
   const CategoryFilter = () => (
     <div className="mb-6">
@@ -277,35 +285,67 @@ export function TeamDetailedStats({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {categoryStats.map((stat, index) => (
-              <div
-                key={`${stat.team_id}-${stat.stat_id}-${index}`}
-                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-sm transition-shadow"
-              >
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                    {stat.display_value || stat.value}
-                  </div>
-                  <div className="font-medium text-gray-900 dark:text-white mb-1">
-                    {stat.stat?.display_name || stat.stat?.name}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                    {stat.stat?.abbreviation}
-                  </div>
-                  {stat.rank_display_value && (
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                      Rank: #{stat.rank_display_value}
-                    </div>
-                  )}
-                  {stat.per_game_display_value && (
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      Per Game: {stat.per_game_display_value}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                <thead className="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Statistic
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Value
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Per Game
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Rank
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                  {categoryStats.map((stat, index) => (
+                    <tr key={`${stat.team_id}-${stat.stat_id}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <td className="px-4 py-3">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          {stat.stat?.display_name || stat.stat?.name}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {stat.stat?.abbreviation}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                          {stat.display_value || stat.value}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          {stat.per_game_display_value || '-'}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        {stat.rank && (
+                          <div className={`text-sm font-medium ${
+                            stat.rank <= 10 ? 'text-green-600 dark:text-green-400' :
+                            stat.rank <= 25 ? 'text-yellow-600 dark:text-yellow-400' :
+                            'text-gray-600 dark:text-gray-400'
+                          }`}>
+                            #{stat.rank}
+                          </div>
+                        )}
+                        {!stat.rank && stat.rank_display_value && (
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            #{stat.rank_display_value}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

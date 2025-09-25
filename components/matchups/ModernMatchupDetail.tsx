@@ -119,11 +119,11 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
         </div>
 
         {/* Teams Display */}
-        <div className="p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+        <div className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
             {/* Away Team */}
             <div className="text-center lg:text-right">
-              <div className="flex flex-col items-center lg:items-end space-y-4">
+              <div className="flex flex-col items-center lg:items-end space-y-3">
                 <TeamLogo team={game.awayTeam} size="xl" />
                 <div>
                   <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
@@ -149,7 +149,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
 
             {/* VS / Score */}
             <div className="text-center">
-              <div className="flex flex-col items-center space-y-4">
+              <div className="flex flex-col items-center space-y-3">
                 {game.awayScore !== undefined && game.homeScore !== undefined ? (
                   <div className="text-4xl font-bold text-gray-400 dark:text-gray-500">
                     FINAL
@@ -164,7 +164,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
 
             {/* Home Team */}
             <div className="text-center lg:text-left">
-              <div className="flex flex-col items-center lg:items-start space-y-4">
+              <div className="flex flex-col items-center lg:items-start space-y-3">
                 <TeamLogo team={game.homeTeam} size="xl" />
                 <div>
                   <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
@@ -189,35 +189,24 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
             </div>
           </div>
 
-          {/* AI Prediction */}
+          {/* AI Prediction - Compact */}
           {predictions && (
-            <div className={`mt-8 p-6 rounded-xl border-2 ${confidenceBg}`}>
-              <div className="text-center">
-                <div className="flex items-center justify-center mb-4">
-                  <ArrowTrendingUpIcon className="h-6 w-6 text-gray-600 dark:text-gray-400 mr-2" />
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    AI Prediction
-                  </h3>
+            <div className={`mt-6 p-4 rounded-lg border ${confidenceBg}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <ArrowTrendingUpIcon className="h-5 w-5 text-gray-600 dark:text-gray-400 mr-2" />
+                  <span className="font-semibold text-gray-900 dark:text-white">AI Prediction:</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-                  <div className="text-center">
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Predicted Winner</div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {predictions.predictedWinner}
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Predicted Score</div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white">
-                      {predictions.predictedScore.away} - {predictions.predictedScore.home}
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Confidence</div>
-                    <div className={`text-2xl font-bold ${confidenceColor}`}>
-                      {(predictions.confidence * 100).toFixed(0)}%
-                    </div>
-                  </div>
+                <div className="flex items-center space-x-4 text-sm">
+                  <span className="text-gray-900 dark:text-white font-medium">
+                    {predictions.predictedWinner}
+                  </span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {predictions.predictedScore.away}-{predictions.predictedScore.home}
+                  </span>
+                  <span className={`font-semibold ${confidenceColor}`}>
+                    {(predictions.confidence * 100).toFixed(0)}%
+                  </span>
                 </div>
               </div>
             </div>

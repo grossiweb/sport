@@ -1,0 +1,205 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "required": [
+      "_id",
+      "abbreviation",
+      "conference",
+      "createdAt",
+      "division",
+      "id",
+      "mascot",
+      "meta",
+      "name",
+      "raw",
+      "record",
+      "sport_id",
+      "team_id"
+    ],
+    "properties": {
+      "_id": {
+        "bsonType": "objectId"
+      },
+      "abbreviation": {
+        "bsonType": "string"
+      },
+      "conference": {
+        "bsonType": "object",
+        "properties": {
+          "conference_id": {
+            "bsonType": [
+              "int",
+              "null"
+            ]
+          },
+          "division_id": {
+            "bsonType": [
+              "int",
+              "null"
+            ]
+          },
+          "name": {
+            "bsonType": [
+              "string",
+              "null"
+            ]
+          },
+          "sport_id": {
+            "bsonType": [
+              "int",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "conference_id",
+          "division_id",
+          "name",
+          "sport_id"
+        ]
+      },
+      "createdAt": {
+        "bsonType": "object",
+        "properties": {}
+      },
+      "division": {
+        "bsonType": "object",
+        "properties": {
+          "division_id": {
+            "bsonType": [
+              "int",
+              "null"
+            ]
+          },
+          "name": {
+            "bsonType": [
+              "string",
+              "null"
+            ]
+          },
+          "sport_id": {
+            "bsonType": [
+              "int",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "division_id",
+          "name",
+          "sport_id"
+        ]
+      },
+      "id": {
+        "bsonType": "int"
+      },
+      "mascot": {
+        "bsonType": "string"
+      },
+      "meta": {
+        "bsonType": "object",
+        "properties": {
+          "savedAt": {
+            "bsonType": "object",
+            "properties": {}
+          },
+          "sourceUrl": {
+            "bsonType": "string"
+          }
+        },
+        "required": [
+          "savedAt",
+          "sourceUrl"
+        ]
+      },
+      "name": {
+        "bsonType": "string"
+      },
+      "raw": {
+        "bsonType": "object",
+        "properties": {
+          "abbreviation": {
+            "bsonType": "string"
+          },
+          "conference": {
+            "bsonType": "object",
+            "properties": {
+              "conference_id": {
+                "bsonType": "int"
+              },
+              "division_id": {
+                "bsonType": "int"
+              },
+              "name": {
+                "bsonType": "string"
+              },
+              "sport_id": {
+                "bsonType": "int"
+              }
+            },
+            "required": [
+              "conference_id",
+              "name",
+              "sport_id"
+            ]
+          },
+          "division": {
+            "bsonType": "object",
+            "properties": {
+              "conference_id": {
+                "bsonType": "int"
+              },
+              "division_id": {
+                "bsonType": "int"
+              },
+              "name": {
+                "bsonType": "string"
+              },
+              "sport_id": {
+                "bsonType": "int"
+              }
+            },
+            "required": [
+              "division_id",
+              "name",
+              "sport_id"
+            ]
+          },
+          "mascot": {
+            "bsonType": "string"
+          },
+          "name": {
+            "bsonType": "string"
+          },
+          "ranking": {
+            "bsonType": "int"
+          },
+          "record": {
+            "bsonType": "string"
+          },
+          "team_id": {
+            "bsonType": "int"
+          }
+        },
+        "required": [
+          "abbreviation",
+          "mascot",
+          "name",
+          "team_id"
+        ]
+      },
+      "record": {
+        "bsonType": [
+          "string",
+          "null"
+        ]
+      },
+      "sport_id": {
+        "bsonType": "int"
+      },
+      "team_id": {
+        "bsonType": "int"
+      }
+    }
+  }
+}

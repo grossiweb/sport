@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sportsAPI } from '@/lib/api/sports-api'
+import { mongoSportsAPI } from '@/lib/api/mongodb-sports-api'
 import { Matchup, GamePrediction, TrendData, InjuryReport, SportType } from '@/types'
 import { isValidSportType } from '@/lib/constants/sports'
 
@@ -124,8 +124,8 @@ export async function GET(
     // For now, we'll generate mock detailed data since we don't have real detailed endpoints
     // In production, you would fetch from your real API
     
-    // Try to get basic game info (filtering is now handled in sportsAPI.getGames)
-    const games = await sportsAPI.getGames(sport as SportType)
+    // Get basic game info (division filtering is now handled at API level for CFB)
+    const games = await mongoSportsAPI.getGames(sport as SportType)
     const enrichedGame = games.find(g => g.id === gameId)
     
     if (!enrichedGame) {
@@ -143,7 +143,7 @@ export async function GET(
     // Fetch real betting data using the game ID
     let bettingData = null
     try {
-      bettingData = await sportsAPI.getBettingData(sport as SportType, gameId)
+      bettingData = await mongoSportsAPI.getBettingData(sport as SportType, gameId)
     } catch (error) {
       console.warn(`Failed to fetch betting data for game ${gameId}:`, error)
     }

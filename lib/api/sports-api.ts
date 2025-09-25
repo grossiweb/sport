@@ -38,12 +38,19 @@ class TheRundownAPI {
   async getGames(date?: string, limit?: number): Promise<Game[]> {
     // Use the correct schedule endpoint for TheRundown API
     const fromDate = date || new Date().toISOString().split('T')[0]
-    const endpoint = `/sports/${this.sportId}/schedule`
+    
+    // Apply division filters only for CFB (sportId = '1')
+    let endpoint = `/sports/${this.sportId}/schedule?include=scores&include=all_periods`
+    if (this.sportId === '1') {
+      // For CFB, filter to only FBS (division_id=1) and FCS (division_id=4)
+      endpoint += '&division_id=1&division_id=4'
+    }
+    
     const params = {
       from: fromDate,
       limit: limit || 10
     }
-  
+    
     // Make the API request
     const data = await this.makeRequest(endpoint, params)
   
@@ -801,55 +808,42 @@ export class SportsAPI {
   async getGames(sport: SportType = 'CFB', date?: string, limit?: number): Promise<Game[]> {
     const client = this.getAPIClient(sport)
     
-    // For CFB, we need to fetch more data to ensure we get enough valid games after filtering
-    if (sport === 'CFB' && limit) {
-      // Fetch significantly more games to account for filtering
-      const fetchLimit = Math.max(limit * 3, 50) // Fetch 3x the requested limit or at least 50
-      const allGames = await client.getGames(date, fetchLimit)
-      
-      // Get teams data to check divisions
-      const teams = await this.getTeams(sport) // This will already be filtered to FBS/FCS only
+    // Get games directly from API - division filtering is now handled at API level for CFB
+    const games = await client.getGames(date, limit)
+    
+    // For CFB, enrich games with additional team data from our teams endpoint
+    if (sport === 'CFB') {
+      // Get teams data to enrich with division, conference, and other details
+      const teams = await this.getTeams(sport)
       const teamsMap = new Map(teams.map(team => [team.id, team]))
       
-      // Enrich games with team division data and filter
-      const enrichedAndFilteredGames = allGames
-        .map(game => {
-          const homeTeam = teamsMap.get(game.homeTeam.id)
-          const awayTeam = teamsMap.get(game.awayTeam.id)
-          
-          return {
-            ...game,
-            homeTeam: {
-              ...game.homeTeam,
-              division: homeTeam?.division,
-              conference: homeTeam?.conference,
-              mascot: homeTeam?.mascot,
-              record: homeTeam?.record
-            },
-            awayTeam: {
-              ...game.awayTeam,
-              division: awayTeam?.division,
-              conference: awayTeam?.conference,
-              mascot: awayTeam?.mascot,
-              record: awayTeam?.record
-            }
+      // Enrich games with team division data
+      const enrichedGames = games.map(game => {
+        const homeTeam = teamsMap.get(game.homeTeam.id)
+        const awayTeam = teamsMap.get(game.awayTeam.id)
+        
+        return {
+          ...game,
+          homeTeam: {
+            ...game.homeTeam,
+            division: homeTeam?.division,
+            conference: homeTeam?.conference,
+            mascot: homeTeam?.mascot,
+            record: homeTeam?.record
+          },
+          awayTeam: {
+            ...game.awayTeam,
+            division: awayTeam?.division,
+            conference: awayTeam?.conference,
+            mascot: awayTeam?.mascot,
+            record: awayTeam?.record
           }
-        })
-        .filter(game => {
-          const homeTeamDivisionId = game.homeTeam.division?.division_id
-          const awayTeamDivisionId = game.awayTeam.division?.division_id
-          
-          // Only show games where both teams are FBS (1) or FCS (4)
-          const validDivisions = [1, 4]
-          return validDivisions.includes(homeTeamDivisionId) && validDivisions.includes(awayTeamDivisionId)
-        })
-        .slice(0, limit) // Apply the requested limit to filtered results
+        }
+      })
       
-      return enrichedAndFilteredGames
+      return enrichedGames
     }
     
-    // For non-CFB or when no limit specified, use original logic
-    const games = await client.getGames(date, limit)
     return games
   }
 

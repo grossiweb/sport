@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "_id",
+    "attendance",
+    "away_score",
+    "away_team",
+    "away_team_id",
+    "broadcast",
+    "conference_competition",
+    "createdAt",
+    "date_event",
+    "event_id",
+    "event_location",
+    "event_name",
+    "event_status",
+    "event_status_detail",
+    "event_uuid",
+    "home_score",
+    "home_team",
+    "home_team_id",
+    "id",
+    "league_name",
+    "meta",
+    "neutral_site",
+    "season_type",
+    "season_year",
+    "sport_id",
+    "updated_at",
+    "updatedAt"
+  ],
+  "properties": {
+    "_id": {
+      "$ref": "#/$defs/ObjectId"
+    },
+    "attendance": {
+      "type": "integer"
+    },
+    "away_score": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "away_team": {
+      "type": "string"
+    },
+    "away_team_id": {
+      "type": "integer"
+    },
+    "broadcast": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "conference_competition": {
+      "type": "boolean"
+    },
+    "createdAt": {
+      "type": "object",
+      "required": [],
+      "properties": {}
+    },
+    "date_event": {
+      "type": "string"
+    },
+    "event_id": {
+      "type": "string"
+    },
+    "event_location": {
+      "type": "string"
+    },
+    "event_name": {
+      "type": "string"
+    },
+    "event_status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "event_status_detail": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "event_uuid": {
+      "type": "string"
+    },
+    "home_score": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "home_team": {
+      "type": "string"
+    },
+    "home_team_id": {
+      "type": "integer"
+    },
+    "id": {
+      "type": "string"
+    },
+    "league_name": {
+      "type": "string"
+    },
+    "meta": {
+      "type": "object",
+      "required": [
+        "fetchedAt",
+        "sourceUrl"
+      ],
+      "properties": {
+        "fetchedAt": {
+          "type": "object",
+          "required": [],
+          "properties": {}
+        },
+        "sourceUrl": {
+          "type": "string"
+        }
+      }
+    },
+    "neutral_site": {
+      "type": "boolean"
+    },
+    "season_type": {
+      "type": "string"
+    },
+    "season_year": {
+      "type": "integer"
+    },
+    "sport_id": {
+      "type": "integer"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "updatedAt": {
+      "type": "object",
+      "required": [],
+      "properties": {}
+    }
+  },
+  "$defs": {
+    "ObjectId": {
+      "type": "object",
+      "properties": {
+        "$oid": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{24}$"
+        }
+      },
+      "required": [
+        "$oid"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

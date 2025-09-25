@@ -221,12 +221,14 @@ export interface Game {
   league: SportType
   gameDate: Date
   status: 'scheduled' | 'live' | 'final' | 'postponed' | 'cancelled'
+  statusDetail?: string
   homeScore?: number
   awayScore?: number
   inning?: number
   quarter?: number
   timeRemaining?: string
   venue?: string
+  broadcast?: string
   weather?: WeatherData
 }
 
@@ -368,6 +370,19 @@ export interface PaginationState {
   totalPages: number
 }
 
+// API Response with Pagination
+export interface PaginatedApiResponse<T> {
+  success: boolean
+  data: T[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
+  error?: string
+}
+
 // WordPress CMS Types
 export interface WordPressPost {
   id: string
@@ -396,4 +411,12 @@ export interface SocialPost {
   imageUrl?: string
   scheduledDate?: Date
   status: 'draft' | 'scheduled' | 'published'
+}
+
+// Global MongoDB connection cache type
+declare global {
+  var mongo: {
+    conn: any
+    promise: any
+  }
 }
