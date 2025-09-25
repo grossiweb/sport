@@ -422,6 +422,18 @@ export class MongoDBSportsAPI {
     }
   }
 
+  // Get predictions from MongoDB (stub method - no collection exists yet)
+  async getPredictions(sport: SportType = 'CFB', date?: string): Promise<any[]> {
+    try {
+      // TODO: Implement when predictions collection is available
+      console.log(`Predictions requested for ${sport}${date ? ` on ${date}` : ''} - returning empty array (no collection exists yet)`)
+      return []
+    } catch (error) {
+      console.error('Error fetching predictions from MongoDB:', error)
+      return []
+    }
+  }
+
 
   // Map event status from MongoDB to our Game status
   private mapEventStatus(status?: string | null): Game['status'] {
