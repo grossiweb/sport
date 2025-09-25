@@ -215,6 +215,38 @@ export interface MongoBettingData {
   updatedAt: any
 }
 
+export interface MongoPlayer {
+  _id?: any
+  active: boolean
+  age: number
+  birth_place_city: string
+  birth_place_country: string
+  createdAt: string
+  date_of_birth: string
+  display_height: string
+  display_name: string
+  display_weight: string
+  experience_years: number
+  first_name: string
+  height: number
+  id: number
+  jersey: string
+  last_name: string
+  meta: {
+    fetchedAt: string
+    sourceUrl: string
+  }
+  position: string
+  position_abbreviation: string
+  slug: string
+  sport_id: number
+  status: string
+  team_id: number
+  updated_at: string
+  updatedAt: string
+  weight: number
+}
+
 // Helper functions to get collections
 export async function getTeamsCollection(): Promise<Collection<MongoTeam>> {
   const { db } = await connectToDatabase()
@@ -234,4 +266,9 @@ export async function getGamesCollection(): Promise<Collection<MongoGame>> {
 export async function getBettingDataCollection(): Promise<Collection<MongoBettingData>> {
   const { db } = await connectToDatabase()
   return db.collection<MongoBettingData>('betting_data')
+}
+
+export async function getPlayersCollection(): Promise<Collection<MongoPlayer>> {
+  const { db } = await connectToDatabase()
+  return db.collection<MongoPlayer>('players')
 }

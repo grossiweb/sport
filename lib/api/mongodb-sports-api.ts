@@ -1,18 +1,34 @@
-import { Game, Team, TeamStats, BettingData, SportType, DetailedTeamStat } from '@/types'
+import { Game, Team, TeamStats, BettingData, SportType, DetailedTeamStat, Player } from '@/types'
 import { 
   getTeamsCollection, 
   getTeamStatsCollection, 
   getGamesCollection, 
   getBettingDataCollection,
+  getPlayersCollection,
   MongoTeam,
   MongoTeamStats,
   MongoGame,
-  MongoBettingData
+  MongoBettingData,
+  MongoPlayer
 } from '@/lib/mongodb'
 
 // MongoDB-based Sports API service
 export class MongoDBSportsAPI {
   
+  // Convert MongoDB player to our Player interface
+  private mapMongoPlayerToPlayer(mongoPlayer: MongoPlayer): Player {
+    return {
+      id: mongoPlayer.id.toString(),
+      name: mongoPlayer.display_name,
+      teamId: mongoPlayer.team_id.toString(),
+      position: mongoPlayer.position,
+      jerseyNumber: mongoPlayer.jersey ? parseInt(mongoPlayer.jersey) : undefined,
+      age: mongoPlayer.age,
+      height: mongoPlayer.display_height,
+      weight: mongoPlayer.weight
+    }
+  }
+
   // Convert MongoDB team to our Team interface
   private mapMongoTeamToTeam(mongoTeam: MongoTeam): Team {
     return {
@@ -380,6 +396,28 @@ export class MongoDBSportsAPI {
       })
     } catch (error) {
       console.error('Error fetching all betting lines:', error)
+      return []
+    }
+  }
+
+  // Get players from MongoDB
+  async getPlayers(sport: SportType = 'CFB', teamId?: string): Promise<Player[]> {
+    try {
+      const collection = await getPlayersCollection()
+      const sportId = sport === 'NFL' ? 2 : 1
+      
+      let query: any = { sport_id: sportId, active: true }
+      
+      // Add team filter if provided
+      if (teamId) {
+        query.team_id = parseInt(teamId)
+      }
+      
+      const mongoPlayers = await collection.find(query).toArray()
+      
+      return mongoPlayers.map(player => this.mapMongoPlayerToPlayer(player))
+    } catch (error) {
+      console.error('Error fetching players from MongoDB:', error)
       return []
     }
   }
