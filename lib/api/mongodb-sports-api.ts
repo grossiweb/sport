@@ -271,7 +271,7 @@ export class MongoDBSportsAPI {
   }
 
   // Get games from MongoDB
-  async getGames(sport: SportType = 'CFB', date?: string, limit?: number): Promise<Game[]> {
+  async getGames(sport: SportType = 'CFB', date?: string, limit?: number, endDate?: string): Promise<Game[]> {
     try {
       const collection = await getGamesCollection()
       const sportId = sport === 'NFL' ? 2 : 1
@@ -280,13 +280,22 @@ export class MongoDBSportsAPI {
       
       // Add date filter if provided
       if (date) {
-        const targetDate = new Date(date)
-        const nextDay = new Date(targetDate)
-        nextDay.setDate(nextDay.getDate() + 1)
-        
-        query.date_event = {
-          $gte: targetDate.toISOString().split('T')[0],
-          $lt: nextDay.toISOString().split('T')[0]
+        if (endDate) {
+          // Date range query for week-based filtering
+          query.date_event = {
+            $gte: date,
+            $lte: endDate
+          }
+        } else {
+          // Single date query (legacy support)
+          const targetDate = new Date(date)
+          const nextDay = new Date(targetDate)
+          nextDay.setDate(nextDay.getDate() + 1)
+          
+          query.date_event = {
+            $gte: targetDate.toISOString().split('T')[0],
+            $lt: nextDay.toISOString().split('T')[0]
+          }
         }
       }
       

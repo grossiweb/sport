@@ -96,6 +96,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const sport = searchParams.get('sport')?.toUpperCase() || 'CFB'
     const date = searchParams.get('date') || format(new Date(), 'yyyy-MM-dd')
+    const endDate = searchParams.get('endDate') // New parameter for week-based date ranges
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10
     const status = searchParams.get('status') // New status filter parameter
     const dateRange = searchParams.get('dateRange') // New date range parameter (past/future)
@@ -107,8 +108,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check cache first - include status and dateRange in cache key
+    // Check cache first - include status, dateRange, and endDate in cache key
     const cacheKey = cacheKeys.matchups(sport, date) + 
+      (endDate ? `_end_${endDate}` : '') +
       (limit !== 10 ? `_limit_${limit}` : '') +
       (status ? `_status_${status}` : '') +
       (dateRange ? `_range_${dateRange}` : '')
@@ -127,20 +129,24 @@ export async function GET(request: NextRequest) {
     
     // Determine date range for fetching games
     let fetchDate = date
+    let fetchEndDate = endDate
+    
     if (dateRange === 'past') {
       // For recent/past games, fetch from the last few days
       const pastDate = new Date()
       pastDate.setDate(pastDate.getDate() - 7) // Last 7 days
       fetchDate = format(pastDate, 'yyyy-MM-dd')
+      fetchEndDate = undefined // Clear end date for past range
     } else if (dateRange === 'future') {
       // For upcoming games, fetch from tomorrow onwards
       const futureDate = new Date()
       futureDate.setDate(futureDate.getDate() + 1) // Starting from tomorrow
       fetchDate = format(futureDate, 'yyyy-MM-dd')
+      fetchEndDate = undefined // Clear end date for future range
     }
     
     // Get games for the specified sport (division filtering is now handled at API level for CFB)
-    const games = await mongoSportsAPI.getGames(sport as SportType, fetchDate, limit)
+    const games = await mongoSportsAPI.getGames(sport as SportType, fetchDate, limit, fetchEndDate)
     // console.log('Games fetched for date:', fetchDate, 'Total games:', games.length)
     
     // Generate matchup data for each game with real betting data

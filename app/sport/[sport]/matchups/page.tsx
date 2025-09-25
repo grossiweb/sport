@@ -8,7 +8,8 @@ import { isValidSportType } from '@/lib/constants/sports'
 import { useSport } from '@/contexts/SportContext'
 import { ModernMatchupCard } from '@/components/matchups/ModernMatchupCard'
 import { MatchupFilters } from '@/components/matchups/MatchupFilters'
-import { useMatchupsPage } from '@/hooks/useOptimizedMatchups'
+import { WeekInfo, getCurrentWeek, getWeekDateRange } from '@/lib/utils/week-utils'
+import { useQuery } from 'react-query'
 
 interface MatchupFiltersState {
   status?: string
@@ -18,13 +19,20 @@ interface MatchupFiltersState {
 
 // Removed fetchMatchups - now using optimized hook
 
+// Fetch matchups for a week
+const fetchWeekMatchups = async (sport: SportType, weekInfo: WeekInfo): Promise<Matchup[]> => {
+  const { startDate, endDate } = getWeekDateRange(weekInfo)
+  const response = await fetch(`/api/matchups?sport=${sport}&date=${startDate}&endDate=${endDate}`)
+  if (!response.ok) throw new Error('Failed to fetch matchups')
+  const result = await response.json()
+  return result.data || []
+}
+
 export default function SportMatchupsPage() {
   const params = useParams()
   const { currentSport, currentSportData, isLoading: contextLoading } = useSport()
   const [validSport, setValidSport] = useState<SportType | null>(null)
-  const [selectedDate, setSelectedDate] = useState<string>(
-    format(new Date(), 'yyyy-MM-dd')
-  )
+  const [selectedWeek, setSelectedWeek] = useState<WeekInfo>(getCurrentWeek())
   const [filters, setFilters] = useState<MatchupFiltersState>({})
 
   useEffect(() => {
@@ -38,9 +46,10 @@ export default function SportMatchupsPage() {
 
   const sport = validSport || currentSport
 
-  const { data: matchups, isLoading: matchupsLoading, error } = useMatchupsPage(
-    sport,
-    selectedDate
+  const { data: matchups, isLoading: matchupsLoading, error } = useQuery(
+    ['weekMatchups', sport, selectedWeek.weekNumber, selectedWeek.year],
+    () => fetchWeekMatchups(sport, selectedWeek),
+    { enabled: !!sport }
   )
 
   const isLoading = contextLoading || matchupsLoading
@@ -120,13 +129,13 @@ export default function SportMatchupsPage() {
         </p>
       </div>
 
-      {/* Date and Filters */}
+      {/* Week and Filters */}
       <div className="mb-6">
         <MatchupFilters
           sport={sport}
-          selectedDate={selectedDate}
+          selectedWeek={selectedWeek}
           filters={filters}
-          onDateChange={setSelectedDate}
+          onWeekChange={setSelectedWeek}
           onFiltersChange={setFilters}
         />
       </div>
@@ -178,7 +187,7 @@ export default function SportMatchupsPage() {
             No games scheduled
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            There are no {currentSportData.displayName} games scheduled for {selectedDate}.
+            There are no {currentSportData.displayName} games scheduled for {selectedWeek.label} ({selectedWeek.dateRange}).
           </p>
         </div>
       )}
