@@ -6,7 +6,7 @@ import { Team, SportType } from '@/types'
 
 interface TeamLogoProps {
   team: Team
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
   className?: string
   fallbackText?: boolean
 }
@@ -16,7 +16,8 @@ const sizeClasses = {
   sm: 'w-8 h-8',
   md: 'w-12 h-12',
   lg: 'w-16 h-16',
-  xl: 'w-24 h-24'
+  xl: 'w-24 h-24',
+  '2xl': 'w-32 h-32'
 }
 
 const fallbackSizeClasses = {
@@ -24,7 +25,8 @@ const fallbackSizeClasses = {
   sm: 'w-8 h-8 text-sm',
   md: 'w-12 h-12 text-lg',
   lg: 'w-16 h-16 text-xl',
-  xl: 'w-24 h-24 text-3xl'
+  xl: 'w-24 h-24 text-3xl',
+  '2xl': 'w-32 h-32 text-4xl'
 }
 
 export function TeamLogo({ team, size = 'md', className = '', fallbackText = true }: TeamLogoProps) {

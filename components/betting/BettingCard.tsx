@@ -270,9 +270,9 @@ export function BettingCard({ bettingData, game }: BettingCardProps) {
             <button className="px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
               Track Lines
             </button>
-            <button className="px-3 py-1 text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
+            {/*}<button className="px-3 py-1 text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
               View History
-            </button>
+            </button>*/}
           </div>
 
           <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">

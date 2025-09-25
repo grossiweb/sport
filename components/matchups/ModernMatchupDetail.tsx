@@ -33,13 +33,21 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
   const [awayTeamDetailedStats, setAwayTeamDetailedStats] = useState<DetailedTeamStat[]>([])
   const [loadingDetailedStats, setLoadingDetailedStats] = useState(false)
 
-  const confidenceColor = predictions.confidence >= 0.8 ? 'text-green-600' : 
-                         predictions.confidence >= 0.6 ? 'text-amber-600' : 'text-red-600'
+  const gameTime = format(new Date(game.gameDate), 'h:mm a')
+  const gameDate = format(new Date(game.gameDate), 'MMM d, yyyy')
+  const gameDayOfWeek = format(new Date(game.gameDate), 'EEEE')
 
-  const confidenceBg = predictions.confidence >= 0.8 ? 'bg-green-50 border-green-200' : 
-                       predictions.confidence >= 0.6 ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'
+  // Calculate win probabilities for AI predictions
+  const homeWinPercentage = predictions.predictedWinner === game.homeTeam.name ? 
+    (predictions.confidence * 100) : (100 - predictions.confidence * 100)
+  const awayWinPercentage = 100 - homeWinPercentage
 
-  const gameTime = format(new Date(game.gameDate), 'EEEE, MMMM d, yyyy \'at\' h:mm a')
+  // Color functions for percentages
+  const getPercentageColor = (percentage: number) => {
+    if (percentage >= 70) return 'text-green-600 dark:text-green-400'
+    if (percentage >= 50) return 'text-blue-600 dark:text-blue-400'
+    return 'text-red-600 dark:text-red-400'
+  }
 
   // Fetch detailed stats when stats tab is active
   useEffect(() => {
@@ -92,122 +100,131 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
 
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-8">
-        {/* Status Bar */}
-        <div className="px-8 py-4 bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700">
+        {/* Dark Header with Team Names */}
+        <div className="px-8 py-6 bg-gray-800 dark:bg-gray-900">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
-                game.status === 'live' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
-                game.status === 'final' ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' :
-                'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-              }`}>
-                {game.status === 'live' && <span className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse"></span>}
-                {game.status.toUpperCase()}
-              </span>
-              <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                <CalendarIcon className="h-4 w-4 mr-1" />
-                {gameTime}
-              </div>
-              {game.venue && (
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <MapPinIcon className="h-4 w-4 mr-1" />
-                  {game.venue}
-                </div>
-              )}
-            </div>
+            <h1 className="text-2xl font-bold text-white">
+              {game.awayTeam.name} @ {game.homeTeam.name}
+            </h1>
+            <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${
+              game.status === 'live' ? 'bg-red-500 text-white' :
+              game.status === 'final' ? 'bg-gray-600 text-gray-200' :
+              'bg-blue-500 text-white'
+            }`}>
+              {game.status === 'live' && <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></span>}
+              {game.status.toUpperCase()}
+            </span>
           </div>
         </div>
 
-        {/* Teams Display */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+        {/* Teams Side by Side with Date in Center */}
+        <div className="p-8">
+          <div className="grid grid-cols-3 gap-8 items-center mb-8">
             {/* Away Team */}
-            <div className="text-center lg:text-right">
-              <div className="flex flex-col items-center lg:items-end space-y-3">
-                <TeamLogo team={game.awayTeam} size="xl" />
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    {game.awayTeam.name}
-                  </h2>
-                  <p className="text-lg text-gray-500 dark:text-gray-400 mt-1 font-medium">
-                    {game.awayTeam.abbreviation}
-                    {game.awayTeam.record && ` (${game.awayTeam.record})`}
-                  </p>
-                  {game.awayTeam.conference && (
-                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                      {game.awayTeam.conference.name}
-                    </p>
-                  )}
-                </div>
+            <div className="text-center">
+              <TeamLogo team={game.awayTeam} size="2xl" className="mx-auto mb-4" />
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                {game.awayTeam.abbreviation}
               </div>
+              <div className="text-lg text-gray-600 dark:text-gray-400 mt-1">
+                {game.awayTeam.name}
+              </div>
+              {game.awayTeam.record && (
+                <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {game.awayTeam.record}
+                </div>
+              )}
+              {game.awayTeam.conference && (
+                <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  {game.awayTeam.conference.name}
+                </div>
+              )}
               {game.awayScore !== undefined && (
-                <div className="mt-4 text-5xl font-bold text-gray-900 dark:text-white">
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mt-4">
                   {game.awayScore}
                 </div>
               )}
             </div>
 
-            {/* VS / Score */}
-            <div className="text-center">
-              <div className="flex flex-col items-center space-y-3">
-                {game.awayScore !== undefined && game.homeScore !== undefined ? (
-                  <div className="text-4xl font-bold text-gray-400 dark:text-gray-500">
-                    FINAL
-                  </div>
-                ) : (
-                  <div className="text-4xl font-bold text-gray-400 dark:text-gray-500">
-                    VS
-                  </div>
-                )}
+            {/* Game Date & Time in Center */}
+            <div className="text-center border-l border-r border-gray-200 dark:border-gray-700 px-6">
+              <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                {gameDayOfWeek}
               </div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white mt-1">
+                {gameDate}
+              </div>
+              <div className="text-lg font-semibold text-blue-600 dark:text-blue-400 mt-1">
+                {gameTime}
+              </div>
+              {game.venue && (
+                <div className="flex items-center justify-center text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  <MapPinIcon className="h-4 w-4 mr-1" />
+                  {game.venue}
+                </div>
+              )}
+              {game.broadcast && (
+                <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  {game.broadcast}
+                </div>
+              )}
             </div>
 
             {/* Home Team */}
-            <div className="text-center lg:text-left">
-              <div className="flex flex-col items-center lg:items-start space-y-3">
-                <TeamLogo team={game.homeTeam} size="xl" />
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    {game.homeTeam.name}
-                  </h2>
-                  <p className="text-lg text-gray-500 dark:text-gray-400 mt-1 font-medium">
-                    {game.homeTeam.abbreviation}
-                    {game.homeTeam.record && ` (${game.homeTeam.record})`}
-                  </p>
-                  {game.homeTeam.conference && (
-                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                      {game.homeTeam.conference.name}
-                    </p>
-                  )}
-                </div>
+            <div className="text-center">
+              <TeamLogo team={game.homeTeam} size="2xl" className="mx-auto mb-4" />
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                {game.homeTeam.abbreviation}
               </div>
+              <div className="text-lg text-gray-600 dark:text-gray-400 mt-1">
+                {game.homeTeam.name}
+              </div>
+              {game.homeTeam.record && (
+                <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {game.homeTeam.record}
+                </div>
+              )}
+              {game.homeTeam.conference && (
+                <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  {game.homeTeam.conference.name}
+                </div>
+              )}
               {game.homeScore !== undefined && (
-                <div className="mt-4 text-5xl font-bold text-gray-900 dark:text-white">
+                <div className="text-4xl font-bold text-gray-900 dark:text-white mt-4">
                   {game.homeScore}
                 </div>
               )}
             </div>
           </div>
 
-          {/* AI Prediction - Compact */}
+          {/* AI Prediction with Colored Percentages */}
           {predictions && (
-            <div className={`mt-6 p-4 rounded-lg border ${confidenceBg}`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <ArrowTrendingUpIcon className="h-5 w-5 text-gray-600 dark:text-gray-400 mr-2" />
-                  <span className="font-semibold text-gray-900 dark:text-white">AI Prediction:</span>
+            <div className="p-6 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="text-center mb-4">
+                <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                  AI Prediction
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-8">
+                <div className="text-center">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    {game.awayTeam.abbreviation}
+                  </div>
+                  <div className={`text-3xl font-bold ${getPercentageColor(awayWinPercentage)}`}>
+                    {awayWinPercentage.toFixed(0)}%
+                  </div>
                 </div>
-                <div className="flex items-center space-x-4 text-sm">
-                  <span className="text-gray-900 dark:text-white font-medium">
-                    {predictions.predictedWinner}
-                  </span>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {predictions.predictedScore.away}-{predictions.predictedScore.home}
-                  </span>
-                  <span className={`font-semibold ${confidenceColor}`}>
-                    {(predictions.confidence * 100).toFixed(0)}%
-                  </span>
+                <div className="text-center">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    {game.homeTeam.abbreviation}
+                  </div>
+                  <div className={`text-3xl font-bold ${getPercentageColor(homeWinPercentage)}`}>
+                    {homeWinPercentage.toFixed(0)}%
+                  </div>
                 </div>
+              </div>
+              <div className="text-center mt-4 text-gray-600 dark:text-gray-400">
+                Predicted Score: {predictions.predictedScore.away} - {predictions.predictedScore.home}
               </div>
             </div>
           )}
