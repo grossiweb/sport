@@ -8,10 +8,11 @@ import {
   MapPinIcon, 
   TrophyIcon, 
   ChevronRightIcon,
-  CurrencyDollarIcon
+  SparklesIcon
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { TeamLogo } from '@/components/ui/TeamLogo'
+import { BettingLinesPopup } from './BettingLinesPopup'
 
 interface ModernMatchupCardProps {
   matchup: Matchup
@@ -19,17 +20,48 @@ interface ModernMatchupCardProps {
 }
 
 export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
-  const { game, predictions, bettingData } = matchup
+  const { game, predictions } = matchup
   const [isHovered, setIsHovered] = useState(false)
+  const [showBettingPopup, setShowBettingPopup] = useState(false)
 
   const gameTime = format(new Date(game.gameDate), 'h:mm a')
   const gameDate = format(new Date(game.gameDate), 'MMM d, yyyy')
   const gameDayOfWeek = format(new Date(game.gameDate), 'EEEE')
+  const isScheduled = game.status === 'scheduled'
+  const showPredictions = isScheduled && !!predictions
 
-  // Calculate win probabilities for AI predictions
-  const homeWinPercentage = predictions.predictedWinner === game.homeTeam.name ? 
-    (predictions.confidence * 100) : (100 - predictions.confidence * 100)
-  const awayWinPercentage = 100 - homeWinPercentage
+  const formatScoreValue = (value: number) => (Number.isInteger(value) ? value.toString() : value.toFixed(1))
+
+  const predictionInfo = showPredictions && predictions
+    ? (() => {
+        const homeWinPct = predictions.predictedWinner === game.homeTeam.name
+          ? predictions.confidence * 100
+          : 100 - predictions.confidence * 100
+
+        return {
+          awayScore: formatScoreValue(predictions.predictedScore.away),
+          homeScore: formatScoreValue(predictions.predictedScore.home),
+          homeWinPercentage: homeWinPct,
+          awayWinPercentage: 100 - homeWinPct,
+          updatedAt: predictions.createdAt
+        }
+      })()
+    : null
+
+  const awayScoreDisplay = predictionInfo
+    ? predictionInfo.awayScore
+    : game.awayScore !== undefined && game.awayScore !== null
+      ? game.awayScore.toString()
+      : '-'
+
+  const homeScoreDisplay = predictionInfo
+    ? predictionInfo.homeScore
+    : game.homeScore !== undefined && game.homeScore !== null
+      ? game.homeScore.toString()
+      : '-'
+
+  const homeWinPercentage = predictionInfo?.homeWinPercentage
+  const awayWinPercentage = predictionInfo?.awayWinPercentage
 
   // Color functions for percentages
   const getPercentageColor = (percentage: number) => {
@@ -62,9 +94,9 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
       </div>
 
       {/* Main Content */}
-      <div className="p-6">
+      <div className="p-4">
         {/* Teams Side by Side with Date in Center */}
-        <div className="grid grid-cols-3 gap-4 items-center mb-6">
+        <div className="grid grid-cols-3 gap-3 items-center mb-4">
           {/* Away Team */}
           <div className="text-center">
             <TeamLogo team={game.awayTeam} size="xl" className="mx-auto mb-3" />
@@ -76,9 +108,23 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
                 {game.awayTeam.record}
               </div>
             )}
-            {game.awayScore !== undefined && (
-              <div className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                {game.awayScore}
+            {predictionInfo ? (
+              <>
+                <div className="mt-2 flex items-center justify-center gap-2">
+                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    {awayScoreDisplay}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
+                    {Math.round(predictionInfo.awayWinPercentage)}% Win
+                  </span>
+                </div>
+                <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-blue-500 dark:text-blue-300">
+                  AI Prediction
+                </div>
+              </>
+            ) : (
+              <div className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+                {awayScoreDisplay}
               </div>
             )}
           </div>
@@ -94,6 +140,11 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
             <div className="text-md font-semibold text-blue-600 dark:text-blue-400">
               {gameTime}
             </div>
+            {showPredictions && (
+              <div className="mt-2 text-xs font-medium text-blue-600 dark:text-blue-300">
+                AI numbers display until kickoff
+              </div>
+            )}
             {game.venue && (
               <div className="flex items-center justify-center text-xs text-gray-500 dark:text-gray-400 mt-1">
                 <MapPinIcon className="h-3 w-3 mr-1" />
@@ -113,118 +164,58 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
                 {game.homeTeam.record}
               </div>
             )}
-            {game.homeScore !== undefined && (
-              <div className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                {game.homeScore}
+            {predictionInfo ? (
+              <>
+                <div className="mt-2 flex items-center justify-center gap-2">
+                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    {homeScoreDisplay}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
+                    {Math.round(predictionInfo.homeWinPercentage)}% Win
+                  </span>
+                </div>
+                <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-blue-500 dark:text-blue-300">
+                  AI Prediction
+                </div>
+              </>
+            ) : (
+              <div className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+                {homeScoreDisplay}
               </div>
             )}
           </div>
         </div>
 
-        {/* AI Prediction with Colored Percentages */}
-        {predictions && (
-          <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div className="text-center mb-3">
-              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                AI Prediction
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  {game.awayTeam.abbreviation}
-                </div>
-                <div className={`text-2xl font-bold ${getPercentageColor(awayWinPercentage)}`}>
-                  {awayWinPercentage.toFixed(0)}%
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  {game.homeTeam.abbreviation}
-                </div>
-                <div className={`text-2xl font-bold ${getPercentageColor(homeWinPercentage)}`}>
-                  {homeWinPercentage.toFixed(0)}%
-                </div>
-              </div>
-            </div>
-            <div className="text-center mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Predicted Score: {predictions.predictedScore.away} - {predictions.predictedScore.home}
-            </div>
-          </div>
-        )}
+        {/* Additional matchup context can go here when available */}
 
-        {/* Improved Betting Lines */}
-        {bettingData && (
-          <div className="mb-6 p-4 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <CurrencyDollarIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mr-2" />
-                <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-                  Betting Lines
-                </span>
-              </div>
-              {bettingData.sportsbook && (
-                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                  {bettingData.sportsbook.name}
-                </span>
-              )}
-            </div>
-            
-            <div className="space-y-3">
-              {/* Spread */}
-              <div className="flex items-center justify-between p-2 bg-white/50 dark:bg-gray-800/50 rounded">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Spread</span>
-                <div className="text-right">
-                  <div className="font-bold text-gray-900 dark:text-white">
-                    {game.homeTeam.abbreviation} {bettingData.spread.home > 0 ? '+' : ''}{bettingData.spread.home}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    ({bettingData.spread.juice > 0 ? '+' : ''}{bettingData.spread.juice})
-                  </div>
-                </div>
-              </div>
-
-              {/* Total */}
-              <div className="flex items-center justify-between p-2 bg-white/50 dark:bg-gray-800/50 rounded">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total</span>
-                <div className="text-right">
-                  <div className="font-bold text-gray-900 dark:text-white">
-                    {bettingData.total.points}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    O{bettingData.total.over} / U{bettingData.total.under}
-                  </div>
-                </div>
-              </div>
-
-              {/* Money Line */}
-              <div className="flex items-center justify-between p-2 bg-white/50 dark:bg-gray-800/50 rounded">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Money Line</span>
-                <div className="text-right text-xs space-y-1">
-                  <div className="text-gray-900 dark:text-white font-semibold">
-                    {game.homeTeam.abbreviation}: {bettingData.moneyLine.home > 0 ? '+' : ''}{bettingData.moneyLine.home}
-                  </div>
-                  <div className="text-gray-900 dark:text-white font-semibold">
-                    {game.awayTeam.abbreviation}: {bettingData.moneyLine.away > 0 ? '+' : ''}{bettingData.moneyLine.away}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Action Button */}
-        <div>
+        {/* Action Buttons */}
+        <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <Link
             href={`/sport/${sport.toLowerCase()}/matchups/${game.id}`}
-            className={`w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform ${isHovered ? 'scale-105' : 'scale-100'}`}
+            className={`flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform ${isHovered ? 'scale-105' : 'scale-100'}`}
           >
-            <TrophyIcon className="h-5 w-5 mr-2" />
-            View Full Analysis
-            <ChevronRightIcon className="h-5 w-5 ml-2" />
+            <TrophyIcon className="h-4 w-4 mr-2" />
+            Matchup
+            <ChevronRightIcon className="h-4 w-4 ml-2" />
           </Link>
+          <button
+            onClick={() => setShowBettingPopup(true)}
+            className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg border border-blue-100 dark:border-blue-500/40 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
+          >
+            View Betting Lines
+          </button>
         </div>
       </div>
+
+      {/* Betting Lines Popup */}
+      <BettingLinesPopup
+        isOpen={showBettingPopup}
+        onClose={() => setShowBettingPopup(false)}
+        gameId={game.id}
+        homeTeam={game.homeTeam}
+        awayTeam={game.awayTeam}
+        sport={sport}
+      />
     </div>
   )
 }

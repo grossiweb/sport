@@ -166,7 +166,7 @@ export async function GET(request: NextRequest) {
         } catch (error) {
           console.warn(`Failed to fetch betting data for game ${game.id}:`, error)
         }
-        
+
         return {
           game,
           predictions,
