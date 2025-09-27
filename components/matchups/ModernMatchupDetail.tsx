@@ -21,6 +21,7 @@ import Link from 'next/link'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 import { TeamDetailedStats } from '@/components/teams/TeamDetailedStats'
 import { BettingLinesPopup } from '@/components/matchups/BettingLinesPopup'
+import { formatToEasternTime, formatToEasternDate, formatToEasternWeekday } from '@/lib/utils/time'
 
 interface ModernMatchupDetailProps {
   matchup: Matchup
@@ -35,9 +36,9 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
   const [loadingDetailedStats, setLoadingDetailedStats] = useState(false)
   const [showBettingPopup, setShowBettingPopup] = useState(false)
 
-  const gameTime = format(new Date(game.gameDate), 'h:mm a')
-  const gameDate = format(new Date(game.gameDate), 'MMM d, yyyy')
-  const gameDayOfWeek = format(new Date(game.gameDate), 'EEEE')
+  const gameTime = formatToEasternTime(game.gameDate)
+  const gameDate = formatToEasternDate(game.gameDate, { month: 'short', day: 'numeric', year: 'numeric' })
+  const gameDayOfWeek = formatToEasternWeekday(game.gameDate)
 
   // Fetch detailed stats when stats tab is active
   useEffect(() => {
@@ -335,7 +336,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                     <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-500 dark:text-gray-400">
-                          {format(new Date(game.date), 'MMM d, yyyy')}
+                          {formatToEasternDate(game.date)}
                         </span>
                         <span className="text-lg font-bold text-gray-900 dark:text-white">
                           {game.awayScore} - {game.homeScore}
@@ -435,17 +436,7 @@ function DetailedBettingSection({ game, sport }: { game: Matchup['game']; sport:
 
   const formatOdds = (odds: number) => (odds > 0 ? `+${odds}` : `${odds}`)
   const formatSpread = (spread: number) => (spread > 0 ? `+${spread}` : `${spread}`)
-  const formatTime = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      })
-    } catch {
-      return 'N/A'
-    }
-  }
+  const formatTime = (dateString: string) => formatToEasternTime(dateString)
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
@@ -608,7 +599,7 @@ function BettingLineCard({
         {updatedAt && (
           <div className="flex items-center text-[11px] text-gray-500 dark:text-gray-400">
             <ClockIcon className="h-3 w-3 mr-1" />
-            {new Date(updatedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+            {formatToEasternTime(updatedAt)}
           </div>
         )}
       </div>

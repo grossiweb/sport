@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/hooks/useAuth'
+import { formatToEasternTime, formatToEasternDate } from '@/lib/utils/time'
 
 export function SessionDebug() {
   const { isAuthenticated } = useAuth()
@@ -32,9 +33,9 @@ export function SessionDebug() {
         setSessionInfo({
           hasToken: !!token,
           hasRefreshToken: !!refreshToken,
-          loginTime: loginDate.toLocaleString(),
+          loginTime: `${formatToEasternDate(loginDate)} ${formatToEasternTime(loginDate)}`,
           hoursLoggedIn: Math.round(hoursLoggedIn * 100) / 100,
-          nextRefresh: nextRefreshTime.toLocaleTimeString()
+          nextRefresh: formatToEasternTime(nextRefreshTime)
         })
       } else {
         setSessionInfo(null)

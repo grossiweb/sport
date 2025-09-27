@@ -7,6 +7,7 @@ import { useSport } from '@/contexts/SportContext'
 import { useWeekBasedUpcomingMatchups } from '@/hooks/useOptimizedMatchups'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 import { format, isToday, isTomorrow } from 'date-fns'
+import { formatToEasternTime, formatToEasternDate } from '@/lib/utils/time'
 
 export function UpcomingMatchups() {
   const { currentSport, currentSportData } = useSport()
@@ -124,7 +125,7 @@ function UpcomingGameCard({ game }: { game: Game }) {
           </span>
           <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
             <ClockIcon className="w-3 h-3 mr-1" />
-            {format(gameDate, 'h:mm a')}
+            {formatToEasternTime(game.gameDate)}
           </div>
         </div>
 

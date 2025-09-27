@@ -97,7 +97,8 @@ export async function GET(request: NextRequest) {
     const sport = searchParams.get('sport')?.toUpperCase() || 'CFB'
     const date = searchParams.get('date') || format(new Date(), 'yyyy-MM-dd')
     const endDate = searchParams.get('endDate') // New parameter for week-based date ranges
-    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10
+    const limitParam = searchParams.get('limit')
+    const limit = limitParam ? parseInt(limitParam, 10) : endDate ? undefined : 10
     const status = searchParams.get('status') // New status filter parameter
     const dateRange = searchParams.get('dateRange') // New date range parameter (past/future)
     
@@ -111,7 +112,7 @@ export async function GET(request: NextRequest) {
     // Check cache first - include status, dateRange, and endDate in cache key
     const cacheKey = cacheKeys.matchups(sport, date) + 
       (endDate ? `_end_${endDate}` : '') +
-      (limit !== 10 ? `_limit_${limit}` : '') +
+      (typeof limit === 'number' && (!limitParam || limitParam !== '10') ? `_limit_${limit}` : '') +
       (status ? `_status_${status}` : '') +
       (dateRange ? `_range_${dateRange}` : '')
     const cachedData = apiCache.get<any>(cacheKey)
@@ -146,7 +147,12 @@ export async function GET(request: NextRequest) {
     }
     
     // Get games for the specified sport (division filtering is now handled at API level for CFB)
-    const games = await mongoSportsAPI.getGames(sport as SportType, fetchDate, limit, fetchEndDate)
+    const games = await mongoSportsAPI.getGames(
+      sport as SportType,
+      fetchDate,
+      fetchEndDate ? undefined : limit,
+      fetchEndDate
+    )
     // console.log('Games fetched for date:', fetchDate, 'Total games:', games.length)
     
     // Generate matchup data for each game with real betting data
@@ -213,7 +219,9 @@ export async function GET(request: NextRequest) {
     }
     
     // Apply limit after filtering and sorting
-    filteredMatchups = filteredMatchups.slice(0, limit)
+    if (typeof limit === 'number') {
+      filteredMatchups = filteredMatchups.slice(0, limit)
+    }
 
     const response = {
       success: true,

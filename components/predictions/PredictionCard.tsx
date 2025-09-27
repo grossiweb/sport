@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { GamePrediction } from '@/types'
 import { format } from 'date-fns'
+import { formatToEasternTime } from '@/lib/utils/time'
 import {
   BoltIcon,
   ChartBarIcon,
@@ -90,7 +91,7 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
           <div className="text-right">
             {getRecommendationBadge()}
             <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Updated: {format(prediction.createdAt, 'h:mm a')}
+              Updated: {formatToEasternTime(prediction.createdAt)}
             </div>
           </div>
         </div>
@@ -104,7 +105,7 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
           </div>
           <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
             <ClockIcon className="h-4 w-4" />
-            <span>{format(mockGame.gameDate, 'h:mm a')}</span>
+            <span>{formatToEasternTime(mockGame.gameDate)}</span>
           </div>
         </div>
 

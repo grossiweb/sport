@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useSport } from '@/contexts/SportContext'
 import { useTodaysMatchups } from '@/hooks/useOptimizedMatchups'
 import { TeamLogo } from '@/components/ui/TeamLogo'
-import { format } from 'date-fns'
+import { formatToEasternTime, formatToEasternDate } from '@/lib/utils/time'
 
 export function DailyMatchups() {
   const { currentSport, currentSportData } = useSport()
@@ -42,7 +42,7 @@ export function DailyMatchups() {
             Today's Featured {currentSportData.displayName} Matchups
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {games.length} games scheduled for {format(new Date(), 'MMMM d, yyyy')}
+            {games.length} games scheduled for {formatToEasternDate(new Date(), { month: 'long', day: 'numeric', year: 'numeric' })}
           </p>
         </div>
         <Link 
@@ -90,7 +90,7 @@ function FeaturedGameCard({ game }: { game: Game }) {
         </span>
         <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
           <ClockIcon className="h-4 w-4 mr-1" />
-          {format(new Date(game.gameDate), 'h:mm a')}
+          {formatToEasternTime(game.gameDate)}
         </div>
       </div>
 

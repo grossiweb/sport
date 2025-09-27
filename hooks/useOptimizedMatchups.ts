@@ -2,6 +2,8 @@
 
 import { useQuery, UseQueryOptions } from 'react-query'
 import { format, subDays, addDays } from 'date-fns'
+import { utcToZonedTime } from 'date-fns-tz'
+import { DEFAULT_TIME_ZONE } from '@/lib/utils/time'
 import { SportType, Matchup } from '@/types'
 
 interface UseMatchupsOptions {
@@ -37,7 +39,8 @@ export function useOptimizedMatchups({
   staleTime = 5 * 60 * 1000, // 5 minutes default
   refetchInterval = 10 * 60 * 1000 // 10 minutes default
 }: UseMatchupsOptions) {
-  const queryDate = date || format(new Date(), 'yyyy-MM-dd')
+  const now = utcToZonedTime(new Date(), DEFAULT_TIME_ZONE)
+  const queryDate = date || format(now, 'yyyy-MM-dd')
   
   return useQuery(
     ['optimizedMatchups', sport, queryDate, limit],
@@ -152,7 +155,8 @@ export function useUpcomingMatchups(sport: SportType, limit: number = 3) {
  * Hook for fetching today's matchups only
  */
 export function useTodaysMatchups(sport: SportType, limit: number = 3) {
-  const today = format(new Date(), 'yyyy-MM-dd')
+  const now = utcToZonedTime(new Date(), DEFAULT_TIME_ZONE)
+  const today = format(now, 'yyyy-MM-dd')
   
   return useQuery(
     ['todaysMatchups', sport, today, limit],
@@ -167,9 +171,9 @@ export function useTodaysMatchups(sport: SportType, limit: number = 3) {
       retry: 2,
       select: (data) => {
         // Filter to only include games that are actually today
-        const todayStart = new Date()
+        const todayStart = utcToZonedTime(new Date(), DEFAULT_TIME_ZONE)
         todayStart.setHours(0, 0, 0, 0)
-        const todayEnd = new Date()
+        const todayEnd = utcToZonedTime(new Date(), DEFAULT_TIME_ZONE)
         todayEnd.setHours(23, 59, 59, 999)
         
         const todaysGames = data.filter(matchup => {
@@ -188,8 +192,9 @@ export function useTodaysMatchups(sport: SportType, limit: number = 3) {
  */
 export function useWeekBasedRecentMatchups(sport: SportType, limit: number = 3) {
   // Calculate date range for last 7 days
-  const endDate = format(new Date(), 'yyyy-MM-dd')
-  const startDate = format(subDays(new Date(), 7), 'yyyy-MM-dd')
+  const now = utcToZonedTime(new Date(), DEFAULT_TIME_ZONE)
+  const endDate = format(now, 'yyyy-MM-dd')
+  const startDate = format(subDays(now, 7), 'yyyy-MM-dd')
   
   return useQuery(
     ['weekBasedRecentMatchups', sport, startDate, endDate, limit],
@@ -209,15 +214,15 @@ export function useWeekBasedRecentMatchups(sport: SportType, limit: number = 3) 
       retry: 2,
       select: (data) => {
         // Filter to only completed games from the last 7 days and sort by most recent
-        const now = new Date()
-        const sevenDaysAgo = subDays(now, 7)
+        const zonedNow = utcToZonedTime(new Date(), DEFAULT_TIME_ZONE)
+        const sevenDaysAgo = subDays(zonedNow, 7)
         
         const recentGames = data
           .filter(matchup => {
             const gameDate = new Date(matchup.game.gameDate)
             return matchup.game.status === 'final' && 
                    gameDate >= sevenDaysAgo && 
-                   gameDate <= now
+                   gameDate <= zonedNow
           })
           .sort((a, b) => new Date(b.game.gameDate).getTime() - new Date(a.game.gameDate).getTime())
         
@@ -232,8 +237,9 @@ export function useWeekBasedRecentMatchups(sport: SportType, limit: number = 3) 
  */
 export function useWeekBasedUpcomingMatchups(sport: SportType, limit: number = 3) {
   // Calculate date range for next 7 days
-  const startDate = format(addDays(new Date(), 1), 'yyyy-MM-dd') // Start from tomorrow
-  const endDate = format(addDays(new Date(), 7), 'yyyy-MM-dd')
+  const now = utcToZonedTime(new Date(), DEFAULT_TIME_ZONE)
+  const startDate = format(addDays(now, 1), 'yyyy-MM-dd') // Start from tomorrow
+  const endDate = format(addDays(now, 7), 'yyyy-MM-dd')
   
   return useQuery(
     ['weekBasedUpcomingMatchups', sport, startDate, endDate, limit],
@@ -253,14 +259,14 @@ export function useWeekBasedUpcomingMatchups(sport: SportType, limit: number = 3
       retry: 2,
       select: (data) => {
         // Filter to only scheduled games in the next 7 days and sort by earliest first
-        const now = new Date()
-        const sevenDaysFromNow = addDays(now, 7)
+        const zonedNow = utcToZonedTime(new Date(), DEFAULT_TIME_ZONE)
+        const sevenDaysFromNow = addDays(zonedNow, 7)
         
         const upcomingGames = data
           .filter(matchup => {
             const gameDate = new Date(matchup.game.gameDate)
             return matchup.game.status === 'scheduled' && 
-                   gameDate > now && 
+                   gameDate > zonedNow && 
                    gameDate <= sevenDaysFromNow
           })
           .sort((a, b) => new Date(a.game.gameDate).getTime() - new Date(b.game.gameDate).getTime())

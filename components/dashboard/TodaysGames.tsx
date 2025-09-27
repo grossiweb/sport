@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useBackgroundMatchups } from '@/hooks/useOptimizedMatchups'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 import { format } from 'date-fns'
+import { formatToEasternTime, formatToEasternDate } from '@/lib/utils/time'
 
 export function TodaysGames() {
   // Use CFB as default sport for today's games, or make this configurable
@@ -74,9 +75,9 @@ export function TodaysGames() {
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             Today's College Football Games
           </h2>
-          <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {games.length} games scheduled for {format(new Date(), 'MMMM d, yyyy')}
-          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            {games.length} games scheduled for {formatToEasternDate(new Date(), { month: 'long', day: 'numeric', year: 'numeric' })}
+          </p>
         </div>
         <Link 
           href="/matchups"
@@ -181,7 +182,7 @@ function GameCard({ game }: { game: Game }) {
             <div className="flex items-center space-x-1">
               <ClockIcon className="h-4 w-4" />
               <span>
-                {isLive ? 'Live Now' : isFinal ? 'Final' : format(new Date(game.gameDate), 'h:mm a')}
+                {isLive ? 'Live Now' : isFinal ? 'Final' : formatToEasternTime(game.gameDate)}
               </span>
             </div>
             {game.venue && (

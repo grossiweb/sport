@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useSport } from '@/contexts/SportContext'
 import { useWeekBasedRecentMatchups } from '@/hooks/useOptimizedMatchups'
 import { TeamLogo } from '@/components/ui/TeamLogo'
-import { format } from 'date-fns'
+import { formatToEasternDate, formatToEasternTime } from '@/lib/utils/time'
 
 export function RecentMatchups() {
   const { currentSport, currentSportData } = useSport()
@@ -111,7 +111,7 @@ function RecentGameCard({ game }: { game: Game }) {
           </span>
           <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
             <CalendarIcon className="w-3 h-3 mr-1" />
-            {format(new Date(game.gameDate), 'MMM d')}
+            {formatToEasternDate(game.gameDate, { month: 'short', day: 'numeric' })}
           </div>
         </div>
 
@@ -174,7 +174,7 @@ function RecentGameCard({ game }: { game: Game }) {
             <span>{game.venue || 'TBD'}</span>
             <span className="flex items-center">
               <ClockIcon className="w-3 h-3 mr-1" />
-              {format(new Date(game.gameDate), 'h:mm a')}
+              {formatToEasternTime(game.gameDate)}
             </span>
           </div>
         </div>

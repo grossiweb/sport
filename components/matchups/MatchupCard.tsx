@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Matchup, SportType } from '@/types'
-import { format } from 'date-fns'
+import { formatToEasternTime } from '@/lib/utils/time'
 import { 
   ClockIcon, 
   MapPinIcon, 
@@ -40,7 +40,7 @@ export function MatchupCard({ matchup, sport }: MatchupCardProps) {
         </span>
         <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
           <ClockIcon className="h-4 w-4 mr-1" />
-          {format(new Date(game.gameDate), 'h:mm a')}
+          {formatToEasternTime(game.gameDate)}
         </div>
       </div>
 

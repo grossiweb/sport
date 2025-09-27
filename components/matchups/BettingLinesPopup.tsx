@@ -9,6 +9,7 @@ import {
   ClockIcon
 } from '@heroicons/react/24/outline'
 import { SportType } from '@/types'
+import { formatToEasternTime } from '@/lib/utils/time'
 
 interface BettingLine {
   affiliate: {
@@ -114,17 +115,7 @@ function BettingLinesPopup({
     return spread > 0 ? `+${spread}` : `${spread}`
   }
 
-  const formatTime = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      })
-    } catch {
-      return 'N/A'
-    }
-  }
+  const formatTime = (dateString: string) => formatToEasternTime(dateString)
 
   const selectedLine = bettingData?.lines?.[selectedSportsbook]
   const availableSportsbooks = bettingData?.lines ? Object.keys(bettingData.lines) : []

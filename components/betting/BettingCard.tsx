@@ -9,6 +9,7 @@ import {
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline'
 import { clsx } from 'clsx'
+import { formatToEasternTime } from '@/lib/utils/time'
 
 interface BettingCardProps {
   bettingData: BettingData
@@ -25,12 +26,7 @@ export function BettingCard({ bettingData, game }: BettingCardProps) {
   }
 
   const formatGameTime = (date: Date | string) => {
-    const dateObj = date instanceof Date ? date : new Date(date)
-    return dateObj.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
-    })
+    return formatToEasternTime(date)
   }
 
   const getPublicSentiment = () => {

@@ -13,6 +13,7 @@ import {
 import Link from 'next/link'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 import { BettingLinesPopup } from './BettingLinesPopup'
+import { formatToEasternTime, formatToEasternDate, formatToEasternWeekday } from '@/lib/utils/time'
 
 interface ModernMatchupCardProps {
   matchup: Matchup
@@ -24,9 +25,9 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [showBettingPopup, setShowBettingPopup] = useState(false)
 
-  const gameTime = format(new Date(game.gameDate), 'h:mm a')
-  const gameDate = format(new Date(game.gameDate), 'MMM d, yyyy')
-  const gameDayOfWeek = format(new Date(game.gameDate), 'EEEE')
+  const gameTime = formatToEasternTime(game.gameDate)
+  const gameDate = formatToEasternDate(game.gameDate, { month: 'short', day: 'numeric', year: 'numeric' })
+  const gameDayOfWeek = formatToEasternWeekday(game.gameDate)
   const isScheduled = game.status === 'scheduled'
   const showPredictions = isScheduled && !!predictions
 
