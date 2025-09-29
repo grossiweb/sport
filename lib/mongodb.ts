@@ -137,6 +137,12 @@ export interface MongoGame {
   sport_id: number
   updated_at: string
   updatedAt: any
+  score?: {
+    score_home_by_period?: number[]
+    score_away_by_period?: number[]
+    updated_at?: string
+    [key: string]: unknown
+  } | null
 }
 
 export interface MongoBettingData {
@@ -208,7 +214,12 @@ export interface MongoBettingData {
   rotation_number_away: number
   rotation_number_home: number
   schedule: any
-  score: any
+  score: {
+    score_home_by_period?: number[]
+    score_away_by_period?: number[]
+    updated_at?: string
+    [key: string]: unknown
+  } | null
   sport_id: number
   teams: any
   teams_normalized: any

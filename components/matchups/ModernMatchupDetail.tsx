@@ -21,7 +21,10 @@ import Link from 'next/link'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 import { TeamDetailedStats } from '@/components/teams/TeamDetailedStats'
 import { BettingLinesPopup } from '@/components/matchups/BettingLinesPopup'
+import { ScoreByPeriodPopup } from '@/components/matchups/ScoreByPeriodPopup'
+import { ScoreByPeriodSummary } from '@/components/matchups/ScoreByPeriodSummary'
 import { formatToEasternTime, formatToEasternDate, formatToEasternWeekday } from '@/lib/utils/time'
+import { useScoreByPeriod } from '@/hooks/useScoreByPeriod'
 
 interface ModernMatchupDetailProps {
   matchup: Matchup
@@ -35,6 +38,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
   const [awayTeamDetailedStats, setAwayTeamDetailedStats] = useState<DetailedTeamStat[]>([])
   const [loadingDetailedStats, setLoadingDetailedStats] = useState(false)
   const [showBettingPopup, setShowBettingPopup] = useState(false)
+  const [showScorePopup, setShowScorePopup] = useState(false)
 
   const gameTime = formatToEasternTime(game.gameDate)
   const gameDate = formatToEasternDate(game.gameDate, { month: 'short', day: 'numeric', year: 'numeric' })
@@ -94,6 +98,10 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
 
   const formatScoreValue = (value: number) => (Number.isInteger(value) ? value.toString() : value.toFixed(1))
 
+  const { hasScores: hasScoreByPeriod } = useScoreByPeriod(game.scoreByPeriod)
+
+  const shouldShowScoreButton = hasScoreByPeriod && game.status === 'final'
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Back Button */}
@@ -116,12 +124,21 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
             <h1 className="text-2xl font-bold text-white">
               {game.awayTeam.name} @ {game.homeTeam.name}
             </h1>
+              {shouldShowScoreButton ? (
+                <button
+                  onClick={() => setShowScorePopup(true)}
+                  className="mt-3 inline-flex items-center px-4 py-2 text-sm font-semibold rounded-lg border border-blue-300/60 text-blue-100 hover:bg-blue-600/20 transition-colors"
+                >
+                  View Box Score
+                </button>
+              ) : (
               <button
                 onClick={() => setShowBettingPopup(true)}
                 className="mt-3 inline-flex items-center px-4 py-2 text-sm font-semibold rounded-lg border border-blue-300/60 text-blue-100 hover:bg-blue-600/20 transition-colors"
               >
                 View Betting Lines
               </button>
+              )}
             </div>
             <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${
               game.status === 'live' ? 'bg-red-500 text-white' :
@@ -246,7 +263,13 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
             </div>
           </div>
 
-          {/* Additional matchup context can go here when available */}
+          <ScoreByPeriodSummary
+            scoreByPeriod={game.scoreByPeriod}
+            gameStatus={game.status}
+            homeTeamAbbreviation={game.homeTeam.abbreviation}
+            awayTeamAbbreviation={game.awayTeam.abbreviation}
+            onOpenPopup={game.status === 'final' ? () => setShowScorePopup(true) : undefined}
+          />
 
         </div>
       </div>
@@ -395,6 +418,16 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
         homeTeam={game.homeTeam}
         awayTeam={game.awayTeam}
         sport={sport}
+      />
+
+      <ScoreByPeriodPopup
+        isOpen={showScorePopup}
+        onClose={() => setShowScorePopup(false)}
+        scoreByPeriod={game.scoreByPeriod}
+        gameStatus={game.status}
+        gameDate={game.gameDate}
+        homeTeam={game.homeTeam}
+        awayTeam={game.awayTeam}
       />
     </div>
   )

@@ -3,17 +3,19 @@
 import { useState } from 'react'
 import { Matchup, SportType } from '@/types'
 import { format } from 'date-fns'
-import { 
-  ClockIcon, 
-  MapPinIcon, 
-  TrophyIcon, 
+import {
+  ClockIcon,
+  MapPinIcon,
+  TrophyIcon,
   ChevronRightIcon,
   SparklesIcon
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 import { BettingLinesPopup } from './BettingLinesPopup'
+import { ScoreByPeriodPopup } from './ScoreByPeriodPopup'
 import { formatToEasternTime, formatToEasternDate, formatToEasternWeekday } from '@/lib/utils/time'
+import { useScoreByPeriod } from '@/hooks/useScoreByPeriod'
 
 interface ModernMatchupCardProps {
   matchup: Matchup
@@ -24,6 +26,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
   const { game, predictions } = matchup
   const [isHovered, setIsHovered] = useState(false)
   const [showBettingPopup, setShowBettingPopup] = useState(false)
+  const [showScorePopup, setShowScorePopup] = useState(false)
 
   const gameTime = formatToEasternTime(game.gameDate)
   const gameDate = formatToEasternDate(game.gameDate, { month: 'short', day: 'numeric', year: 'numeric' })
@@ -71,6 +74,9 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
     return 'text-red-600 dark:text-red-400'
   }
 
+  const { hasScores: hasScoreByPeriod } = useScoreByPeriod(game.scoreByPeriod)
+  const shouldShowScoreButton = hasScoreByPeriod && game.status === 'final'
+
   return (
     <div 
       className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
@@ -109,7 +115,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
                 {game.awayTeam.record}
               </div>
             )}
-            {predictionInfo ? (
+              {predictionInfo ? (
               <>
                 <div className="mt-2 flex items-center justify-center gap-2">
                   <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
@@ -165,7 +171,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
                 {game.homeTeam.record}
               </div>
             )}
-            {predictionInfo ? (
+              {predictionInfo ? (
               <>
                 <div className="mt-2 flex items-center justify-center gap-2">
                   <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
@@ -199,12 +205,21 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
             Matchup
             <ChevronRightIcon className="h-4 w-4 ml-2" />
           </Link>
-          <button
-            onClick={() => setShowBettingPopup(true)}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg border border-blue-100 dark:border-blue-500/40 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
-          >
-            View Betting Lines
-          </button>
+          {shouldShowScoreButton ? (
+            <button
+              onClick={() => setShowScorePopup(true)}
+              className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg border border-blue-100 dark:border-blue-500/40 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
+            >
+              View Box Score
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowBettingPopup(true)}
+              className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg border border-blue-100 dark:border-blue-500/40 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
+            >
+              View Betting Lines
+            </button>
+          )}
         </div>
       </div>
 
@@ -217,6 +232,16 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
         awayTeam={game.awayTeam}
         sport={sport}
       />
+
+    <ScoreByPeriodPopup
+      isOpen={showScorePopup}
+      onClose={() => setShowScorePopup(false)}
+      scoreByPeriod={game.scoreByPeriod}
+      gameStatus={game.status}
+      gameDate={game.gameDate}
+      homeTeam={game.homeTeam}
+      awayTeam={game.awayTeam}
+    />
     </div>
   )
 }

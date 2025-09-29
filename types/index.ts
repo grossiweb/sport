@@ -224,12 +224,20 @@ export interface Game {
   statusDetail?: string
   homeScore?: number
   awayScore?: number
+  scoreByPeriod?: ScoreByPeriod
   inning?: number
   quarter?: number
   timeRemaining?: string
   venue?: string
   broadcast?: string
   weather?: WeatherData
+}
+
+export interface ScoreByPeriod {
+  home?: number[]
+  away?: number[]
+  updatedAt?: string
+  periodLabels?: string[]
 }
 
 export interface WeatherData {

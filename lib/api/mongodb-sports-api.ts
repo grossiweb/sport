@@ -1,4 +1,4 @@
-import { Game, Team, TeamStats, BettingData, SportType, DetailedTeamStat, Player } from '@/types'
+import { Game, Team, TeamStats, BettingData, SportType, DetailedTeamStat, Player, ScoreByPeriod } from '@/types'
 import { 
   getTeamsCollection, 
   getTeamStatsCollection, 
@@ -57,7 +57,31 @@ export class MongoDBSportsAPI {
   }
 
   // Convert MongoDB game to our Game interface
-  private mapMongoGameToGame(mongoGame: MongoGame): Game {
+  private mapScoreByPeriod(score: MongoBettingData['score'] | MongoGame['score'] | undefined | null): ScoreByPeriod | undefined {
+    if (!score) return undefined
+
+    const homePeriods = Array.isArray(score.score_home_by_period) ? score.score_home_by_period : undefined
+    const awayPeriods = Array.isArray(score.score_away_by_period) ? score.score_away_by_period : undefined
+
+    if (!homePeriods && !awayPeriods) return undefined
+
+    const inferredLength = Math.max(homePeriods?.length ?? 0, awayPeriods?.length ?? 0)
+    const periodLabels = inferredLength
+      ? Array.from({ length: inferredLength }, (_, index) => `Q${index + 1}`)
+      : undefined
+
+    return {
+      home: homePeriods ?? new Array(inferredLength).fill(0),
+      away: awayPeriods ?? new Array(inferredLength).fill(0),
+      updatedAt: typeof score.updated_at === 'string' ? score.updated_at : undefined,
+      periodLabels
+    }
+  }
+
+  private mapMongoGameToGame(
+    mongoGame: MongoGame,
+    bettingData?: MongoBettingData | null
+  ): Game {
     return {
       id: mongoGame.event_id,
       homeTeam: {
@@ -80,6 +104,7 @@ export class MongoDBSportsAPI {
       statusDetail: mongoGame.event_status_detail || '',
       homeScore: mongoGame.home_score ?? 0,
       awayScore: mongoGame.away_score ?? 0,
+      scoreByPeriod: this.mapScoreByPeriod(bettingData?.score ?? mongoGame.score),
       venue: mongoGame.event_location || 'TBD',
       broadcast: mongoGame.broadcast || 'N/A'
     }
@@ -306,7 +331,21 @@ export class MongoDBSportsAPI {
       }
       
       const mongoGames = await cursor.toArray()
-      const games = mongoGames.map(game => this.mapMongoGameToGame(game))
+      const bettingCollection = await getBettingDataCollection()
+
+      const bettingDataByEventId = new Map<string, MongoBettingData>()
+
+      const eventIds = mongoGames.map(game => game.event_id)
+      if (eventIds.length > 0) {
+      if (eventIds.length > 0) {
+        const bettingDocuments = await bettingCollection.find({ event_id: { $in: eventIds } }).toArray()
+        for (const doc of bettingDocuments) {
+          bettingDataByEventId.set(doc.event_id, doc)
+        }
+      }
+      }
+
+      const games = mongoGames.map(game => this.mapMongoGameToGame(game, bettingDataByEventId.get(game.event_id)))
       
       // Enrich games with team data
       const teams = await this.getTeams(sport)
