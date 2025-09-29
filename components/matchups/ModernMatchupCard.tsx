@@ -86,7 +86,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
       {/* Dark Header with Team Names */}
       <div className="px-6 py-4 bg-gray-800 dark:bg-gray-900">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-white">
+          <h3 className="text-base font-bold text-white">
             {game.awayTeam.name} @ {game.homeTeam.name}
           </h3>
           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
@@ -101,24 +101,24 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
       </div>
 
       {/* Main Content */}
-      <div className="p-4">
+      <div className="p-3">
         {/* Teams Side by Side with Date in Center */}
-        <div className="grid grid-cols-3 gap-3 items-center mb-4">
+        <div className="grid grid-cols-3 gap-2 items-center mb-3">
           {/* Away Team */}
           <div className="text-center">
-            <TeamLogo team={game.awayTeam} size="xl" className="mx-auto mb-3" />
-            <div className="text-lg font-bold text-gray-900 dark:text-white">
+            <TeamLogo team={game.awayTeam} size="md" className="mx-auto mb-2" />
+            <div className="text-base font-bold text-gray-900 dark:text-white">
               {game.awayTeam.abbreviation}
             </div>
             {game.awayTeam.record && (
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
                 {game.awayTeam.record}
               </div>
             )}
               {predictionInfo ? (
               <>
                 <div className="mt-2 flex items-center justify-center gap-2">
-                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
                     {awayScoreDisplay}
                   </span>
                   <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
@@ -139,14 +139,14 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
           </div>
 
           {/* Game Date & Time in Center */}
-          <div className="text-center border-l border-r border-gray-200 dark:border-gray-700 px-4">
-            <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+            <div className="text-center border-l border-r border-gray-200 dark:border-gray-700 px-4">
+            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
               {gameDayOfWeek}
             </div>
-            <div className="text-lg font-bold text-gray-900 dark:text-white">
+            <div className="text-base font-bold text-gray-900 dark:text-white">
               {gameDate}
             </div>
-            <div className="text-md font-semibold text-blue-600 dark:text-blue-400">
+            <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">
               {gameTime}
             </div>
             {showPredictions && (
@@ -164,19 +164,19 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
 
           {/* Home Team */}
           <div className="text-center">
-            <TeamLogo team={game.homeTeam} size="xl" className="mx-auto mb-3" />
-            <div className="text-lg font-bold text-gray-900 dark:text-white">
+            <TeamLogo team={game.homeTeam} size="md" className="mx-auto mb-2" />
+            <div className="text-base font-bold text-gray-900 dark:text-white">
               {game.homeTeam.abbreviation}
             </div>
             {game.homeTeam.record && (
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
                 {game.homeTeam.record}
               </div>
             )}
               {predictionInfo ? (
               <>
                 <div className="mt-2 flex items-center justify-center gap-2">
-                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
                     {homeScoreDisplay}
                   </span>
                   <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
@@ -190,7 +190,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
                 */}
               </>
             ) : (
-              <div className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="mt-2 text-xl font-bold text-gray-900 dark:text-white">
                 {homeScoreDisplay}
               </div>
             )}
