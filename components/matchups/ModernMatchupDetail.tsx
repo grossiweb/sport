@@ -183,9 +183,11 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                       {Math.round(predictionInfo.awayWinPercentage)}% Win
                     </span>
                   </div>
+                  {/*}
                   <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-blue-500 dark:text-blue-300">
                     AI Prediction
                   </div>
+                  */}
                 </>
               ) : game.awayScore !== undefined ? (
                 <div className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
@@ -249,9 +251,11 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                       {Math.round(predictionInfo.homeWinPercentage)}% Win
                     </span>
                   </div>
+                  {/*}
                   <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-blue-500 dark:text-blue-300">
                     AI Prediction
                   </div>
+                  */}
                 </>
               ) : game.homeScore !== undefined ? (
                 <div className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
