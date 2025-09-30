@@ -3,10 +3,10 @@
 import { useState } from 'react'
 import { Matchup, SportType } from '@/types'
 import { formatToEasternTime } from '@/lib/utils/time'
-import { 
-  ClockIcon, 
-  MapPinIcon, 
-  TrophyIcon, 
+import {
+  ClockIcon,
+  MapPinIcon,
+  TrophyIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   ChartBarIcon,

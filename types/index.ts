@@ -262,6 +262,7 @@ export interface Matchup {
     home: any
     away: any
   }
+  coversSummary?: MatchupCoversSummary
 }
 
 // Prediction and Betting Types
@@ -308,6 +309,34 @@ export interface BettingData {
     url: string
     affiliateId: string
   }
+}
+
+export interface RecordSummary {
+  wins: number
+  losses: number
+  pushes: number
+  gamesPlayed: number
+}
+
+export interface TeamCoversSummary {
+  teamId: string
+  teamName?: string
+  overall: RecordSummary
+  home: RecordSummary
+  road: RecordSummary
+  lastTen: RecordSummary
+  ats?: {
+    overall?: RecordSummary
+    home?: RecordSummary
+    road?: RecordSummary
+    lastTen?: RecordSummary
+  }
+}
+
+export interface MatchupCoversSummary {
+  away: TeamCoversSummary
+  home: TeamCoversSummary
+  notes?: string
 }
 
 export interface TrendData {

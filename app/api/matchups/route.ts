@@ -173,6 +173,16 @@ export async function GET(request: NextRequest) {
           console.warn(`Failed to fetch betting data for game ${game.id}:`, error)
         }
 
+        const coversSummary = bettingData
+          ? await mongoSportsAPI.buildMatchupCoversSummary(
+              sport as SportType,
+              game.homeTeam.id,
+              game.awayTeam.id,
+              game.homeTeam.name,
+              game.awayTeam.name
+            )
+          : null
+
         return {
           game,
           predictions,
@@ -182,7 +192,8 @@ export async function GET(request: NextRequest) {
           injuries,
           matchupAnalysis: null, // Will be loaded on demand
           headToHead: [], // Will be loaded on demand
-          teamStats: null // Will be loaded on demand
+          teamStats: null, // Will be loaded on demand
+          coversSummary: coversSummary ?? undefined
         }
       })
     )

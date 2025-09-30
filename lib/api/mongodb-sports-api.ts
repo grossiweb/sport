@@ -1,4 +1,4 @@
-import { Game, Team, TeamStats, BettingData, SportType, DetailedTeamStat, Player, ScoreByPeriod } from '@/types'
+import { Game, Team, TeamStats, BettingData, SportType, DetailedTeamStat, Player, ScoreByPeriod, MatchupCoversSummary, TeamCoversSummary, RecordSummary } from '@/types'
 import { 
   getTeamsCollection, 
   getTeamStatsCollection, 
@@ -78,7 +78,7 @@ export class MongoDBSportsAPI {
     }
   }
 
-  private mapMongoGameToGame(
+  public mapMongoGameToGame(
     mongoGame: MongoGame,
     bettingData?: MongoBettingData | null
   ): Game {
@@ -107,6 +107,133 @@ export class MongoDBSportsAPI {
       scoreByPeriod: this.mapScoreByPeriod(bettingData?.score ?? mongoGame.score),
       venue: mongoGame.event_location || 'TBD',
       broadcast: mongoGame.broadcast || 'N/A'
+    }
+  }
+
+  private createEmptyRecord(): RecordSummary {
+    return {
+      wins: 0,
+      losses: 0,
+      pushes: 0,
+      gamesPlayed: 0
+    }
+  }
+
+  private accumulateRecord(record: RecordSummary, result: 'win' | 'loss' | 'push') {
+    record.gamesPlayed += 1
+    if (result === 'win') {
+      record.wins += 1
+    } else if (result === 'loss') {
+      record.losses += 1
+    } else {
+      record.pushes += 1
+    }
+  }
+
+  private computeTeamResult(game: Game, teamId: string): 'win' | 'loss' | 'push' | null {
+    if (game.status !== 'final') return null
+
+    const isHome = game.homeTeam.id === teamId
+    const teamScore = isHome ? game.homeScore ?? 0 : game.awayScore ?? 0
+    const opponentScore = isHome ? game.awayScore ?? 0 : game.homeScore ?? 0
+
+    if (teamScore > opponentScore) return 'win'
+    if (teamScore < opponentScore) return 'loss'
+    return 'push'
+  }
+
+  private computeTeamCoversSummary(teamId: string, teamName: string | undefined, games: Game[]): TeamCoversSummary {
+    const finalGames = games.filter(game => game.status === 'final')
+    const overall = this.createEmptyRecord()
+    const home = this.createEmptyRecord()
+    const road = this.createEmptyRecord()
+    const lastTen = this.createEmptyRecord()
+
+    finalGames.forEach(game => {
+      const result = this.computeTeamResult(game, teamId)
+      if (!result) return
+
+      this.accumulateRecord(overall, result)
+
+      const isHome = game.homeTeam.id === teamId
+      if (isHome) {
+        this.accumulateRecord(home, result)
+      } else {
+        this.accumulateRecord(road, result)
+      }
+    })
+
+    const lastTenGames = finalGames
+      .slice()
+      .sort((a, b) => new Date(b.gameDate).getTime() - new Date(a.gameDate).getTime())
+      .slice(0, 10)
+
+    lastTenGames.forEach(game => {
+      const result = this.computeTeamResult(game, teamId)
+      if (!result) return
+      this.accumulateRecord(lastTen, result)
+    })
+
+    return {
+      teamId,
+      teamName,
+      overall,
+      home,
+      road,
+      lastTen,
+      ats: undefined
+    }
+  }
+
+  public async getTeamSeasonGames(
+    sport: SportType,
+    teamId: string,
+    seasonYear: number
+  ): Promise<Game[]> {
+    const collection = await getGamesCollection()
+    const sportId = sport === 'NFL' ? 2 : 1
+    const numericTeamId = parseInt(teamId, 10)
+
+    const mongoGames = await collection
+      .find({
+        sport_id: sportId,
+        season_year: seasonYear,
+        $or: [
+          { home_team_id: numericTeamId },
+          { away_team_id: numericTeamId }
+        ]
+      })
+      .sort({ date_event: -1 })
+      .toArray()
+
+    return mongoGames.map(game => this.mapMongoGameToGame(game))
+  }
+
+  async buildMatchupCoversSummary(
+    sport: SportType,
+    homeTeamId: string,
+    awayTeamId: string,
+    homeTeamName?: string,
+    awayTeamName?: string
+  ): Promise<MatchupCoversSummary | null> {
+    try {
+      const currentYear = new Date().getFullYear()
+
+      const [homeGames, awayGames] = await Promise.all([
+        this.getTeamSeasonGames(sport, homeTeamId, currentYear),
+        this.getTeamSeasonGames(sport, awayTeamId, currentYear)
+      ])
+
+      const homeSummary = this.computeTeamCoversSummary(homeTeamId, homeTeamName, homeGames)
+      const awaySummary = this.computeTeamCoversSummary(awayTeamId, awayTeamName, awayGames)
+
+      return {
+        home: homeSummary,
+        away: awaySummary
+      }
+    } catch (error) {
+      console.error('Error building matchup covers summary:', error)
+      return null
     }
   }
 

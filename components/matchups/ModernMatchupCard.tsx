@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Matchup, SportType } from '@/types'
+import { Matchup, SportType, RecordSummary } from '@/types'
 import { format } from 'date-fns'
 import {
   ClockIcon,
@@ -23,7 +23,7 @@ interface ModernMatchupCardProps {
 }
 
 export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
-  const { game, predictions } = matchup
+  const { game, predictions, coversSummary } = matchup
   const [isHovered, setIsHovered] = useState(false)
   const [showBettingPopup, setShowBettingPopup] = useState(false)
   const [showScorePopup, setShowScorePopup] = useState(false)
@@ -77,6 +77,48 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
   const { hasScores: hasScoreByPeriod } = useScoreByPeriod(game.scoreByPeriod)
   const shouldShowScoreButton = hasScoreByPeriod && game.status === 'final'
 
+  const formatRecord = (record?: RecordSummary) => {
+    if (!record) return '0-0-0'
+    return `${record.wins}-${record.losses}-${record.pushes}`
+  }
+
+  const formatRecordCompact = (record?: RecordSummary) => {
+    if (!record) return '0-0'
+    const { wins, losses, pushes } = record
+    return pushes > 0 ? `${wins}-${losses}-${pushes}` : `${wins}-${losses}`
+  }
+
+  const getWinLossRecord = (recordString?: string, fallback?: RecordSummary) => {
+    if (recordString && recordString.trim().length > 0) return recordString.trim()
+    return formatRecordCompact(fallback)
+  }
+
+  const renderCoversRow = (
+    label: string,
+    prefix: string,
+    suffix: string,
+    homeRecord?: RecordSummary,
+    awayRecord?: RecordSummary
+  ) => (
+    <div className="grid grid-cols-5 items-center text-[11px] text-gray-600 dark:text-gray-400">
+      <span className="truncate" title={prefix}>
+        {prefix}
+      </span>
+      <span className="text-center font-semibold text-gray-900 dark:text-white">
+        {formatRecord(awayRecord)}
+      </span>
+      <span className="text-center font-medium text-gray-700 dark:text-gray-300">
+        {label}
+      </span>
+      <span className="text-center font-semibold text-gray-900 dark:text-white">
+        {formatRecord(homeRecord)}
+      </span>
+      <span className="text-right truncate" title={suffix}>
+        {suffix}
+      </span>
+    </div>
+  )
+
   return (
     <div 
       className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
@@ -84,12 +126,12 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Dark Header with Team Names */}
-      <div className="px-6 py-4 bg-gray-800 dark:bg-gray-900">
+      <div className="px-5 py-3 bg-gray-800 dark:bg-gray-900">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-white">
+          <h3 className="text-sm font-semibold text-white">
             {game.awayTeam.name} @ {game.homeTeam.name}
           </h3>
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
             game.status === 'live' ? 'bg-red-500 text-white' :
             game.status === 'final' ? 'bg-gray-600 text-gray-200' :
             'bg-blue-500 text-white'
@@ -110,11 +152,12 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
             <div className="text-base font-bold text-gray-900 dark:text-white">
               {game.awayTeam.abbreviation}
             </div>
+            {/*}
             {game.awayTeam.record && (
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 {game.awayTeam.record}
               </div>
-            )}
+            )}*/}
               {predictionInfo ? (
               <>
                 <div className="mt-2 flex items-center justify-center gap-2">
@@ -168,11 +211,12 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
             <div className="text-base font-bold text-gray-900 dark:text-white">
               {game.homeTeam.abbreviation}
             </div>
+            {/*}
             {game.homeTeam.record && (
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 {game.homeTeam.record}
               </div>
-            )}
+            )}*/}
               {predictionInfo ? (
               <>
                 <div className="mt-2 flex items-center justify-center gap-2">
@@ -197,7 +241,42 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
           </div>
         </div>
 
-        {/* Additional matchup context can go here when available */}
+        {/* Matchup of Covers */}
+        {coversSummary && (
+          <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700 rounded-lg">
+            <div className="space-y-1">
+              {renderCoversRow(
+                'Win/Loss',
+                game.awayTeam.record || '(no data)',
+                game.homeTeam.record || '(no data)',
+                coversSummary.home.overall,
+                coversSummary.away.overall
+              )}
+              {renderCoversRow(
+                'Against the Spread',
+                coversSummary.away.ats?.road
+                  ? `Road ATS: ${formatRecord(coversSummary.away.ats.road)}`
+                  : '(coming soon)',
+                coversSummary.home.ats?.home
+                  ? `Home ATS: ${formatRecord(coversSummary.home.ats.home)}`
+                  : '(coming soon)',
+                coversSummary.home.ats?.overall,
+                coversSummary.away.ats?.overall
+              )}
+              {renderCoversRow(
+                'Last 10',
+                coversSummary.away.lastTen.gamesPlayed > 0
+                  ? `SU: ${formatRecord(coversSummary.away.lastTen)}`
+                  : '(no data)',
+                coversSummary.home.lastTen.gamesPlayed > 0
+                  ? `SU: ${formatRecord(coversSummary.home.lastTen)}`
+                  : '(no data)',
+                coversSummary.home.ats?.lastTen,
+                coversSummary.away.ats?.lastTen
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">

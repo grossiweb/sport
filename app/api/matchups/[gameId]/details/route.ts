@@ -148,6 +148,14 @@ export async function GET(
       console.warn(`Failed to fetch betting data for game ${gameId}:`, error)
     }
 
+    const coversSummary = await mongoSportsAPI.buildMatchupCoversSummary(
+      sport as SportType,
+      enrichedGame.homeTeam.id,
+      enrichedGame.awayTeam.id,
+      enrichedGame.homeTeam.name,
+      enrichedGame.awayTeam.name
+    )
+
     const detailedMatchup: Matchup = {
       game: enrichedGame,
       predictions: detailedPredictions,
@@ -187,7 +195,8 @@ export async function GET(
           averageYards: Math.floor(Math.random() * 100) + 350,
           turnoverDifferential: Math.floor(Math.random() * 21) - 10
         }
-      }
+      },
+      coversSummary: coversSummary ?? undefined
     }
 
     return NextResponse.json({
