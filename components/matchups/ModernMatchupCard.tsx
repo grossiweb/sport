@@ -6,8 +6,6 @@ import { format } from 'date-fns'
 import {
   ClockIcon,
   MapPinIcon,
-  TrophyIcon,
-  ChevronRightIcon,
   SparklesIcon
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
@@ -199,10 +197,10 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
           <div>
             <div className="flex items-center justify-start gap-2 mb-1">
               <TeamLogo team={game.awayTeam} size="md" className="" /> 
-              <div className="text-base font-bold text-gray-900 dark:text-white">
+              <div className="text-[26px] font-bold leading-none text-gray-900 dark:text-white">
                 {game.awayTeam.abbreviation}
               </div>
-              <div className="text-xl font-bold text-gray-900 dark:text-white">
+              <div className="text-[26px] font-bold leading-none text-gray-900 dark:text-white">
                 {awayScoreDisplay}
               </div>
             </div>
@@ -227,10 +225,10 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
           {/* Home Team: [Short Name][Score][Logo] right-aligned */}
           <div>
             <div className="flex items-center justify-end gap-2 mb-1">
-              <div className="text-xl font-bold text-gray-900 dark:text-white">
+              <div className="text-[26px] font-bold leading-none text-gray-900 dark:text-white">
                 {homeScoreDisplay}
               </div>
-              <div className="text-base font-bold text-gray-900 dark:text-white">
+              <div className="text-[26px] font-bold leading-none text-gray-900 dark:text-white">
                 {game.homeTeam.abbreviation}
               </div>
               <TeamLogo team={game.homeTeam} size="md" className="" />
@@ -316,23 +314,21 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
         <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <Link
             href={`/sport/${sport.toLowerCase()}/matchups/${game.id}`}
-            className={`flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform ${isHovered ? 'scale-105' : 'scale-100'}`}
+            className={`h-[35px] w-auto px-4 inline-flex items-center justify-center border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200`}
           >
-            <TrophyIcon className="h-4 w-4 mr-2" />
             Matchup
-            <ChevronRightIcon className="h-4 w-4 ml-2" />
           </Link>
           {shouldShowScoreButton ? (
             <button
               onClick={() => setShowScorePopup(true)}
-              className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg border border-blue-100 dark:border-blue-500/40 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
+              className="h-[35px] w-auto px-4 inline-flex items-center justify-center text-sm font-semibold rounded-lg border border-blue-100 dark:border-blue-500/40 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
             >
               View Box Score
             </button>
           ) : (
             <button
               onClick={() => setShowBettingPopup(true)}
-              className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg border border-blue-100 dark:border-blue-500/40 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
+              className="h-[35px] w-auto px-4 inline-flex items-center justify-center text-sm font-semibold rounded-lg border border-blue-100 dark:border-blue-500/40 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
             >
               View Betting Lines
             </button>
