@@ -15,7 +15,8 @@ import {
   FireIcon,
   UserGroupIcon,
   CalendarIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  CloudIcon
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { TeamLogo } from '@/components/ui/TeamLogo'
@@ -74,10 +75,10 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
   }, [activeTab, game.homeTeam.id, game.awayTeam.id, sport, homeTeamDetailedStats.length, awayTeamDetailedStats.length])
 
   const tabs = [
-    { id: 'overview', name: 'Overview', icon: TrophyIcon },
+    //{ id: 'overview', name: 'Overview', icon: TrophyIcon },
     { id: 'stats', name: 'Team Stats', icon: ChartBarIcon },
-    { id: 'trends', name: 'Trends & Analysis', icon: ArrowTrendingUpIcon },
-    { id: 'betting', name: 'Betting', icon: CurrencyDollarIcon },
+    { id: 'trends', name: 'Trends & Analysis', icon: ArrowTrendingUpIcon }, // hidden for now
+    { id: 'betting', name: 'Odds', icon: CurrencyDollarIcon },
   ] as const
 
   const predictionInfo = null
@@ -102,125 +103,58 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
       </div>
 
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-8">
-        {/* Dark Header with Team Names */}
-        <div className="px-8 py-6 bg-gray-800 dark:bg-gray-900">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-            <h1 className="text-2xl font-bold text-white">
-              {game.awayTeam.name} @ {game.homeTeam.name}
-            </h1>
-              {shouldShowScoreButton ? (
-                <button
-                  onClick={() => setShowScorePopup(true)}
-                  className="mt-3 inline-flex items-center px-4 py-2 text-sm font-semibold rounded-lg border border-blue-300/60 text-blue-100 hover:bg-blue-600/20 transition-colors"
-                >
-                  View Box Score
-                </button>
-              ) : (
-              <button
-                onClick={() => setShowBettingPopup(true)}
-                className="mt-3 inline-flex items-center px-4 py-2 text-sm font-semibold rounded-lg border border-blue-300/60 text-blue-100 hover:bg-blue-600/20 transition-colors"
-              >
-                View Betting Lines
-              </button>
-              )}
+      <div className="bg-[#0D1B2A] text-white rounded-xl shadow-lg overflow-hidden mb-8">
+        {/* Covers-style Matchup Header Card */}
+        <div className="p-6">
+          <div className="flex items-center justify-center gap-3">
+            {/* Away Team (Left) */}
+            <div className="w-1/3 flex items-center justify-end gap-3 min-w-0">
+              <TeamLogo team={game.awayTeam} size="xl" className="flex-shrink-0" />
+              <div className="min-w-0">
+                <div className="text-lg font-bold truncate">{game.awayTeam.name}</div>
+                <div className="text-xs text-gray-300 truncate">
+                  {game.awayTeam.conference?.name || '—'} • {game.awayTeam.record || '—'}
             </div>
-            <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${
-              game.status === 'live' ? 'bg-red-500 text-white' :
-              game.status === 'final' ? 'bg-gray-600 text-gray-200' :
-              'bg-blue-500 text-white'
-            }`}>
-              {game.status === 'live' && <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></span>}
-              {game.status.toUpperCase()}
-            </span>
           </div>
         </div>
 
-        {/* Teams Side by Side with Date in Center */}
-        <div className="p-4">
-          <div className="grid grid-cols-3 gap-4 items-center mb-4">
-            {/* Away Team */}
-            <div className="text-center">
-              <TeamLogo team={game.awayTeam} size="xl" className="mx-auto mb-2" />
-              <div className="text-lg font-bold text-gray-900 dark:text-white">
-                {game.awayTeam.abbreviation}
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                {game.awayTeam.name}
-              </div>
-              {game.awayTeam.record && (
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {game.awayTeam.record}
-                </div>
-              )}
-              {game.awayTeam.conference && (
-                <div className="text-xs text-gray-400 dark:text-gray-500">
-                  {game.awayTeam.conference.name}
-                </div>
-              )}
-              {game.awayScore !== undefined ? (
-                <div className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                  {game.awayScore}
-                </div>
-              ) : (
-                <div className="text-2xl font-bold text-gray-400 dark:text-gray-500 mt-2">-</div>
-              )}
-            </div>
-
-            {/* Game Date & Time in Center */}
-            <div className="text-center border-l border-r border-gray-200 dark:border-gray-700 px-3">
-              <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                {gameDayOfWeek}
-              </div>
-              <div className="text-sm font-bold text-gray-900 dark:text-white">
-                {gameDate}
-              </div>
-              <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                {gameTime}
-              </div>
+            {/* Center Info */}
+            <div className="w-1/3 text-center px-2">
+              <div className="text-sm font-semibold">{gameTime}</div>
+              <div className="text-xs text-gray-300">{format(new Date(game.gameDate), 'MMM dd, yyyy')}</div>
               {game.venue && (
-                <div className="flex items-center justify-center text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  <MapPinIcon className="h-3 w-3 mr-1" />
-                  {game.venue}
+                <div className="mt-1 flex items-center justify-center text-xs text-gray-300 gap-1">
+                  <MapPinIcon className="h-4 w-4" />
+                  <span className="truncate max-w-[220px]">{game.venue}</span>
                 </div>
               )}
               {game.broadcast && (
-                <div className="text-xs text-gray-400 dark:text-gray-500">
-                  {game.broadcast}
+                <div className="text-xs text-gray-300 mt-0.5">{game.broadcast}</div>
+              )}
+              {/* Weather if available */}
+              {game.weather && (
+                <div className="mt-1 flex items-center justify-center text-xs text-gray-200 gap-1">
+                  <CloudIcon className="h-4 w-4" />
+                  <span>{`${game.weather.condition} ${Math.round(game.weather.temperature)}°F`}</span>
                 </div>
               )}
             </div>
 
-            {/* Home Team */}
-            <div className="text-center">
-              <TeamLogo team={game.homeTeam} size="xl" className="mx-auto mb-2" />
-              <div className="text-lg font-bold text-gray-900 dark:text-white">
-                {game.homeTeam.abbreviation}
+            {/* Home Team (Right) */}
+            <div className="w-1/3 flex items-center justify-start gap-3 min-w-0">
+              <div className="text-right min-w-0">
+                <div className="text-lg font-bold truncate">{game.homeTeam.name}</div>
+                <div className="text-xs text-gray-300 truncate">
+                  {game.homeTeam.conference?.name || '—'} • {game.homeTeam.record || '—'}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                {game.homeTeam.name}
               </div>
-              {game.homeTeam.record && (
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {game.homeTeam.record}
+              <TeamLogo team={game.homeTeam} size="xl" className="flex-shrink-0" />
                 </div>
-              )}
-              {game.homeTeam.conference && (
-                <div className="text-xs text-gray-400 dark:text-gray-500">
-                  {game.homeTeam.conference.name}
-                </div>
-              )}
-              {game.homeScore !== undefined ? (
-                <div className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                  {game.homeScore}
-                </div>
-              ) : (
-                <div className="text-2xl font-bold text-gray-400 dark:text-gray-500 mt-2">-</div>
-              )}
             </div>
           </div>
 
+        {/* Optional: score by period below header card */}
+        <div className="px-6 pb-6">
           <ScoreByPeriodSummary
             scoreByPeriod={game.scoreByPeriod}
             gameStatus={game.status}
@@ -228,7 +162,6 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
             awayTeamAbbreviation={game.awayTeam.abbreviation}
             onOpenPopup={game.status === 'final' ? () => setShowScorePopup(true) : undefined}
           />
-
         </div>
       </div>
 
@@ -260,13 +193,13 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Betting Summary moved in place of predictions */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
                 <CurrencyDollarIcon className="h-5 w-5 mr-2 text-green-600" />
                 Betting Summary
-              </h3>
+                </h3>
               <DetailedBettingSection game={game} sport={sport} />
-            </div>
+              </div>
 
             {/* Injuries */}
             {injuries && injuries.length > 0 && (
