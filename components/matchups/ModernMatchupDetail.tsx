@@ -34,7 +34,7 @@ interface ModernMatchupDetailProps {
 
 export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps) {
   const { game, predictions, trends, injuries, matchupAnalysis, headToHead } = matchup
-  const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'trends' | 'betting'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'trends' | 'betting'>('stats')
   const [homeTeamDetailedStats, setHomeTeamDetailedStats] = useState<DetailedTeamStat[]>([])
   const [awayTeamDetailedStats, setAwayTeamDetailedStats] = useState<DetailedTeamStat[]>([])
   const [loadingDetailedStats, setLoadingDetailedStats] = useState(false)
@@ -75,7 +75,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
   }, [activeTab, game.homeTeam.id, game.awayTeam.id, sport, homeTeamDetailedStats.length, awayTeamDetailedStats.length])
 
   const tabs = [
-    //{ id: 'overview', name: 'Overview', icon: TrophyIcon },
+    // { id: 'overview', name: 'Overview', icon: TrophyIcon }, // hidden
     { id: 'stats', name: 'Team Stats', icon: ChartBarIcon },
     { id: 'trends', name: 'Trends & Analysis', icon: ArrowTrendingUpIcon }, // hidden for now
     { id: 'betting', name: 'Odds', icon: CurrencyDollarIcon },
