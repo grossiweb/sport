@@ -80,21 +80,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
     { id: 'betting', name: 'Betting', icon: CurrencyDollarIcon },
   ] as const
 
-  const predictionInfo = game.status === 'scheduled' && predictions
-    ? (() => {
-        const homeWinPct = predictions.predictedWinner === game.homeTeam.name
-          ? predictions.confidence * 100
-          : 100 - predictions.confidence * 100
-
-        return {
-          awayScore: predictions.predictedScore.away,
-          homeScore: predictions.predictedScore.home,
-          homeWinPercentage: homeWinPct,
-          awayWinPercentage: 100 - homeWinPct,
-          updatedAt: predictions.createdAt
-        }
-      })()
-    : null
+  const predictionInfo = null
 
   const formatScoreValue = (value: number) => (Number.isInteger(value) ? value.toString() : value.toFixed(1))
 
@@ -173,23 +159,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                   {game.awayTeam.conference.name}
                 </div>
               )}
-              {predictionInfo ? (
-                <>
-                  <div className="mt-2 flex items-center justify-center gap-2">
-                    <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {formatScoreValue(predictionInfo.awayScore)}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
-                      {Math.round(predictionInfo.awayWinPercentage)}% Win
-                    </span>
-                  </div>
-                  {/*}
-                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-blue-500 dark:text-blue-300">
-                    AI Prediction
-                  </div>
-                  */}
-                </>
-              ) : game.awayScore !== undefined ? (
+              {game.awayScore !== undefined ? (
                 <div className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
                   {game.awayScore}
                 </div>
@@ -241,23 +211,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                   {game.homeTeam.conference.name}
                 </div>
               )}
-              {predictionInfo ? (
-                <>
-                  <div className="mt-2 flex items-center justify-center gap-2">
-                    <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {formatScoreValue(predictionInfo.homeScore)}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
-                      {Math.round(predictionInfo.homeWinPercentage)}% Win
-                    </span>
-                  </div>
-                  {/*}
-                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-blue-500 dark:text-blue-300">
-                    AI Prediction
-                  </div>
-                  */}
-                </>
-              ) : game.homeScore !== undefined ? (
+              {game.homeScore !== undefined ? (
                 <div className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
                   {game.homeScore}
                 </div>
@@ -305,23 +259,14 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
       <div className="space-y-8">
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Key Factors */}
-            {predictions?.keyFactors && predictions.keyFactors.length > 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                  <FireIcon className="h-5 w-5 mr-2 text-orange-500" />
-                  Key Factors
-                </h3>
-                <div className="space-y-3">
-                  {predictions.keyFactors.map((factor, index) => (
-                    <div key={index} className="flex items-start">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                      <span className="text-gray-700 dark:text-gray-300">{factor}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Betting Summary moved in place of predictions */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                <CurrencyDollarIcon className="h-5 w-5 mr-2 text-green-600" />
+                Betting Summary
+              </h3>
+              <DetailedBettingSection game={game} sport={sport} />
+            </div>
 
             {/* Injuries */}
             {injuries && injuries.length > 0 && (

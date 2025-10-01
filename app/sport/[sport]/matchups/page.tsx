@@ -10,6 +10,8 @@ import { ModernMatchupCard } from '@/components/matchups/ModernMatchupCard'
 import { MatchupFilters } from '@/components/matchups/MatchupFilters'
 import { WeekInfo, getCurrentWeek, getWeekDateRange } from '@/lib/utils/week-utils'
 import { useQuery } from 'react-query'
+import { CoversStyleMatchupCard } from '@/components/matchups/CoversStyleMatchupCard'
+import sampleBetting from '@/sportStats.betting_data.json'
 
 interface MatchupFiltersState {
   status?: string
@@ -169,6 +171,30 @@ export default function SportMatchupsPage() {
               key={matchup.game.id}
               matchup={matchup}
               sport={sport}
+            />
+          ))}
+
+          {/* Demo: Covers-style cards using provided betting JSON (renders if IDs match) */}
+          {Array.isArray(sampleBetting) && sampleBetting.map((evt: any) => (
+            <CoversStyleMatchupCard
+              key={evt.event_id}
+              away={{
+                id: evt.teams?.find((t: any) => t.is_away)?.team_id || 'away',
+                name: evt.teams_normalized?.find((t: any) => t.is_away)?.name || 'Away',
+                abbreviation: evt.teams_normalized?.find((t: any) => t.is_away)?.abbreviation,
+                city: evt.teams_normalized?.find((t: any) => t.is_away)?.name,
+                league: 'NFL',
+                score: evt.score?.score_away ?? 0
+              }}
+              home={{
+                id: evt.teams?.find((t: any) => t.is_home)?.team_id || 'home',
+                name: evt.teams_normalized?.find((t: any) => t.is_home)?.name || 'Home',
+                abbreviation: evt.teams_normalized?.find((t: any) => t.is_home)?.abbreviation,
+                city: evt.teams_normalized?.find((t: any) => t.is_home)?.name,
+                league: 'NFL',
+                score: evt.score?.score_home ?? 0
+              }}
+              lines={evt.lines}
             />
           ))}
         </div>

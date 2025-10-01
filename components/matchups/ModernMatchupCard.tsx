@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Matchup, SportType, RecordSummary } from '@/types'
 import { format } from 'date-fns'
 import {
@@ -16,6 +16,7 @@ import { BettingLinesPopup } from './BettingLinesPopup'
 import { ScoreByPeriodPopup } from './ScoreByPeriodPopup'
 import { formatToEasternTime, formatToEasternDate, formatToEasternWeekday } from '@/lib/utils/time'
 import { useScoreByPeriod } from '@/hooks/useScoreByPeriod'
+import { computeConsensus, computeAtsFromConsensus } from '@/lib/utils/consensus'
 
 interface ModernMatchupCardProps {
   matchup: Matchup
@@ -27,45 +28,34 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [showBettingPopup, setShowBettingPopup] = useState(false)
   const [showScorePopup, setShowScorePopup] = useState(false)
+  const [consensusData, setConsensusData] = useState<{
+    spreadAway: number | null
+    spreadHome: number | null
+    totalPoints: number | null
+    winProbAway: number | null
+    winProbHome: number | null
+  } | null>(null)
 
   const gameTime = formatToEasternTime(game.gameDate)
-  const gameDate = formatToEasternDate(game.gameDate, { month: 'short', day: 'numeric', year: 'numeric' })
+  const gameDateShort = formatToEasternDate(game.gameDate, { month: 'short', day: 'numeric' })
   const gameDayOfWeek = formatToEasternWeekday(game.gameDate)
   const isScheduled = game.status === 'scheduled'
-  const showPredictions = isScheduled && !!predictions
+  const showPredictions = false
 
   const formatScoreValue = (value: number) => (Number.isInteger(value) ? value.toString() : value.toFixed(1))
 
-  const predictionInfo = showPredictions && predictions
-    ? (() => {
-        const homeWinPct = predictions.predictedWinner === game.homeTeam.name
-          ? predictions.confidence * 100
-          : 100 - predictions.confidence * 100
+  const predictionInfo = null
 
-        return {
-          awayScore: formatScoreValue(predictions.predictedScore.away),
-          homeScore: formatScoreValue(predictions.predictedScore.home),
-          homeWinPercentage: homeWinPct,
-          awayWinPercentage: 100 - homeWinPct,
-          updatedAt: predictions.createdAt
-        }
-      })()
-    : null
-
-  const awayScoreDisplay = predictionInfo
-    ? predictionInfo.awayScore
-    : game.awayScore !== undefined && game.awayScore !== null
+  const awayScoreDisplay = game.awayScore !== undefined && game.awayScore !== null
       ? game.awayScore.toString()
       : '-'
 
-  const homeScoreDisplay = predictionInfo
-    ? predictionInfo.homeScore
-    : game.homeScore !== undefined && game.homeScore !== null
+  const homeScoreDisplay = game.homeScore !== undefined && game.homeScore !== null
       ? game.homeScore.toString()
       : '-'
 
-  const homeWinPercentage = predictionInfo?.homeWinPercentage
-  const awayWinPercentage = predictionInfo?.awayWinPercentage
+  const homeWinPercentage = undefined
+  const awayWinPercentage = undefined
 
   // Color functions for percentages
   const getPercentageColor = (percentage: number) => {
@@ -119,7 +109,69 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
     </div>
   )
 
+  // Fetch all sportsbook lines for the game and compute consensus
+  useEffect(() => {
+    let isMounted = true
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/betting-lines/${game.id}`)
+        if (!res.ok) return
+        const data = await res.json()
+        const lineArray = Object.values(data?.lines || {}) as any[]
+        if (lineArray.length === 0) return
+        const consensus = computeConsensus(
+          lineArray.map((l: any) => ({
+            spread: {
+              point_spread_away: l?.spread?.point_spread_away,
+              point_spread_home: l?.spread?.point_spread_home,
+              point_spread_away_money: l?.spread?.point_spread_away_money,
+              point_spread_home_money: l?.spread?.point_spread_home_money
+            },
+            moneyline: {
+              moneyline_away: l?.moneyline?.moneyline_away,
+              moneyline_home: l?.moneyline?.moneyline_home
+            },
+            total: {
+              total_over: l?.total?.total_over,
+              total_under: l?.total?.total_under,
+              total_over_money: l?.total?.total_over_money,
+              total_under_money: l?.total?.total_under_money
+            }
+          }))
+        )
+        if (isMounted) setConsensusData(consensus)
+      } catch (e) {
+        // Silently ignore for now
+      }
+    })()
+    return () => {
+      isMounted = false
+    }
+  }, [game.id])
+
+  const formatPct = (p: number | null | undefined) => (p == null ? '-' : `${Math.round(p * 100)}%`)
+  const formatSpread = (v: number | null | undefined) => (v == null ? '-' : (v > 0 ? `+${v.toFixed(1)}` : v.toFixed(1)))
+  const formatTotal = (v: number | null | undefined) => (v == null ? '-' : v.toFixed(1))
+
+  const pctBadgeClass = (p: number | null | undefined) => {
+    if (p == null) return 'bg-gray-100 text-gray-600 dark:bg-gray-700/40 dark:text-gray-300'
+    return p >= 0.5
+      ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300'
+      : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'
+  }
+
+  const canComputeATS = game.status === 'final' && consensusData &&
+    typeof consensusData.spreadAway === 'number' && typeof consensusData.spreadHome === 'number'
+  const atsResult = canComputeATS
+    ? computeAtsFromConsensus(
+        game.awayScore ?? 0,
+        game.homeScore ?? 0,
+        { spreadAway: consensusData!.spreadAway!, spreadHome: consensusData!.spreadHome! }
+      )
+    : null
+
   return (
+    <>
     <div 
       className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
       onMouseEnter={() => setIsHovered(true)}
@@ -146,104 +198,86 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
       <div className="p-3">
         {/* Teams Side by Side with Date in Center */}
         <div className="grid grid-cols-3 gap-2 items-center mb-3">
-          {/* Away Team */}
-          <div className="text-center">
-            <TeamLogo team={game.awayTeam} size="md" className="mx-auto mb-2" />
-            <div className="text-base font-bold text-gray-900 dark:text-white">
-              {game.awayTeam.abbreviation}
-            </div>
-            {/*}
-            {game.awayTeam.record && (
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                {game.awayTeam.record}
+          {/* Away Team: [Logo][Score][Short Name] left-aligned */}
+          <div>
+            <div className="flex items-center justify-start gap-2 mb-1">
+              <TeamLogo team={game.awayTeam} size="md" className="" /> 
+              <div className="text-base font-bold text-gray-900 dark:text-white">
+                {game.awayTeam.abbreviation}
               </div>
-            )}*/}
-              {predictionInfo ? (
-              <>
-                <div className="mt-2 flex items-center justify-center gap-2">
-                  <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                    {awayScoreDisplay}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
-                    {Math.round(predictionInfo.awayWinPercentage)}% Win
-                  </span>
-                </div>
-                {/*}
-                <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-blue-500 dark:text-blue-300">
-                  AI Prediction
-                </div>
-                */}
-              </>
-            ) : (
-              <div className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="text-xl font-bold text-gray-900 dark:text-white">
                 {awayScoreDisplay}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Game Date & Time in Center */}
             <div className="text-center border-l border-r border-gray-200 dark:border-gray-700 px-4">
-            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-              {gameDayOfWeek}
+            <div className="inline-block text-[10px] text-gray-700 dark:text-gray-800 font-medium bg-[#fff7d1] px-2 py-0.5 rounded">
+              {`${gameDayOfWeek}, ${gameDateShort}`}
             </div>
-            <div className="text-base font-bold text-gray-900 dark:text-white">
-              {gameDate}
-            </div>
-            <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+            <div className="text-[10px] font-semibold text-blue-600 dark:text-blue-400">
               {gameTime}
             </div>
-            {showPredictions && (
-              <div className="mt-2 text-xs font-medium text-blue-600 dark:text-blue-300">
-                AI numbers display until kickoff
-              </div>
-            )}
             {game.venue && (
-              <div className="flex items-center justify-center text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <div className="flex items-center justify-center text-[10px] text-gray-500 dark:text-gray-400 mt-1">
                 <MapPinIcon className="h-3 w-3 mr-1" />
                 {game.venue}
               </div>
             )}
           </div>
 
-          {/* Home Team */}
-          <div className="text-center">
-            <TeamLogo team={game.homeTeam} size="md" className="mx-auto mb-2" />
-            <div className="text-base font-bold text-gray-900 dark:text-white">
-              {game.homeTeam.abbreviation}
-            </div>
-            {/*}
-            {game.homeTeam.record && (
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                {game.homeTeam.record}
-              </div>
-            )}*/}
-              {predictionInfo ? (
-              <>
-                <div className="mt-2 flex items-center justify-center gap-2">
-                  <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                    {homeScoreDisplay}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
-                    {Math.round(predictionInfo.homeWinPercentage)}% Win
-                  </span>
-                </div>
-                {/*}
-                <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-blue-500 dark:text-blue-300">
-                  AI Prediction
-                </div>
-                */}
-              </>
-            ) : (
-              <div className="mt-2 text-xl font-bold text-gray-900 dark:text-white">
+          {/* Home Team: [Short Name][Score][Logo] right-aligned */}
+          <div>
+            <div className="flex items-center justify-end gap-2 mb-1">
+              <div className="text-xl font-bold text-gray-900 dark:text-white">
                 {homeScoreDisplay}
               </div>
-            )}
+              <div className="text-base font-bold text-gray-900 dark:text-white">
+                {game.homeTeam.abbreviation}
+              </div>
+              <TeamLogo team={game.homeTeam} size="md" className="" />
+            </div>
           </div>
         </div>
 
+        {/* Consensus Lines aligned under team logos */}
+        {consensusData && (
+          <div className="mt-3 p-3  rounded-lg">
+            <div className="w-full grid grid-cols-3 items-center">
+              {/* Left: Away% and Away Spread */}
+              <div className="flex items-center gap-2 justify-start">
+                <span className={`px-2 py-0.5 rounded text-[18px] font-bold ${pctBadgeClass(consensusData.winProbAway)}`}>
+                  {formatPct(consensusData.winProbAway)}
+                </span>
+                <span className="text-[16px] font-normal text-gray-900 dark:text-white">
+                  {formatSpread(consensusData.spreadAway)}
+                </span>
+              </div>
+
+              {/* Center: o/u TOTAL */}
+              <div className="flex items-center justify-center">
+                <span className="px-2 py-0.5 rounded  text-gray-800 dark:text-gray-200 text-[16px] font-normal uppercase tracking-wide">
+                  o/u {formatTotal(consensusData.totalPoints)}
+                </span>
+              </div>
+
+              {/* Right: Home Spread and Home% */}
+              <div className="flex items-center gap-2 justify-end">
+                <span className="text-[16px] font-normal text-gray-900 dark:text-white">
+                  {formatSpread(consensusData.spreadHome)}
+                </span>
+                <span className={`px-2 py-0.5 rounded text-[18px] font-bold ${pctBadgeClass(consensusData.winProbHome)}`}>
+                  {formatPct(consensusData.winProbHome)}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Matchup of Covers */}
         {coversSummary && (
-          <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700 rounded-lg">
+          <div className="mt-4 p-3  rounded-lg">
             <div className="space-y-1">
               {renderCoversRow(
                 'Win/Loss',
@@ -306,15 +340,17 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
         </div>
       </div>
 
-      {/* Betting Lines Popup */}
-      <BettingLinesPopup
-        isOpen={showBettingPopup}
-        onClose={() => setShowBettingPopup(false)}
-        gameId={game.id}
-        homeTeam={game.homeTeam}
-        awayTeam={game.awayTeam}
-        sport={sport}
-      />
+    </div>
+
+    {/* Betting Lines Popup */}
+    <BettingLinesPopup
+      isOpen={showBettingPopup}
+      onClose={() => setShowBettingPopup(false)}
+      gameId={game.id}
+      homeTeam={game.homeTeam}
+      awayTeam={game.awayTeam}
+      sport={sport}
+    />
 
     <ScoreByPeriodPopup
       isOpen={showScorePopup}
@@ -325,6 +361,6 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
       homeTeam={game.homeTeam}
       awayTeam={game.awayTeam}
     />
-    </div>
+    </>
   )
 }
