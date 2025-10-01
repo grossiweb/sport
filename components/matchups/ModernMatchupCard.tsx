@@ -43,16 +43,13 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
   const showPredictions = false
 
   const formatScoreValue = (value: number) => (Number.isInteger(value) ? value.toString() : value.toFixed(1))
+  const displayScore = (val: unknown) => (typeof val === 'number' ? val.toString() : val === 0 ? '0' : '-')
 
   const predictionInfo = null
 
-  const awayScoreDisplay = game.awayScore !== undefined && game.awayScore !== null
-      ? game.awayScore.toString()
-      : '-'
+  const awayScoreDisplay = displayScore(game.awayScore)
 
-  const homeScoreDisplay = game.homeScore !== undefined && game.homeScore !== null
-      ? game.homeScore.toString()
-      : '-'
+  const homeScoreDisplay = displayScore(game.homeScore)
 
   const homeWinPercentage = undefined
   const awayWinPercentage = undefined
@@ -284,30 +281,30 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
             <div className="space-y-1">
               {renderCoversRow(
                 'Win/Loss',
-                game.awayTeam.record || '(no data)',
-                game.homeTeam.record || '(no data)',
+                `(${game.awayTeam.record} Road)` || '(-)',
+                `(${game.homeTeam.record} Home)` || '(-)',
                 coversSummary.home.overall,
                 coversSummary.away.overall
               )}
               {renderCoversRow(
                 'Against the Spread',
                 coversSummary.away.ats?.road
-                  ? `Road ATS: ${formatRecord(coversSummary.away.ats.road)}`
-                  : '(coming soon)',
+                  ? `(${formatRecord(coversSummary.away.ats.road)} Road)`
+                  : '-',
                 coversSummary.home.ats?.home
-                  ? `Home ATS: ${formatRecord(coversSummary.home.ats.home)}`
-                  : '(coming soon)',
+                  ? `(${formatRecord(coversSummary.home.ats.home)} Home)`
+                  : '-',
                 coversSummary.home.ats?.overall,
                 coversSummary.away.ats?.overall
               )}
               {renderCoversRow(
                 'Last 10',
                 coversSummary.away.lastTen.gamesPlayed > 0
-                  ? `SU: ${formatRecord(coversSummary.away.lastTen)}`
-                  : '(no data)',
+                  ? `(${formatRecord(coversSummary.away.lastTen)})`
+                  : '-',
                 coversSummary.home.lastTen.gamesPlayed > 0
-                  ? `SU: ${formatRecord(coversSummary.home.lastTen)}`
-                  : '(no data)',
+                  ? `(${formatRecord(coversSummary.home.lastTen)})`
+                  : '-',
                 coversSummary.home.ats?.lastTen,
                 coversSummary.away.ats?.lastTen
               )}

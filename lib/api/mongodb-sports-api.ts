@@ -185,6 +185,97 @@ export class MongoDBSportsAPI {
     }
   }
 
+  // Compute consensus spreads for a game from betting_data lines (averaging across books)
+  private async getConsensusSpreadsForGame(eventId: string): Promise<{ home: number | null; away: number | null }> {
+    try {
+      const collection = await getBettingDataCollection()
+      const mongoBetting = await collection.findOne({ event_id: eventId })
+      if (!mongoBetting || !mongoBetting.lines) return { home: null, away: null }
+
+      const lines = Object.values(mongoBetting.lines) as any[]
+      const homeVals: number[] = []
+      const awayVals: number[] = []
+      for (const l of lines) {
+        const h = typeof l?.spread?.point_spread_home === 'number' && isFinite(l.spread.point_spread_home)
+          ? l.spread.point_spread_home
+          : (typeof l?.spread?.point_spread_home_delta === 'number' ? l.spread.point_spread_home_delta : null)
+        const a = typeof l?.spread?.point_spread_away === 'number' && isFinite(l.spread.point_spread_away)
+          ? l.spread.point_spread_away
+          : (typeof l?.spread?.point_spread_away_delta === 'number' ? l.spread.point_spread_away_delta : null)
+        if (typeof h === 'number' && isFinite(h)) homeVals.push(h)
+        if (typeof a === 'number' && isFinite(a)) awayVals.push(a)
+      }
+      const avg = (arr: number[]) => (arr.length ? arr.reduce((x, y) => x + y, 0) / arr.length : null)
+      return { home: avg(homeVals), away: avg(awayVals) }
+    } catch {
+      return { home: null, away: null }
+    }
+  }
+
+  private computeAtsOutcome(teamScore: number, opponentScore: number, teamSpread: number | null | undefined): 'win' | 'loss' | 'push' | null {
+    if (teamSpread == null || !isFinite(teamSpread)) return null
+    const adjusted = (teamScore ?? 0) + teamSpread
+    if (adjusted > (opponentScore ?? 0)) return 'win'
+    if (adjusted < (opponentScore ?? 0)) return 'loss'
+    return 'push'
+  }
+
+  private accumulateAtsRecord(record: RecordSummary, outcome: 'win' | 'loss' | 'push' | null) {
+    if (!outcome) return
+    record.gamesPlayed += 1
+    if (outcome === 'win') record.wins += 1
+    else if (outcome === 'loss') record.losses += 1
+    else record.pushes += 1
+  }
+
+  private async computeTeamAtsSummary(teamId: string, games: Game[]): Promise<{ overall: RecordSummary; home: RecordSummary; road: RecordSummary; lastTen: RecordSummary }> {
+    const overall = this.createEmptyRecord()
+    const home = this.createEmptyRecord()
+    const road = this.createEmptyRecord()
+    const lastTen = this.createEmptyRecord()
+
+    const finalGames = games.filter(g => g.status === 'final')
+
+    // Cache spreads per event
+    const spreadsCache = new Map<string, { home: number | null; away: number | null }>()
+
+    for (const game of finalGames) {
+      if (!spreadsCache.has(game.id)) {
+        spreadsCache.set(game.id, await this.getConsensusSpreadsForGame(game.id))
+      }
+      const spreads = spreadsCache.get(game.id)!
+      const isHome = game.homeTeam.id === teamId
+      const teamSpread = isHome ? spreads.home : spreads.away
+      const teamScore = isHome ? (game.homeScore ?? 0) : (game.awayScore ?? 0)
+      const oppScore = isHome ? (game.awayScore ?? 0) : (game.homeScore ?? 0)
+      const outcome = this.computeAtsOutcome(teamScore, oppScore, teamSpread)
+
+      this.accumulateAtsRecord(overall, outcome)
+      if (isHome) this.accumulateAtsRecord(home, outcome)
+      else this.accumulateAtsRecord(road, outcome)
+    }
+
+    const lastTenGames = finalGames
+      .slice()
+      .sort((a, b) => new Date(b.gameDate).getTime() - new Date(a.gameDate).getTime())
+      .slice(0, 10)
+
+    for (const game of lastTenGames) {
+      if (!spreadsCache.has(game.id)) {
+        spreadsCache.set(game.id, await this.getConsensusSpreadsForGame(game.id))
+      }
+      const spreads = spreadsCache.get(game.id)!
+      const isHome = game.homeTeam.id === teamId
+      const teamSpread = isHome ? spreads.home : spreads.away
+      const teamScore = isHome ? (game.homeScore ?? 0) : (game.awayScore ?? 0)
+      const oppScore = isHome ? (game.awayScore ?? 0) : (game.homeScore ?? 0)
+      const outcome = this.computeAtsOutcome(teamScore, oppScore, teamSpread)
+      this.accumulateAtsRecord(lastTen, outcome)
+    }
+
+    return { overall, home, road, lastTen }
+  }
+
   public async getTeamSeasonGames(
     sport: SportType,
     teamId: string,
@@ -226,6 +317,25 @@ export class MongoDBSportsAPI {
 
       const homeSummary = this.computeTeamCoversSummary(homeTeamId, homeTeamName, homeGames)
       const awaySummary = this.computeTeamCoversSummary(awayTeamId, awayTeamName, awayGames)
+
+      // Compute ATS summaries using betting_data spreads
+      const [homeAts, awayAts] = await Promise.all([
+        this.computeTeamAtsSummary(homeTeamId, homeGames),
+        this.computeTeamAtsSummary(awayTeamId, awayGames)
+      ])
+
+      homeSummary.ats = {
+        overall: homeAts.overall,
+        home: homeAts.home,
+        road: homeAts.road,
+        lastTen: homeAts.lastTen
+      }
+      awaySummary.ats = {
+        overall: awayAts.overall,
+        home: awayAts.home,
+        road: awayAts.road,
+        lastTen: awayAts.lastTen
+      }
 
       return {
         home: homeSummary,
