@@ -242,8 +242,8 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
         </div>
 
         {/* Consensus Lines aligned under team logos */}
-        {consensusData && (
-          <div className="mt-3 p-3  rounded-lg">
+        {game.status !== 'final' && consensusData ? (
+          <div className="mt-3 p-3 rounded-lg min-h-[38px]">
             <div className="w-full grid grid-cols-3 items-center">
               {/* Left: Away% and Away Spread */}
               <div className="flex items-center gap-2 justify-start">
@@ -257,7 +257,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
 
               {/* Center: o/u TOTAL */}
               <div className="flex items-center justify-center">
-                <span className="px-2 py-0.5 rounded  text-gray-800 dark:text-gray-200 text-[16px] font-normal uppercase tracking-wide">
+                <span className="px-2 py-0.5 rounded text-gray-800 dark:text-gray-200 text-[16px] font-normal uppercase tracking-wide">
                   o/u {formatTotal(consensusData.totalPoints)}
                 </span>
               </div>
@@ -273,6 +273,9 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
               </div>
             </div>
           </div>
+        ) : (
+          // Placeholder to preserve height when consensus is hidden on final games
+          <div className="mt-3 p-3 rounded-lg min-h-[38px]"></div>
         )}
 
         {/* Matchup of Covers */}
