@@ -88,14 +88,14 @@ export class MongoDBSportsAPI {
         id: mongoGame.home_team_id.toString(),
         name: mongoGame.home_team,
         city: '',
-        abbreviation: mongoGame.home_team.substring(0, 3).toUpperCase(),
+        abbreviation: mongoGame.home_team_abbreviation || mongoGame.home_team?.substring(0, 3).toUpperCase(),
         league: (mongoGame.sport_id === 2 ? 'NFL' : 'CFB') as SportType
       },
       awayTeam: {
         id: mongoGame.away_team_id.toString(),
         name: mongoGame.away_team,
         city: '',
-        abbreviation: mongoGame.away_team.substring(0, 3).toUpperCase(),
+        abbreviation: mongoGame.away_team_abbreviation || mongoGame.away_team?.substring(0, 3).toUpperCase(),
         league: (mongoGame.sport_id === 2 ? 'NFL' : 'CFB') as SportType
       },
       league: (mongoGame.sport_id === 2 ? 'NFL' : 'CFB') as SportType,
@@ -596,6 +596,7 @@ export class MongoDBSportsAPI {
           ...game,
           homeTeam: {
             ...game.homeTeam,
+            abbreviation: homeTeam?.abbreviation || game.homeTeam.abbreviation,
             division: homeTeam?.division,
             conference: homeTeam?.conference,
             mascot: homeTeam?.mascot,
@@ -603,6 +604,7 @@ export class MongoDBSportsAPI {
           },
           awayTeam: {
             ...game.awayTeam,
+            abbreviation: awayTeam?.abbreviation || game.awayTeam.abbreviation,
             division: awayTeam?.division,
             conference: awayTeam?.conference,
             mascot: awayTeam?.mascot,

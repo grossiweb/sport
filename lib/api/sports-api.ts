@@ -86,14 +86,14 @@ class TheRundownAPI {
           id: event.home_team_id != null ? String(event.home_team_id) : 'unknown',
           name: event.home_team || 'Home Team',
           city: '', // ❌ Not provided in response
-          abbreviation: event.home_team?.substring(0, 3).toUpperCase() || 'HOM',
+          abbreviation: event.home_team_abbreviation || event.home_team?.substring(0, 3).toUpperCase() || 'HOM',
           league: (this.sportId === '2' ? 'NFL' : 'CFB') as SportType
         },
         awayTeam: {
           id: event.away_team_id != null ? String(event.away_team_id) : 'unknown',
           name: event.away_team || 'Away Team',
           city: '', // ❌ Not provided in response
-          abbreviation: event.away_team?.substring(0, 3).toUpperCase() || 'AWY',
+          abbreviation: event.away_team_abbreviation || event.away_team?.substring(0, 3).toUpperCase() || 'AWY',
           league: (this.sportId === '2' ? 'NFL' : 'CFB') as SportType
         },
         league: (this.sportId === '2' ? 'NFL' : 'CFB') as SportType,
