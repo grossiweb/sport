@@ -64,8 +64,10 @@ export function TeamDetailedStats({
         comparisonMap.set(key, {
           ...stat,
           homeValue: stat.display_value || stat.value,
+          homePerGame: stat.per_game_display_value || null,
           homeRank: stat.rank_display_value || stat.rank,
           awayValue: null,
+          awayPerGame: null,
           awayRank: null
         })
       }
@@ -78,13 +80,16 @@ export function TeamDetailedStats({
         const existing = comparisonMap.get(key)
         if (existing) {
           existing.awayValue = stat.display_value || stat.value
+          existing.awayPerGame = stat.per_game_display_value || null,
           existing.awayRank = stat.rank_display_value || stat.rank
         } else {
           comparisonMap.set(key, {
             ...stat,
             homeValue: null,
+            homePerGame: null,
             homeRank: null,
             awayValue: stat.display_value || stat.value,
+            awayPerGame: stat.per_game_display_value || null,
             awayRank: stat.rank_display_value || stat.rank
           })
         }
@@ -121,6 +126,23 @@ export function TeamDetailedStats({
     } else {
       return homeNum > awayNum ? 'home' : awayNum > homeNum ? 'away' : null
     }
+  }
+
+  // Format display value with integer rounding only; preserve percent sign if present
+  const formatValueDisplay = (value: any): string => {
+    if (value === null || value === undefined) return '-'
+    if (typeof value === 'number') {
+      return String(Math.round(value))
+    }
+    const str = String(value).trim()
+    if (!str) return '-'
+    const hasPercent = str.includes('%')
+    const numeric = parseFloat(str.replace(/%/g, '').replace(/,/g, ''))
+    if (!isNaN(numeric)) {
+      const rounded = String(Math.round(numeric))
+      return hasPercent ? `${rounded}%` : rounded
+    }
+    return str
   }
 
   const ViewToggle = () => {
@@ -183,79 +205,61 @@ export function TeamDetailedStats({
         </div>
       ) : (
         <>
-          {/* Header */}
-          <div className="grid grid-cols-5 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300">
-            <div className="flex items-center">
-              {homeTeam && <TeamLogo team={homeTeam} size="xs" className="mr-2" />}
-              {homeTeamName}
-            </div>
-            <div className="text-center">Stat</div>
-            <div className="text-center">Winner</div>
-            <div className="text-center">Stat</div>
-            <div className="flex items-center justify-end">
+          <div className="text-xs text-gray-500 dark:text-gray-400 px-1">
+            Note: values represent averages per game when available.
+          </div>
+          {/* Header: Stat | [logo] Away | [logo] Home */}
+          <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300">
+            <div className="text-left">Stat</div>
+            <div className="flex items-center justify-center">
               {awayTeam && <TeamLogo team={awayTeam} size="xs" className="mr-2" />}
-              {awayTeamName}
+              <span className="truncate">{awayTeamName}</span>
+            </div>
+            <div className="flex items-center justify-center">
+              {homeTeam && <TeamLogo team={homeTeam} size="xs" className="mr-2" />}
+              <span className="truncate">{homeTeamName}</span>
             </div>
           </div>
 
-          {/* Stats Rows */}
+          {/* Stats Rows: Stat | Away (per game if available) | Home */}
           {filteredData.map((stat, index) => {
-            const winner = getWinnerIndicator(stat.homeValue, stat.awayValue, stat.stat?.abbreviation)
-            
+            const winner = getWinnerIndicator(stat.homePerGame || stat.homeValue, stat.awayPerGame || stat.awayValue, stat.stat?.abbreviation)
+            const statLabel = stat.stat?.display_name || stat.stat?.name || '—'
+            const statAbbr = stat.stat?.abbreviation
+            const awayDisplay = formatValueDisplay(stat.awayPerGame ?? stat.awayValue)
+            const homeDisplay = formatValueDisplay(stat.homePerGame ?? stat.homeValue)
             return (
               <div
                 key={`${stat.stat?.id}-${index}`}
-                className="grid grid-cols-5 gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-sm transition-shadow"
+                className="grid grid-cols-3 gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-sm transition-shadow"
               >
-                {/* Home Value */}
-                <div className={`text-right font-semibold ${
-                  winner === 'home' ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'
-                }`}>
-                  {stat.homeValue || '-'}
-                  {stat.homeRank && (
-                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
-                      (#{stat.homeRank})
-                    </span>
-                  )}
-                </div>
-
                 {/* Stat Name */}
-                <div className="text-center">
-                  <div className="font-medium text-gray-900 dark:text-white">
-                    {stat.stat?.abbreviation || stat.stat?.name}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {stat.stat?.display_name}
-                  </div>
-                </div>
-
-                {/* Winner Indicator */}
-                <div className="flex justify-center">
-                  {winner === 'home' && (
-                    <ArrowUpIcon className="h-5 w-5 text-green-500 transform -rotate-45" />
-                  )}
-                  {winner === 'away' && (
-                    <ArrowUpIcon className="h-5 w-5 text-green-500 transform rotate-45" />
-                  )}
-                  {!winner && stat.homeValue && stat.awayValue && (
-                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                <div className="text-left">
+                  <div className="font-medium text-gray-900 dark:text-white">{statLabel}</div>
+                  {statAbbr && (
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{statAbbr}</div>
                   )}
                 </div>
 
                 {/* Away Value */}
-                <div className={`text-left font-semibold ${
+                <div className={`text-center font-semibold ${
                   winner === 'away' ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'
                 }`}>
-                  {stat.awayValue || '-'}
+                  {awayDisplay}
                   {stat.awayRank && (
-                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
-                      (#{stat.awayRank})
-                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">(#{stat.awayRank})</span>
                   )}
                 </div>
 
-                {/* Placeholder for alignment */}
-                <div></div>
+                {/* Home Value */}
+                <div className={`text-center font-semibold ${
+                  winner === 'home' ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'
+                }`}>
+                  {homeDisplay}
+                  {stat.homeRank && (
+                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">(#{stat.homeRank})</span>
+                  )}
+                </div>
               </div>
             )
           })}
