@@ -80,7 +80,9 @@ export class MongoDBSportsAPI {
 
   public mapMongoGameToGame(
     mongoGame: MongoGame,
-    bettingData?: MongoBettingData | null
+    bettingData?: MongoBettingData | null,
+    homeTeam?: MongoTeam,
+    awayTeam?: MongoTeam
   ): Game {
     return {
       id: mongoGame.event_id,
@@ -88,14 +90,14 @@ export class MongoDBSportsAPI {
         id: mongoGame.home_team_id.toString(),
         name: mongoGame.home_team,
         city: '',
-        abbreviation: mongoGame.home_team_abbreviation || mongoGame.home_team?.substring(0, 3).toUpperCase(),
+        abbreviation: homeTeam?.abbreviation || mongoGame.home_team?.substring(0, 3).toUpperCase(),
         league: (mongoGame.sport_id === 2 ? 'NFL' : 'CFB') as SportType
       },
       awayTeam: {
         id: mongoGame.away_team_id.toString(),
         name: mongoGame.away_team,
         city: '',
-        abbreviation: mongoGame.away_team_abbreviation || mongoGame.away_team?.substring(0, 3).toUpperCase(),
+        abbreviation: awayTeam?.abbreviation || mongoGame.away_team?.substring(0, 3).toUpperCase(),
         league: (mongoGame.sport_id === 2 ? 'NFL' : 'CFB') as SportType
       },
       league: (mongoGame.sport_id === 2 ? 'NFL' : 'CFB') as SportType,
@@ -282,6 +284,7 @@ export class MongoDBSportsAPI {
     seasonYear: number
   ): Promise<Game[]> {
     const collection = await getGamesCollection()
+    const teamsCollection = await getTeamsCollection()
     const sportId = sport === 'NFL' ? 2 : 1
     const numericTeamId = parseInt(teamId, 10)
 
@@ -297,7 +300,15 @@ export class MongoDBSportsAPI {
       .sort({ date_event: -1 })
       .toArray()
 
-    return mongoGames.map(game => this.mapMongoGameToGame(game))
+    // Get all teams for this sport to look up abbreviations
+    const allTeams = await teamsCollection.find({ sport_id: sportId }).toArray()
+    const teamsMap = new Map(allTeams.map(team => [team.team_id, team]))
+
+    return mongoGames.map(game => {
+      const homeTeam = teamsMap.get(game.home_team_id)
+      const awayTeam = teamsMap.get(game.away_team_id)
+      return this.mapMongoGameToGame(game, null, homeTeam, awayTeam)
+    })
   }
 
   async buildMatchupCoversSummary(
@@ -582,21 +593,29 @@ export class MongoDBSportsAPI {
       }
       }
 
-      const games = mongoGames.map(game => this.mapMongoGameToGame(game, bettingDataByEventId.get(game.event_id)))
-      
       // Enrich games with team data
       const teams = await this.getTeams(sport)
       const teamsMap = new Map(teams.map(team => [team.id, team]))
-      
+
+      // Get MongoDB team data for abbreviations
+      const teamsCollection = await getTeamsCollection()
+      const allMongoTeams = await teamsCollection.find({ sport_id: sportId }).toArray()
+      const mongoTeamsMap = new Map(allMongoTeams.map(team => [team.team_id.toString(), team]))
+
+      const games = mongoGames.map(game => {
+        const homeTeamData = mongoTeamsMap.get(game.home_team_id.toString())
+        const awayTeamData = mongoTeamsMap.get(game.away_team_id.toString())
+        return this.mapMongoGameToGame(game, bettingDataByEventId.get(game.event_id), homeTeamData, awayTeamData)
+      })
+
       return games.map(game => {
         const homeTeam = teamsMap.get(game.homeTeam.id)
         const awayTeam = teamsMap.get(game.awayTeam.id)
-        
+
         return {
           ...game,
           homeTeam: {
             ...game.homeTeam,
-            abbreviation: homeTeam?.abbreviation || game.homeTeam.abbreviation,
             division: homeTeam?.division,
             conference: homeTeam?.conference,
             mascot: homeTeam?.mascot,
@@ -604,7 +623,6 @@ export class MongoDBSportsAPI {
           },
           awayTeam: {
             ...game.awayTeam,
-            abbreviation: awayTeam?.abbreviation || game.awayTeam.abbreviation,
             division: awayTeam?.division,
             conference: awayTeam?.conference,
             mascot: awayTeam?.mascot,

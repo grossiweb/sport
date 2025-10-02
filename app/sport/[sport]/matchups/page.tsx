@@ -175,6 +175,7 @@ export default function SportMatchupsPage() {
           ))}
 
           {/* Demo: Covers-style cards using provided betting JSON (renders if IDs match) */}
+          {/*} 
           {Array.isArray(sampleBetting) && sampleBetting.map((evt: any) => (
             <CoversStyleMatchupCard
               key={evt.event_id}
@@ -197,6 +198,7 @@ export default function SportMatchupsPage() {
               lines={evt.lines}
             />
           ))}
+            */}
         </div>
       ) : matchups && matchups.length > 0 ? (
         <div className="text-center py-12">
