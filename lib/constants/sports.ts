@@ -3,7 +3,7 @@ import { Sport, SportType } from '@/types'
 export const SPORTS: Record<SportType, Sport> = {
   CFB: {
     id: 'cfb',
-    name: 'College Football',
+    name: 'NCAAF',
     displayName: 'NCAAF',
     shortName: 'NCAAF',
     apiId: 1
@@ -11,7 +11,7 @@ export const SPORTS: Record<SportType, Sport> = {
   NFL: {
     id: 'nfl',
     name: 'NFL',
-    displayName: 'National Football League',
+    displayName: 'NFL',
     shortName: 'NFL',
     apiId: 2
   }
