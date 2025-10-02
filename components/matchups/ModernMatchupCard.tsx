@@ -79,30 +79,79 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
   }
 
   const renderCoversRow = (
-    label: string,
-    prefix: string,
-    suffix: string,
+    label: any,
+    prefix: any,
+    suffix: any,
     homeRecord?: RecordSummary,
     awayRecord?: RecordSummary
   ) => (
     <div className="grid grid-cols-5 items-center text-[11px] text-gray-600 dark:text-gray-400">
-      <span className="truncate" title={prefix}>
-        {prefix}
+      <span className="text-center f text-gray-900 dark:text-white" title={prefix}>
+      {prefix}
       </span>
-      <span className="text-center font-semibold text-gray-900 dark:text-white">
-        {formatRecord(awayRecord)}
+      <span className="text-center  text-gray-900 dark:text-white">
+      {formatRecord(awayRecord)}
       </span>
       <span className="text-center font-medium text-gray-700 dark:text-gray-300">
-        {label}
+      {label}
       </span>
-      <span className="text-center font-semibold text-gray-900 dark:text-white">
-        {formatRecord(homeRecord)}
+      <span className="text-center  text-gray-900 dark:text-white">
+      {formatRecord(homeRecord)}
       </span>
       <span className="text-right truncate" title={suffix}>
-        {suffix}
+      {suffix}
       </span>
     </div>
   )
+
+  // Custom Win/Loss row ordering: [away overall] [away record] [label] [home record] [home record]
+  const renderWinLossRow = () => (
+    <div className="grid grid-cols-5 items-center text-[11px] text-gray-600 dark:text-gray-400">
+      <span className="text-center f text-gray-900 dark:text-white">
+        ({formatRecord(coversSummary?.away.overall)} Road)
+      </span>
+      <span className="text-center  text-gray-900 dark:text-white">
+        {game.awayTeam.record || '-'}-0
+      </span>
+      <span className="text-center font-medium text-gray-700 dark:text-gray-300">
+        Win/Loss
+      </span>
+      <span className="text-center  text-gray-900 dark:text-white">
+        {game.homeTeam.record || '-'}-0
+      </span>
+      <span className="text-right truncate" title={formatRecord(coversSummary?.home.overall)}>
+        ({formatRecord(coversSummary?.home.overall)} Home)
+      </span>
+    </div>
+  )
+
+  // Last 10 row mirrors Win/Loss layout but uses lastTen records
+  const renderLastTenRow = () => (
+    <div className="grid grid-cols-5 items-center text-[11px] text-gray-600 dark:text-gray-400">
+      {/* 1: away lastTen overall */}
+      <span className="text-center text-gray-900 dark:text-white">
+        ({formatRecord(coversSummary?.away.ats?.overall)} ATS)
+      </span>
+      {/* 2: away lastTen record string */}
+      <span className="text-center  text-gray-900 dark:text-white">
+      {game.awayTeam.record || '-'}-0
+      </span>
+      {/* 3: label */}
+      <span className="text-center font-medium text-gray-700 dark:text-gray-300">
+        Last 10
+      </span>
+      {/* 4: home lastTen record string */}
+      <span className="text-center  text-gray-900 dark:text-white">
+      {game.homeTeam.record || '-'}-0
+      </span>
+      {/* 5: home lastTen overall */}
+      <span className="text-right truncate" title={coversSummary?.home.lastTen ? formatRecord(coversSummary.home.lastTen) : '-' }>
+      ({formatRecord(coversSummary?.home.ats?.overall)} ATS)
+      </span>
+    </div>
+  )
+
+  
 
   // Fetch all sportsbook lines for the game and compute consensus
   useEffect(() => {
@@ -277,13 +326,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
         {coversSummary && (
           <div className="mt-4 p-3  rounded-lg">
             <div className="space-y-1">
-              {renderCoversRow(
-                'Win/Loss',
-                `(${game.awayTeam.record} Road)` || '(-)',
-                `(${game.homeTeam.record} Home)` || '(-)',
-                coversSummary.home.overall,
-                coversSummary.away.overall
-              )}
+              {renderWinLossRow()}
               {renderCoversRow(
                 'Against the Spread',
                 coversSummary.away.ats?.road
@@ -295,17 +338,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
                 coversSummary.home.ats?.overall,
                 coversSummary.away.ats?.overall
               )}
-              {renderCoversRow(
-                'Last 10',
-                coversSummary.away.lastTen.gamesPlayed > 0
-                  ? `(${formatRecord(coversSummary.away.lastTen)})`
-                  : '-',
-                coversSummary.home.lastTen.gamesPlayed > 0
-                  ? `(${formatRecord(coversSummary.home.lastTen)})`
-                  : '-',
-                coversSummary.home.ats?.lastTen,
-                coversSummary.away.ats?.lastTen
-              )}
+              {renderLastTenRow()}
             </div>
           </div>
         )}
