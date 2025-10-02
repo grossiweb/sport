@@ -258,6 +258,17 @@ export interface MongoPlayer {
   weight: number
 }
 
+// Sport seasons collection (used for dynamic season-based weeks)
+export interface MongoSportSeason {
+  _id?: any
+  season: number
+  sport_id: number
+  sport_name?: string
+  // Stored as ISO string or Date depending on import; accept both
+  start_date: string | Date
+  end_date?: string | Date
+}
+
 // Helper functions to get collections
 export async function getTeamsCollection(): Promise<Collection<MongoTeam>> {
   const { db } = await connectToDatabase()
@@ -282,4 +293,9 @@ export async function getBettingDataCollection(): Promise<Collection<MongoBettin
 export async function getPlayersCollection(): Promise<Collection<MongoPlayer>> {
   const { db } = await connectToDatabase()
   return db.collection<MongoPlayer>('players')
+}
+
+export async function getSportSeasonsCollection(): Promise<Collection<MongoSportSeason>> {
+  const { db } = await connectToDatabase()
+  return db.collection<MongoSportSeason>('sport_seasons')
 }

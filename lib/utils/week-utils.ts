@@ -1,4 +1,4 @@
-import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, getWeek, getYear, startOfYear, differenceInWeeks } from 'date-fns'
+import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, getWeek, getYear, startOfYear, isAfter } from 'date-fns'
 
 export interface WeekInfo {
   weekNumber: number
@@ -13,6 +13,11 @@ export interface WeekOption {
   value: string
   label: string
   weekInfo: WeekInfo
+}
+
+export interface SeasonWeeksOptions {
+  startDate: Date
+  endDate?: Date
 }
 
 /**
@@ -91,6 +96,42 @@ export function getAvailableWeekOptions(): WeekOption[] {
   const nextYearWeeks = getWeekOptionsForYear(currentYear + 1)
   
   return [...currentYearWeeks, ...nextYearWeeks]
+}
+
+/**
+ * Build week options dynamically between a season start and (optional) end date.
+ * Weeks are Monday-Sunday and labels mirror getWeekInfo labeling.
+ */
+export function getSeasonWeekOptions({ startDate, endDate }: SeasonWeeksOptions): WeekOption[] {
+  const weeks: WeekOption[] = []
+  const seasonStart = startOfWeek(startDate, { weekStartsOn: 1 })
+  const hardEnd = endDate ? endOfWeek(endDate, { weekStartsOn: 1 }) : undefined
+
+  let cursor = seasonStart
+  for (let i = 0; i < 60; i++) { // safety bound ~60 weeks max
+    const info = getWeekInfo(cursor)
+    if (hardEnd && isAfter(info.startDate, hardEnd)) break
+    // Build a WeekInfo with season-relative numbering so labels are correct everywhere
+    const seasonWeekInfo: WeekInfo = {
+      weekNumber: i + 1,
+      year: info.year,
+      startDate: info.startDate,
+      endDate: info.endDate,
+      label: `Week ${i + 1}`,
+      dateRange: info.dateRange
+    }
+    weeks.push({
+      // Keep value as ISO year-week for stable parsing, but show season-relative label
+      value: `${info.year}-W${info.weekNumber.toString().padStart(2, '0')}`,
+      label: `${seasonWeekInfo.label} (${seasonWeekInfo.dateRange})`,
+      weekInfo: seasonWeekInfo
+    })
+    // Stop if adding another week would exceed endDate by too much (when provided)
+    const nextCursor = addWeeks(cursor, 1)
+    if (hardEnd && isAfter(nextCursor, hardEnd)) break
+    cursor = nextCursor
+  }
+  return weeks
 }
 
 /**

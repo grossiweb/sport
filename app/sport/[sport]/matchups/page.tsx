@@ -8,7 +8,7 @@ import { isValidSportType } from '@/lib/constants/sports'
 import { useSport } from '@/contexts/SportContext'
 import { ModernMatchupCard } from '@/components/matchups/ModernMatchupCard'
 import { MatchupFilters } from '@/components/matchups/MatchupFilters'
-import { WeekInfo, getCurrentWeek, getWeekDateRange } from '@/lib/utils/week-utils'
+import { WeekInfo, getCurrentWeek, getWeekDateRange, getSeasonWeekOptions } from '@/lib/utils/week-utils'
 import { useQuery } from 'react-query'
 import { CoversStyleMatchupCard } from '@/components/matchups/CoversStyleMatchupCard'
 import sampleBetting from '@/sportStats.betting_data.json'
@@ -35,6 +35,28 @@ export default function SportMatchupsPage() {
   const { currentSport, currentSportData, isLoading: contextLoading } = useSport()
   const [validSport, setValidSport] = useState<SportType | null>(null)
   const [selectedWeek, setSelectedWeek] = useState<WeekInfo>(getCurrentWeek())
+  // Align initial selectedWeek to current season-relative week if season data exists
+  useEffect(() => {
+    const alignToSeason = async () => {
+      const sportId = (validSport || currentSport) === 'CFB' ? 1 : (validSport || currentSport) === 'NFL' ? 2 : undefined
+      if (!sportId) return
+      const year = new Date().getFullYear()
+      try {
+        const res = await fetch(`/api/seasons?sport_id=${sportId}&season=${year}`)
+        const json = await res.json()
+        const season = Array.isArray(json.data) ? json.data[0] : null
+        if (!season?.start_date) return
+        const start = new Date(season.start_date)
+        const endDate = season.end_date ? new Date(season.end_date) : undefined
+        const weeks = getSeasonWeekOptions({ startDate: start, endDate })
+        // Find current date week within season
+        const now = new Date()
+        const current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+        if (current) setSelectedWeek(current.weekInfo)
+      } catch {}
+    }
+    alignToSeason()
+  }, [validSport, currentSport])
   const [filters, setFilters] = useState<MatchupFiltersState>({})
 
   useEffect(() => {
