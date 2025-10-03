@@ -9,12 +9,13 @@ import { useSport } from '@/contexts/SportContext'
 import { ModernMatchupCard } from '@/components/matchups/ModernMatchupCard'
 import { MatchupFilters } from '@/components/matchups/MatchupFilters'
 import { WeekInfo, getCurrentWeek, getWeekDateRange, getSeasonWeekOptions } from '@/lib/utils/week-utils'
+import { formatToEasternWeekday } from '@/lib/utils/time'
 import { useQuery } from 'react-query'
 import { CoversStyleMatchupCard } from '@/components/matchups/CoversStyleMatchupCard'
 
 interface MatchupFiltersState {
   status?: string
-  confidence?: string
+  search?: string
   division?: string
 }
 
@@ -94,20 +95,17 @@ export default function SportMatchupsPage() {
       return false
     }
     
-    // Confidence filter
-    if (filters.confidence) {
-      const confidence = matchup.predictions?.confidence || 0
-      switch (filters.confidence) {
-        case 'high':
-          if (confidence < 0.8) return false
-          break
-        case 'medium':
-          if (confidence < 0.6 || confidence >= 0.8) return false
-          break
-        case 'low':
-          if (confidence >= 0.6) return false
-          break
-      }
+    // Search filter (team name, abbreviation, weekday)
+    if (filters.search && filters.search.trim().length > 0) {
+      const q = filters.search.trim().toLowerCase()
+      const homeName = matchup.game.homeTeam.name?.toLowerCase() || ''
+      const awayName = matchup.game.awayTeam.name?.toLowerCase() || ''
+      const homeAbbr = matchup.game.homeTeam.abbreviation?.toLowerCase() || ''
+      const awayAbbr = matchup.game.awayTeam.abbreviation?.toLowerCase() || ''
+      const weekdayET = formatToEasternWeekday(matchup.game.gameDate).toLowerCase()
+      const weekdayShort = weekdayET.slice(0, 3)
+      const matches = [homeName, awayName, homeAbbr, awayAbbr, weekdayET, weekdayShort].some(val => val.includes(q))
+      if (!matches) return false
     }
     
     // Division filtering is now handled at API level for CFB (only FBS and FCS teams)

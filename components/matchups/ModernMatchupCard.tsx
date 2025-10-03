@@ -224,11 +224,13 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
     >
       {/* Dark Header with Team Names */}
       <div className="px-5 py-3 bg-gray-800 dark:bg-gray-900">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-white">
-            {game.awayTeam.name} @ {game.homeTeam.name}
-          </h3>
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-semibold text-white truncate">
+              {game.awayTeam.name} @ {game.homeTeam.name}
+            </h3>
+          </div>
+          <span className={`flex-shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
             game.status === 'live' ? 'bg-red-500 text-white' :
             game.status === 'final' ? 'bg-gray-600 text-gray-200' :
             'bg-blue-500 text-white'
@@ -242,10 +244,10 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
       {/* Main Content */}
       <div className="p-3">
         {/* Teams Side by Side with Date in Center */}
-        <div className="grid grid-cols-3 gap-2 items-center mb-3">
+        <div className="grid grid-cols-3 gap-2 items-center mb-3 min-w-0">
           {/* Away Team: [Logo][Score][Short Name] left-aligned */}
-          <div>
-            <div className="flex items-center justify-start gap-2 mb-1">
+          <div className="min-w-0">
+            <div className="flex items-center justify-start gap-2 mb-1 min-w-0">
               <TeamLogo team={game.awayTeam} size="md" className="" /> 
               <div className="text-[26px] font-bold leading-none text-gray-900 dark:text-white">
                 {game.awayTeam.abbreviation}
@@ -257,7 +259,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
           </div>
 
           {/* Game Date & Time in Center */}
-            <div className="text-center border-l border-r border-gray-200 dark:border-gray-700 px-4">
+            <div className="text-center border-l border-r border-gray-200 dark:border-gray-700 px-2 sm:px-4 min-w-0">
             <div className="inline-block text-[10px] text-gray-700 dark:text-gray-800 font-medium bg-[#fff7d1] px-2 py-0.5 rounded">
               {`${gameDayOfWeek}, ${gameDateShort}`}
             </div>
@@ -265,7 +267,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
               {gameTime}
             </div>
             {game.venue && (
-              <div className="flex items-center justify-center text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+              <div className="flex items-center justify-center text-[10px] text-gray-500 dark:text-gray-400 mt-1 truncate">
                 <MapPinIcon className="h-3 w-3 mr-1" />
                 {game.venue}
               </div>
@@ -273,8 +275,8 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
           </div>
 
           {/* Home Team: [Short Name][Score][Logo] right-aligned */}
-          <div>
-            <div className="flex items-center justify-end gap-2 mb-1">
+          <div className="min-w-0">
+            <div className="flex items-center justify-end gap-2 mb-1 min-w-0">
               <div className="text-[26px] font-bold leading-none text-gray-900 dark:text-white">
                 {homeScoreDisplay}
               </div>

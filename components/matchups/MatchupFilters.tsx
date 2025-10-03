@@ -26,59 +26,49 @@ export function MatchupFilters({
         Week Selection & Filters
       </h3>
       
-      {/* All Filters in One Line */}
-      <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
+		{/* All Filters in One Line (scrolls horizontally on small screens) */}
+		<div className="flex flex-row items-center gap-3 md:gap-4 overflow-x-auto whitespace-nowrap">
         {/* Week Selector */}
-        <div className="flex-shrink-0">
+			<div className="flex-shrink-0 min-w-[160px]">
           <WeekSelector
             currentWeek={selectedWeek}
             onWeekChange={onWeekChange}
           />
         </div>
         
-        {/* Vertical Divider */}
-        <div className="hidden lg:block w-px h-12 bg-gray-200 dark:bg-gray-600"></div>
+			{/* Vertical Divider */}
+			<div className="hidden md:block w-px h-12 bg-gray-200 dark:bg-gray-600"></div>
         
-        {/* Other Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 flex-1">
+			{/* Other Filters */}
+			<div className="flex flex-row items-center gap-3 md:gap-4 flex-1 min-w-0">
+			{/* Search Filter first */}
+			<div className="min-w-0 sm:min-w-[200px] flex-1">
+				<input
+					id="search"
+					type="text"
+					placeholder="Search (team, abbreviation, weekday)"
+					value={filters.search || ''}
+					onChange={(e) => onFiltersChange({ ...filters, search: e.target.value })}
+					className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+				/>
+			</div>
 
-          {/* Game Status Filter */}
-          <div className="min-w-0 flex-1">
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Game Status
-            </label>
-            <select
-              id="status"
-              value={filters.status || ''}
-              onChange={(e) => onFiltersChange({ ...filters, status: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">All Games</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="live">Live</option>
-              <option value="final">Final</option>
-              <option value="postponed">Postponed</option>
-            </select>
-          </div>
-
-          {/* Confidence Filter */}
-          <div className="min-w-0 flex-1">
-            <label htmlFor="confidence" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Prediction Confidence
-            </label>
-            <select
-              id="confidence"
-              value={filters.confidence || ''}
-              onChange={(e) => onFiltersChange({ ...filters, confidence: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">All Confidence Levels</option>
-              <option value="high">High Confidence (&gt;80%)</option>
-              <option value="medium">Medium Confidence (60-80%)</option>
-              <option value="low">Low Confidence (&lt;60%)</option>
-            </select>
-          </div>
-        </div>
+			{/* Game Status Filter second */}
+			<div className="min-w-[130px] flex-none">
+				<select
+					id="status"
+					value={filters.status || ''}
+					onChange={(e) => onFiltersChange({ ...filters, status: e.target.value })}
+					className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+				>
+					<option value="">All Games</option>
+					<option value="scheduled">Scheduled</option>
+					<option value="live">Live</option>
+					<option value="final">Final</option>
+					<option value="postponed">Postponed</option>
+				</select>
+			</div>
+		</div>
       </div>
 
       <div className="mt-4 flex items-center justify-between">
