@@ -365,7 +365,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                     <div className="font-semibold text-gray-900 dark:text-white mb-2">{game.awayTeam.name}</div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
-                        <div className="text-xs text-gray-500 dark:text-gray-400">SU Overall</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Straight Up (Overall)</div>
                         <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.away.overall)}</div>
                       </div>
                       <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
@@ -373,7 +373,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                         <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.away.ats?.overall)}</div>
                       </div>
                       <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
-                        <div className="text-xs text-gray-500 dark:text-gray-400">SU Road</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Straight Up (Road)</div>
                         <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.away.road)}</div>
                       </div>
                       <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
@@ -381,7 +381,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                         <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.away.ats?.road)}</div>
                       </div>
                       <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Last 10 (SU)</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Straight Up (Last 10)</div>
                         <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.away.lastTen)}</div>
                       </div>
                       <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
@@ -394,7 +394,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                     <div className="font-semibold text-gray-900 dark:text-white mb-2">{game.homeTeam.name}</div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
-                        <div className="text-xs text-gray-500 dark:text-gray-400">SU Overall</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Straight Up (Overall)</div>
                         <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.home.overall)}</div>
                       </div>
                       <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
@@ -402,7 +402,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                         <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.home.ats?.overall)}</div>
                       </div>
                       <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
-                        <div className="text-xs text-gray-500 dark:text-gray-400">SU Home</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Straight Up (Home)</div>
                         <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.home.home)}</div>
                       </div>
                       <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
@@ -410,7 +410,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                         <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.home.ats?.home)}</div>
                       </div>
                       <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Last 10 (SU)</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Straight Up (Last 10)</div>
                         <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.home.lastTen)}</div>
                       </div>
                       <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
