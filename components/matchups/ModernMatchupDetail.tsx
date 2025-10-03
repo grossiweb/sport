@@ -423,67 +423,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
               </div>
             )}
 
-            {/* Offensive & Defensive Snapshot */}
-            {teamStats && (teamStats.home || teamStats.away) && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                  <ChartBarIcon className="h-5 w-5 mr-2 text-sky-500" />
-                  Offensive & Defensive Snapshot
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded p-4">
-                    <div className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{game.awayTeam.name}</div>
-                    <div className="grid grid-cols-2 gap-3 text-xs">
-                      <div>
-                        <div className="text-gray-500 dark:text-gray-400">Points For</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.away?.pointsFor ?? '—'}</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500 dark:text-gray-400">Points Against</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.away?.pointsAgainst ?? '—'}</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500 dark:text-gray-400">Yards For</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.away?.yardsFor ?? '—'}</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500 dark:text-gray-400">Yards Against</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.away?.yardsAgainst ?? '—'}</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500 dark:text-gray-400">TO Differential</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.away?.turnoverDifferential ?? '—'}</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded p-4">
-                    <div className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{game.homeTeam.name}</div>
-                    <div className="grid grid-cols-2 gap-3 text-xs">
-                      <div>
-                        <div className="text-gray-500 dark:text-gray-400">Points For</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.home?.pointsFor ?? '—'}</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500 dark:text-gray-400">Points Against</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.home?.pointsAgainst ?? '—'}</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500 dark:text-gray-400">Yards For</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.home?.yardsFor ?? '—'}</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500 dark:text-gray-400">Yards Against</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.home?.yardsAgainst ?? '—'}</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500 dark:text-gray-400">TO Differential</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.home?.turnoverDifferential ?? '—'}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            
           </div>
         )}
 
