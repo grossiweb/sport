@@ -214,6 +214,27 @@ export class MongoDBSportsAPI {
     }
   }
 
+  // Get final scores for a game from betting_data by summing score_by_period
+  private async getScoresFromBettingData(eventId: string): Promise<{ home: number | null; away: number | null }> {
+    try {
+      const collection = await getBettingDataCollection()
+      const mongoBetting = await collection.findOne({ event_id: eventId }) as MongoBettingData | null
+      if (!mongoBetting || !mongoBetting.score) return { home: null, away: null }
+
+      const homePeriods = Array.isArray(mongoBetting.score.score_home_by_period)
+        ? mongoBetting.score.score_home_by_period as number[]
+        : null
+      const awayPeriods = Array.isArray(mongoBetting.score.score_away_by_period)
+        ? mongoBetting.score.score_away_by_period as number[]
+        : null
+
+      const sum = (arr: number[] | null) => arr && arr.length ? arr.reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0) : null
+      return { home: sum(homePeriods), away: sum(awayPeriods) }
+    } catch {
+      return { home: null, away: null }
+    }
+  }
+
   private computeAtsOutcome(teamScore: number, opponentScore: number, teamSpread: number | null | undefined): 'win' | 'loss' | 'push' | null {
     if (teamSpread == null || !isFinite(teamSpread)) return null
     const adjusted = (teamScore ?? 0) + teamSpread
@@ -240,16 +261,24 @@ export class MongoDBSportsAPI {
 
     // Cache spreads per event
     const spreadsCache = new Map<string, { home: number | null; away: number | null }>()
+    // Cache scores per event (from betting_data)
+    const scoresCache = new Map<string, { home: number | null; away: number | null }>()
 
     for (const game of finalGames) {
       if (!spreadsCache.has(game.id)) {
         spreadsCache.set(game.id, await this.getConsensusSpreadsForGame(game.id))
       }
+      if (!scoresCache.has(game.id)) {
+        scoresCache.set(game.id, await this.getScoresFromBettingData(game.id))
+      }
       const spreads = spreadsCache.get(game.id)!
+      const scores = scoresCache.get(game.id)!
       const isHome = game.homeTeam.id === teamId
       const teamSpread = isHome ? spreads.home : spreads.away
-      const teamScore = isHome ? (game.homeScore ?? 0) : (game.awayScore ?? 0)
-      const oppScore = isHome ? (game.awayScore ?? 0) : (game.homeScore ?? 0)
+      const teamScoreFromBetting = isHome ? scores.home : scores.away
+      const oppScoreFromBetting = isHome ? scores.away : scores.home
+      const teamScore = (teamScoreFromBetting ?? null) != null ? teamScoreFromBetting! : (isHome ? (game.homeScore ?? 0) : (game.awayScore ?? 0))
+      const oppScore = (oppScoreFromBetting ?? null) != null ? oppScoreFromBetting! : (isHome ? (game.awayScore ?? 0) : (game.homeScore ?? 0))
       const outcome = this.computeAtsOutcome(teamScore, oppScore, teamSpread)
 
       this.accumulateAtsRecord(overall, outcome)
@@ -266,11 +295,17 @@ export class MongoDBSportsAPI {
       if (!spreadsCache.has(game.id)) {
         spreadsCache.set(game.id, await this.getConsensusSpreadsForGame(game.id))
       }
+      if (!scoresCache.has(game.id)) {
+        scoresCache.set(game.id, await this.getScoresFromBettingData(game.id))
+      }
       const spreads = spreadsCache.get(game.id)!
+      const scores = scoresCache.get(game.id)!
       const isHome = game.homeTeam.id === teamId
       const teamSpread = isHome ? spreads.home : spreads.away
-      const teamScore = isHome ? (game.homeScore ?? 0) : (game.awayScore ?? 0)
-      const oppScore = isHome ? (game.awayScore ?? 0) : (game.homeScore ?? 0)
+      const teamScoreFromBetting = isHome ? scores.home : scores.away
+      const oppScoreFromBetting = isHome ? scores.away : scores.home
+      const teamScore = (teamScoreFromBetting ?? null) != null ? teamScoreFromBetting! : (isHome ? (game.homeScore ?? 0) : (game.awayScore ?? 0))
+      const oppScore = (oppScoreFromBetting ?? null) != null ? oppScoreFromBetting! : (isHome ? (game.awayScore ?? 0) : (game.homeScore ?? 0))
       const outcome = this.computeAtsOutcome(teamScore, oppScore, teamSpread)
       this.accumulateAtsRecord(lastTen, outcome)
     }
