@@ -363,8 +363,8 @@ export class MongoDBSportsAPI {
   }
 
   // Bulk fetch spreads (avg across books) and summed scores for many events in one query
-  private async getBettingSummariesForEvents(eventIds: string[]): Promise<Map<string, { spreadHome: number | null; spreadAway: number | null; totalPoints: number | null; scoreHome: number | null; scoreAway: number | null }>> {
-    const result = new Map<string, { spreadHome: number | null; spreadAway: number | null; totalPoints: number | null; scoreHome: number | null; scoreAway: number | null }>()
+  private async getBettingSummariesForEvents(eventIds: string[]): Promise<Map<string, { spreadHome: number | null; spreadAway: number | null; totalPoints: number | null; scoreHome: number | null; scoreAway: number | null; moneylineHome: number | null; moneylineAway: number | null }>> {
+    const result = new Map<string, { spreadHome: number | null; spreadAway: number | null; totalPoints: number | null; scoreHome: number | null; scoreAway: number | null; moneylineHome: number | null; moneylineAway: number | null }>()
     if (!eventIds.length) return result
     try {
       const collection = await getBettingDataCollection()
@@ -375,6 +375,8 @@ export class MongoDBSportsAPI {
         const homeSpreads: number[] = []
         const awaySpreads: number[] = []
         const totals: number[] = []
+        const moneyHome: number[] = []
+        const moneyAway: number[] = []
         for (const l of lines) {
           const h = typeof l?.spread?.point_spread_home === 'number' && isFinite(l.spread.point_spread_home)
             ? l.spread.point_spread_home
@@ -390,6 +392,14 @@ export class MongoDBSportsAPI {
           if (typeof h === 'number' && isFinite(h)) homeSpreads.push(h)
           if (typeof a === 'number' && isFinite(a)) awaySpreads.push(a)
           if (typeof t === 'number' && isFinite(t)) totals.push(t)
+          const mh = typeof l?.moneyline?.moneyline_home === 'number' && isFinite(l.moneyline.moneyline_home)
+            ? l.moneyline.moneyline_home
+            : (typeof l?.moneyline?.moneyline_home_delta === 'number' ? l.moneyline.moneyline_home_delta : null)
+          const ma = typeof l?.moneyline?.moneyline_away === 'number' && isFinite(l.moneyline.moneyline_away)
+            ? l.moneyline.moneyline_away
+            : (typeof l?.moneyline?.moneyline_away_delta === 'number' ? l.moneyline.moneyline_away_delta : null)
+          if (typeof mh === 'number' && isFinite(mh)) moneyHome.push(mh)
+          if (typeof ma === 'number' && isFinite(ma)) moneyAway.push(ma)
         }
         const avg = (arr: number[]) => (arr.length ? arr.reduce((x, y) => x + y, 0) / arr.length : null)
         const sum = (arr?: number[] | null) => Array.isArray(arr) ? arr.reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0) : null
@@ -398,7 +408,9 @@ export class MongoDBSportsAPI {
           spreadAway: avg(awaySpreads),
           totalPoints: avg(totals),
           scoreHome: sum(doc.score?.score_home_by_period),
-          scoreAway: sum(doc.score?.score_away_by_period)
+          scoreAway: sum(doc.score?.score_away_by_period),
+          moneylineHome: avg(moneyHome),
+          moneylineAway: avg(moneyAway)
         })
       }
     } catch (e) {
@@ -615,6 +627,25 @@ export class MongoDBSportsAPI {
       console.error('Error building matchup covers summary:', error)
       return null
     }
+  }
+
+  // Compute implied win probabilities from closing moneylines
+  public computeWinProbFromMoneylines(moneylineHome: number | null, moneylineAway: number | null): { winProbHome: number | null; winProbAway: number | null } {
+    if (moneylineHome == null || moneylineAway == null || !isFinite(moneylineHome) || !isFinite(moneylineAway)) {
+      return { winProbHome: null, winProbAway: null }
+    }
+    const americanToImplied = (odds: number): number => {
+      if (odds > 0) return 100 / (odds + 100)
+      return -odds / (-odds + 100)
+    }
+    let pHome = americanToImplied(moneylineHome)
+    let pAway = americanToImplied(moneylineAway)
+    const sum = pHome + pAway
+    if (sum > 0) {
+      pHome = pHome / sum
+      pAway = pAway / sum
+    }
+    return { winProbHome: pHome, winProbAway: pAway }
   }
 
   // Bulk fetch season games for multiple teams to reduce DB roundtrips

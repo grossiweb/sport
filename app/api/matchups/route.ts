@@ -175,6 +175,10 @@ export async function GET(request: NextRequest) {
       }
     }))
 
+    // Preload closing moneylines for all games and compute implied probabilities (finals preferred)
+    const allEventIds = games.map(g => g.id)
+    const bulkBetting = await (mongoSportsAPI as any).getBettingSummariesForEvents(allEventIds)
+
     // Generate matchup data for each game
     const matchups: Matchup[] = await Promise.all(
       games.map(async (game) => {
@@ -188,7 +192,11 @@ export async function GET(request: NextRequest) {
         // Use precomputed covers summary for this pair
         const coversSummary = coversByPair.get(pairKey(game.homeTeam.id, game.awayTeam.id)) || null
 
-        return {
+        // Use closing moneylines consensus to compute win probabilities
+        const betting = bulkBetting.get(game.id)
+        const probs = betting ? mongoSportsAPI.computeWinProbFromMoneylines(betting.moneylineHome, betting.moneylineAway) : { winProbHome: null, winProbAway: null }
+
+        const item: Matchup = {
           game,
           predictions,
           bettingData: null,
@@ -198,8 +206,10 @@ export async function GET(request: NextRequest) {
           matchupAnalysis: null, // Will be loaded on demand
           headToHead: [], // Will be loaded on demand
           teamStats: null, // Will be loaded on demand
-          coversSummary: coversSummary ?? undefined
+          coversSummary: coversSummary ?? undefined,
+          closingConsensus: probs
         }
+        return item
       })
     )
 

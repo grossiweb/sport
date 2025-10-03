@@ -263,6 +263,10 @@ export interface Matchup {
     away: any
   }
   coversSummary?: MatchupCoversSummary
+  closingConsensus?: {
+    winProbHome: number | null
+    winProbAway: number | null
+  }
 }
 
 // Prediction and Betting Types

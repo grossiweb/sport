@@ -294,8 +294,8 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
             <div className="w-full grid grid-cols-3 items-center">
               {/* Left: Away% and Away Spread */}
               <div className="flex items-center gap-2 justify-start">
-                <span className={`px-2 py-0.5 rounded text-[18px] font-bold ${pctBadgeClass(consensusData.winProbAway)}`}>
-                  {formatPct(consensusData.winProbAway)}
+                <span className={`px-2 py-0.5 rounded text-[18px] font-bold ${pctBadgeClass(matchup.closingConsensus?.winProbAway ?? consensusData.winProbAway)}`}>
+                  {formatPct(matchup.closingConsensus?.winProbAway ?? consensusData.winProbAway)}
                 </span>
                 <span className="text-[16px] font-normal text-gray-900 dark:text-white">
                   {formatSpread(consensusData.spreadAway)}
@@ -314,8 +314,8 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
                 <span className="text-[16px] font-normal text-gray-900 dark:text-white">
                   {formatSpread(consensusData.spreadHome)}
                 </span>
-                <span className={`px-2 py-0.5 rounded text-[18px] font-bold ${pctBadgeClass(consensusData.winProbHome)}`}>
-                  {formatPct(consensusData.winProbHome)}
+                <span className={`px-2 py-0.5 rounded text-[18px] font-bold ${pctBadgeClass(matchup.closingConsensus?.winProbHome ?? consensusData.winProbHome)}`}>
+                  {formatPct(matchup.closingConsensus?.winProbHome ?? consensusData.winProbHome)}
                 </span>
               </div>
             </div>
