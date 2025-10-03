@@ -33,7 +33,7 @@ interface ModernMatchupDetailProps {
 }
 
 export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps) {
-  const { game, predictions, trends, injuries, matchupAnalysis, headToHead } = matchup
+  const { game, predictions, trends, injuries, matchupAnalysis, headToHead, coversSummary, teamStats } = matchup
   const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'trends' | 'betting'>('stats')
   const [homeTeamDetailedStats, setHomeTeamDetailedStats] = useState<DetailedTeamStat[]>([])
   const [awayTeamDetailedStats, setAwayTeamDetailedStats] = useState<DetailedTeamStat[]>([])
@@ -88,6 +88,18 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
   const { hasScores: hasScoreByPeriod } = useScoreByPeriod(game.scoreByPeriod)
 
   const shouldShowScoreButton = hasScoreByPeriod && game.status === 'final'
+
+  const formatCompactRecord = (r: any | undefined) => r ? `${r.wins}-${r.losses}-${r.pushes}` : '0-0-0'
+  const countRecentRecord = (games: Array<{ result: 'win' | 'loss' | 'push' }> | undefined) => {
+    const rec = { wins: 0, losses: 0, pushes: 0 }
+    if (!Array.isArray(games)) return rec
+    for (const g of games) {
+      if (g.result === 'win') rec.wins += 1
+      else if (g.result === 'loss') rec.losses += 1
+      else rec.pushes += 1
+    }
+    return rec
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -252,6 +264,223 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'trends' && (
+          <div className="space-y-6">
+            {/* Head-to-Head */}
+            {headToHead && headToHead.length > 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                  <UserGroupIcon className="h-5 w-5 mr-2 text-purple-500" />
+                  Head-to-Head (Last {Math.min(10, headToHead.length)})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {headToHead.map((g: any, index: number) => (
+                    <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {formatToEasternDate(g.date)}
+                        </span>
+                        <span className="text-lg font-bold text-gray-900 dark:text-white">
+                          {g.awayTeamName || game.awayTeam.name} {g.awayScore} @ {g.homeTeamName || game.homeTeam.name} {g.homeScore}
+                        </span>
+                      </div>
+                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-1">
+                        {g.result}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recent Form */}
+            {(matchupAnalysis?.recentGames?.home || matchupAnalysis?.recentGames?.away) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <CalendarIcon className="h-5 w-5 mr-2 text-blue-500" />
+                    {game.awayTeam.name} Recent (Last {Math.min(10, matchupAnalysis?.recentGames?.away?.length || 0)})
+                  </h3>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    Record: {(() => { const r = countRecentRecord(matchupAnalysis?.recentGames?.away); return `${r.wins}-${r.losses}-${r.pushes}` })()}
+                  </div>
+                  <div className="space-y-2">
+                    {(matchupAnalysis?.recentGames?.away || []).map((g: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded px-3 py-2">
+                        <span className="text-xs text-gray-600 dark:text-gray-300">
+                          {formatToEasternDate(g.date)}
+                        </span>
+                        <span className="text-xs font-medium text-gray-900 dark:text-white">
+                          {g.isHome ? 'vs' : '@'} {g.opponentName || g.opponentId}
+                        </span>
+                        <span className="text-xs font-semibold {g.result === 'win' ? 'text-green-600 dark:text-green-400' : g.result === 'loss' ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}">
+                          {g.teamScore}-{g.opponentScore} ({g.result.toUpperCase()})
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <CalendarIcon className="h-5 w-5 mr-2 text-emerald-500" />
+                    {game.homeTeam.name} Recent (Last {Math.min(10, matchupAnalysis?.recentGames?.home?.length || 0)})
+                  </h3>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    Record: {(() => { const r = countRecentRecord(matchupAnalysis?.recentGames?.home); return `${r.wins}-${r.losses}-${r.pushes}` })()}
+                  </div>
+                  <div className="space-y-2">
+                    {(matchupAnalysis?.recentGames?.home || []).map((g: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded px-3 py-2">
+                        <span className="text-xs text-gray-600 dark:text-gray-300">
+                          {formatToEasternDate(g.date)}
+                        </span>
+                        <span className="text-xs font-medium text-gray-900 dark:text-white">
+                          {g.isHome ? 'vs' : '@'} {g.opponentName || g.opponentId}
+                        </span>
+                        <span className="text-xs font-semibold {g.result === 'win' ? 'text-green-600 dark:text-green-400' : g.result === 'loss' ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}">
+                          {g.teamScore}-{g.opponentScore} ({g.result.toUpperCase()})
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* W/L and ATS Splits */}
+            {coversSummary && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                  <ArrowTrendingUpIcon className="h-5 w-5 mr-2 text-indigo-500" />
+                  Win/Loss and ATS Splits
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                  <div>
+                    <div className="font-semibold text-gray-900 dark:text-white mb-2">{game.awayTeam.name}</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">SU Overall</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.away.overall)}</div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">ATS Overall</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.away.ats?.overall)}</div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">SU Road</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.away.road)}</div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">ATS Road</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.away.ats?.road)}</div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Last 10 (SU)</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.away.lastTen)}</div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Last 10 (ATS)</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.away.ats?.lastTen)}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900 dark:text-white mb-2">{game.homeTeam.name}</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">SU Overall</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.home.overall)}</div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">ATS Overall</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.home.ats?.overall)}</div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">SU Home</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.home.home)}</div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">ATS Home</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.home.ats?.home)}</div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Last 10 (SU)</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.home.lastTen)}</div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Last 10 (ATS)</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{formatCompactRecord(coversSummary.home.ats?.lastTen)}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Offensive & Defensive Snapshot */}
+            {teamStats && (teamStats.home || teamStats.away) && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                  <ChartBarIcon className="h-5 w-5 mr-2 text-sky-500" />
+                  Offensive & Defensive Snapshot
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded p-4">
+                    <div className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{game.awayTeam.name}</div>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <div className="text-gray-500 dark:text-gray-400">Points For</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.away?.pointsFor ?? '—'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500 dark:text-gray-400">Points Against</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.away?.pointsAgainst ?? '—'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500 dark:text-gray-400">Yards For</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.away?.yardsFor ?? '—'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500 dark:text-gray-400">Yards Against</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.away?.yardsAgainst ?? '—'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500 dark:text-gray-400">TO Differential</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.away?.turnoverDifferential ?? '—'}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded p-4">
+                    <div className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{game.homeTeam.name}</div>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <div className="text-gray-500 dark:text-gray-400">Points For</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.home?.pointsFor ?? '—'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500 dark:text-gray-400">Points Against</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.home?.pointsAgainst ?? '—'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500 dark:text-gray-400">Yards For</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.home?.yardsFor ?? '—'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500 dark:text-gray-400">Yards Against</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.home?.yardsAgainst ?? '—'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500 dark:text-gray-400">TO Differential</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{teamStats?.home?.turnoverDifferential ?? '—'}</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

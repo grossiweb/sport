@@ -14,6 +14,8 @@ import {
 
 // MongoDB-based Sports API service
 export class MongoDBSportsAPI {
+  private atsSummaryCache = new Map<string, { seasonYear: number; summary: { overall: RecordSummary; home: RecordSummary; road: RecordSummary; lastTen: RecordSummary }; createdAt: number }>()
+  private teamSeasonGamesCache = new Map<string, { seasonYear: number; games: Game[]; createdAt: number }>()
   
   // Convert MongoDB player to our Player interface
   private mapMongoPlayerToPlayer(mongoPlayer: MongoPlayer): Player {
@@ -26,6 +28,130 @@ export class MongoDBSportsAPI {
       age: mongoPlayer.age,
       height: mongoPlayer.display_height,
       weight: mongoPlayer.weight
+    }
+  }
+
+  // Get head-to-head games between two teams (most recent first)
+  public async getHeadToHeadGames(
+    sport: SportType,
+    teamIdA: string,
+    teamIdB: string,
+    limit: number = 10
+  ): Promise<Array<{ date: string; homeTeamId: string; awayTeamId: string; homeTeamName?: string; awayTeamName?: string; homeScore: number; awayScore: number; result: string }>> {
+    try {
+      const collection = await getGamesCollection()
+      const sportId = sport === 'NFL' ? 2 : 1
+
+      const numericA = parseInt(teamIdA, 10)
+      const numericB = parseInt(teamIdB, 10)
+
+      const mongoGames = await collection
+        .find({
+          sport_id: sportId,
+          $or: [
+            { home_team_id: numericA, away_team_id: numericB },
+            { home_team_id: numericB, away_team_id: numericA }
+          ]
+        })
+        .sort({ date_event: -1 })
+        .limit(limit)
+        .toArray()
+
+      // Fetch teams to get names
+      const teamsCollection = await getTeamsCollection()
+      const allTeams = await teamsCollection.find({ sport_id: sportId }).toArray()
+      const teamsMap = new Map(allTeams.map(t => [t.team_id, t]))
+
+      // Optionally fetch betting scores per event for accuracy
+      const bettingCollection = await getBettingDataCollection()
+      const eventIds = mongoGames.map(g => g.event_id)
+      const bettingDocs = eventIds.length > 0
+        ? await bettingCollection.find({ event_id: { $in: eventIds } }).toArray()
+        : []
+      const bettingByEvent = new Map(bettingDocs.map(doc => [doc.event_id, doc]))
+
+      const sum = (arr?: number[] | null) => Array.isArray(arr) ? arr.reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0) : undefined
+
+      return mongoGames.map(g => {
+        const betting = bettingByEvent.get(g.event_id) as MongoBettingData | undefined
+        const bdHome = sum(betting?.score?.score_home_by_period)
+        const bdAway = sum(betting?.score?.score_away_by_period)
+        const homeScore = (bdHome ?? g.home_score ?? 0)
+        const awayScore = (bdAway ?? g.away_score ?? 0)
+        const homeTeamName = teamsMap.get(g.home_team_id)?.name
+        const awayTeamName = teamsMap.get(g.away_team_id)?.name
+        const result = homeScore > awayScore ? 'Home win' : homeScore < awayScore ? 'Away win' : 'Tie'
+        return {
+          date: g.date_event,
+          homeTeamId: g.home_team_id.toString(),
+          awayTeamId: g.away_team_id.toString(),
+          homeTeamName,
+          awayTeamName,
+          homeScore,
+          awayScore,
+          result
+        }
+      })
+    } catch (error) {
+      console.error('Error fetching head-to-head games:', error)
+      return []
+    }
+  }
+
+  // Get a team's most recent final games (default 10) for the current season
+  public async getTeamRecentGames(
+    sport: SportType,
+    teamId: string,
+    limit: number = 10
+  ): Promise<Array<{ date: string; opponentId: string; opponentName?: string; isHome: boolean; teamScore: number; opponentScore: number; result: 'win' | 'loss' | 'push' }>> {
+    try {
+      const currentYear = new Date().getFullYear()
+      const games = await this.getTeamSeasonGames(sport, teamId, currentYear)
+      const recentFinal = games
+        .filter(g => g.status === 'final')
+        .sort((a, b) => new Date(b.gameDate).getTime() - new Date(a.gameDate).getTime())
+        .slice(0, limit)
+
+      // Fetch teams for names
+      const teamsCollection = await getTeamsCollection()
+      const sportId = sport === 'NFL' ? 2 : 1
+      const allTeams = await teamsCollection.find({ sport_id: sportId }).toArray()
+      const teamsMap = new Map(allTeams.map(t => [t.team_id.toString(), t.name]))
+
+      // Prefer betting_data summed scores if available
+      const bettingCollection = await getBettingDataCollection()
+      const eventIds = recentFinal.map(g => g.id)
+      const bettingDocs = eventIds.length > 0
+        ? await bettingCollection.find({ event_id: { $in: eventIds } }).toArray()
+        : []
+      const bettingByEvent = new Map(bettingDocs.map(doc => [doc.event_id, doc]))
+      const sum = (arr?: number[] | null) => Array.isArray(arr) ? arr.reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0) : undefined
+
+      return recentFinal.map(g => {
+        const isHome = g.homeTeam.id === teamId
+        const opponentId = isHome ? g.awayTeam.id : g.homeTeam.id
+        const opponentName = teamsMap.get(opponentId)
+        const betting = bettingByEvent.get(g.id) as MongoBettingData | undefined
+        const bdHome = sum(betting?.score?.score_home_by_period)
+        const bdAway = sum(betting?.score?.score_away_by_period)
+        const homeScore = (bdHome ?? g.homeScore ?? 0)
+        const awayScore = (bdAway ?? g.awayScore ?? 0)
+        const teamScore = isHome ? homeScore : awayScore
+        const opponentScore = isHome ? awayScore : homeScore
+        const result: 'win' | 'loss' | 'push' = teamScore > opponentScore ? 'win' : teamScore < opponentScore ? 'loss' : 'push'
+        return {
+          date: g.gameDate.toISOString(),
+          opponentId,
+          opponentName,
+          isHome,
+          teamScore,
+          opponentScore,
+          result
+        }
+      })
+    } catch (error) {
+      console.error('Error fetching recent games for team:', error)
+      return []
     }
   }
 
@@ -235,6 +361,51 @@ export class MongoDBSportsAPI {
     }
   }
 
+  // Bulk fetch spreads (avg across books) and summed scores for many events in one query
+  private async getBettingSummariesForEvents(eventIds: string[]): Promise<Map<string, { spreadHome: number | null; spreadAway: number | null; totalPoints: number | null; scoreHome: number | null; scoreAway: number | null }>> {
+    const result = new Map<string, { spreadHome: number | null; spreadAway: number | null; totalPoints: number | null; scoreHome: number | null; scoreAway: number | null }>()
+    if (!eventIds.length) return result
+    try {
+      const collection = await getBettingDataCollection()
+      const docs = await collection.find({ event_id: { $in: eventIds } }).toArray()
+
+      for (const doc of docs as MongoBettingData[]) {
+        const lines = Object.values(doc.lines || {}) as any[]
+        const homeSpreads: number[] = []
+        const awaySpreads: number[] = []
+        const totals: number[] = []
+        for (const l of lines) {
+          const h = typeof l?.spread?.point_spread_home === 'number' && isFinite(l.spread.point_spread_home)
+            ? l.spread.point_spread_home
+            : (typeof l?.spread?.point_spread_home_delta === 'number' ? l.spread.point_spread_home_delta : null)
+          const a = typeof l?.spread?.point_spread_away === 'number' && isFinite(l.spread.point_spread_away)
+            ? l.spread.point_spread_away
+            : (typeof l?.spread?.point_spread_away_delta === 'number' ? l.spread.point_spread_away_delta : null)
+          const t = typeof l?.total?.total_over === 'number' && isFinite(l.total.total_over) && typeof l?.total?.total_under === 'number' && isFinite(l.total.total_under)
+            ? (Number(l.total.total_over) + Number(l.total.total_under)) / 2
+            : (typeof l?.total?.total_over_delta === 'number' && typeof l?.total?.total_under_delta === 'number'
+              ? (Number(l.total.total_over_delta) + Number(l.total.total_under_delta)) / 2
+              : null)
+          if (typeof h === 'number' && isFinite(h)) homeSpreads.push(h)
+          if (typeof a === 'number' && isFinite(a)) awaySpreads.push(a)
+          if (typeof t === 'number' && isFinite(t)) totals.push(t)
+        }
+        const avg = (arr: number[]) => (arr.length ? arr.reduce((x, y) => x + y, 0) / arr.length : null)
+        const sum = (arr?: number[] | null) => Array.isArray(arr) ? arr.reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0) : null
+        result.set(doc.event_id, {
+          spreadHome: avg(homeSpreads),
+          spreadAway: avg(awaySpreads),
+          totalPoints: avg(totals),
+          scoreHome: sum(doc.score?.score_home_by_period),
+          scoreAway: sum(doc.score?.score_away_by_period)
+        })
+      }
+    } catch (e) {
+      // On failure, return empty map; callers should fallback
+    }
+    return result
+  }
+
   private computeAtsOutcome(teamScore: number, opponentScore: number, teamSpread: number | null | undefined): 'win' | 'loss' | 'push' | null {
     if (teamSpread == null || !isFinite(teamSpread)) return null
     const adjusted = (teamScore ?? 0) + teamSpread
@@ -251,11 +422,19 @@ export class MongoDBSportsAPI {
     else record.pushes += 1
   }
 
-  private async computeTeamAtsSummary(teamId: string, games: Game[]): Promise<{ overall: RecordSummary; home: RecordSummary; road: RecordSummary; lastTen: RecordSummary }> {
+  private async computeTeamAtsSummary(teamId: string, games: Game[], seasonYear?: number, preloadedBetting?: Map<string, { spreadHome: number | null; spreadAway: number | null; totalPoints: number | null; scoreHome: number | null; scoreAway: number | null }>): Promise<{ overall: RecordSummary; home: RecordSummary; road: RecordSummary; lastTen: RecordSummary }> {
     const overall = this.createEmptyRecord()
     const home = this.createEmptyRecord()
     const road = this.createEmptyRecord()
     const lastTen = this.createEmptyRecord()
+
+    // Cache check per team-season
+    const cacheSeason = seasonYear ?? (games[0] ? new Date(games[0].gameDate).getFullYear() : new Date().getFullYear())
+    const cacheKey = `${teamId}:${cacheSeason}`
+    const cached = this.atsSummaryCache.get(cacheKey)
+    if (cached && cached.seasonYear === cacheSeason && (Date.now() - cached.createdAt) < 6 * 60 * 60 * 1000) {
+      return cached.summary
+    }
 
     const finalGames = games.filter(g => g.status === 'final')
 
@@ -264,12 +443,23 @@ export class MongoDBSportsAPI {
     // Cache scores per event (from betting_data)
     const scoresCache = new Map<string, { home: number | null; away: number | null }>()
 
+    // Preload betting data for all events once if not provided
+    if (!preloadedBetting) {
+      const allEventIds = Array.from(new Set(finalGames.map(g => g.id)))
+      const bulk = await this.getBettingSummariesForEvents(allEventIds)
+      preloadedBetting = bulk
+    }
+
     for (const game of finalGames) {
       if (!spreadsCache.has(game.id)) {
-        spreadsCache.set(game.id, await this.getConsensusSpreadsForGame(game.id))
+        const b = preloadedBetting?.get(game.id)
+        if (b) spreadsCache.set(game.id, { home: b.spreadHome, away: b.spreadAway })
+        else spreadsCache.set(game.id, await this.getConsensusSpreadsForGame(game.id))
       }
       if (!scoresCache.has(game.id)) {
-        scoresCache.set(game.id, await this.getScoresFromBettingData(game.id))
+        const b = preloadedBetting?.get(game.id)
+        if (b) scoresCache.set(game.id, { home: b.scoreHome, away: b.scoreAway })
+        else scoresCache.set(game.id, await this.getScoresFromBettingData(game.id))
       }
       const spreads = spreadsCache.get(game.id)!
       const scores = scoresCache.get(game.id)!
@@ -293,10 +483,14 @@ export class MongoDBSportsAPI {
 
     for (const game of lastTenGames) {
       if (!spreadsCache.has(game.id)) {
-        spreadsCache.set(game.id, await this.getConsensusSpreadsForGame(game.id))
+        const b = preloadedBetting?.get(game.id)
+        if (b) spreadsCache.set(game.id, { home: b.spreadHome, away: b.spreadAway })
+        else spreadsCache.set(game.id, await this.getConsensusSpreadsForGame(game.id))
       }
       if (!scoresCache.has(game.id)) {
-        scoresCache.set(game.id, await this.getScoresFromBettingData(game.id))
+        const b = preloadedBetting?.get(game.id)
+        if (b) scoresCache.set(game.id, { home: b.scoreHome, away: b.scoreAway })
+        else scoresCache.set(game.id, await this.getScoresFromBettingData(game.id))
       }
       const spreads = spreadsCache.get(game.id)!
       const scores = scoresCache.get(game.id)!
@@ -310,7 +504,9 @@ export class MongoDBSportsAPI {
       this.accumulateAtsRecord(lastTen, outcome)
     }
 
-    return { overall, home, road, lastTen }
+    const summary = { overall, home, road, lastTen }
+    this.atsSummaryCache.set(cacheKey, { seasonYear: cacheSeason, summary, createdAt: Date.now() })
+    return summary
   }
 
   public async getTeamSeasonGames(
@@ -318,6 +514,12 @@ export class MongoDBSportsAPI {
     teamId: string,
     seasonYear: number
   ): Promise<Game[]> {
+    const cacheKey = `${sport}:${teamId}:${seasonYear}`
+    const cached = this.teamSeasonGamesCache.get(cacheKey)
+    if (cached && cached.seasonYear === seasonYear && (Date.now() - cached.createdAt) < 6 * 60 * 60 * 1000) {
+      return cached.games
+    }
+
     const collection = await getGamesCollection()
     const teamsCollection = await getTeamsCollection()
     const sportId = sport === 'NFL' ? 2 : 1
@@ -339,11 +541,14 @@ export class MongoDBSportsAPI {
     const allTeams = await teamsCollection.find({ sport_id: sportId }).toArray()
     const teamsMap = new Map(allTeams.map(team => [team.team_id, team]))
 
-    return mongoGames.map(game => {
+    const games = mongoGames.map(game => {
       const homeTeam = teamsMap.get(game.home_team_id)
       const awayTeam = teamsMap.get(game.away_team_id)
       return this.mapMongoGameToGame(game, null, homeTeam, awayTeam)
     })
+
+    this.teamSeasonGamesCache.set(cacheKey, { seasonYear, games, createdAt: Date.now() })
+    return games
   }
 
   async buildMatchupCoversSummary(
@@ -365,9 +570,15 @@ export class MongoDBSportsAPI {
       const awaySummary = this.computeTeamCoversSummary(awayTeamId, awayTeamName, awayGames)
 
       // Compute ATS summaries using betting_data spreads
+      // Preload all betting summaries for both teams' final games in one query
+      const allEventIds = Array.from(new Set([
+        ...homeGames.filter(g => g.status === 'final').map(g => g.id),
+        ...awayGames.filter(g => g.status === 'final').map(g => g.id)
+      ]))
+      const bulkBetting = await this.getBettingSummariesForEvents(allEventIds)
       const [homeAts, awayAts] = await Promise.all([
-        this.computeTeamAtsSummary(homeTeamId, homeGames),
-        this.computeTeamAtsSummary(awayTeamId, awayGames)
+        this.computeTeamAtsSummary(homeTeamId, homeGames, currentYear, bulkBetting),
+        this.computeTeamAtsSummary(awayTeamId, awayGames, currentYear, bulkBetting)
       ])
 
       homeSummary.ats = {

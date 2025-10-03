@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Matchup, SportType, RecordSummary } from '@/types'
 import { format } from 'date-fns'
 import {
@@ -33,6 +33,12 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
     winProbAway: number | null
     winProbHome: number | null
   } | null>(null)
+
+  // Simple in-memory cache to avoid refetching consensus per game
+  const consensusCacheRef = (globalThis as any).__CONSENSUS_CACHE__ || new Map<string, any>()
+  if (!(globalThis as any).__CONSENSUS_CACHE__) {
+    ;(globalThis as any).__CONSENSUS_CACHE__ = consensusCacheRef
+  }
 
   const gameTime = formatToEasternTime(game.gameDate)
   const gameDateShort = formatToEasternDate(game.gameDate, { month: 'short', day: 'numeric' })
@@ -153,45 +159,43 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
 
   
 
-  // Fetch all sportsbook lines for the game and compute consensus
-  useEffect(() => {
-    let isMounted = true
-    ;(async () => {
-      try {
-        const res = await fetch(`/api/betting-lines/${game.id}`)
-        if (!res.ok) return
-        const data = await res.json()
-        const lineArray = Object.values(data?.lines || {}) as any[]
-        if (lineArray.length === 0) return
-        const consensus = computeConsensus(
-          lineArray.map((l: any) => ({
-            spread: {
-              point_spread_away: l?.spread?.point_spread_away,
-              point_spread_home: l?.spread?.point_spread_home,
-              point_spread_away_money: l?.spread?.point_spread_away_money,
-              point_spread_home_money: l?.spread?.point_spread_home_money
-            },
-            moneyline: {
-              moneyline_away: l?.moneyline?.moneyline_away,
-              moneyline_home: l?.moneyline?.moneyline_home
-            },
-            total: {
-              total_over: l?.total?.total_over,
-              total_under: l?.total?.total_under,
-              total_over_money: l?.total?.total_over_money,
-              total_under_money: l?.total?.total_under_money
-            }
-          }))
-        )
-        if (isMounted) setConsensusData(consensus)
-      } catch (e) {
-        // Silently ignore for now
-      }
-    })()
-    return () => {
-      isMounted = false
+  const loadConsensus = useCallback(async () => {
+    if (game.status === 'final') return
+    const cached = consensusCacheRef.get(game.id)
+    if (cached) {
+      setConsensusData(cached)
+      return
     }
-  }, [game.id])
+    try {
+      const res = await fetch(`/api/betting-lines/${game.id}`)
+      if (!res.ok) return
+      const data = await res.json()
+      const lineArray = Object.values(data?.lines || {}) as any[]
+      if (lineArray.length === 0) return
+      const consensus = computeConsensus(
+        lineArray.map((l: any) => ({
+          spread: {
+            point_spread_away: l?.spread?.point_spread_away,
+            point_spread_home: l?.spread?.point_spread_home,
+            point_spread_away_money: l?.spread?.point_spread_away_money,
+            point_spread_home_money: l?.spread?.point_spread_home_money
+          },
+          moneyline: {
+            moneyline_away: l?.moneyline?.moneyline_away,
+            moneyline_home: l?.moneyline?.moneyline_home
+          },
+          total: {
+            total_over: l?.total?.total_over,
+            total_under: l?.total?.total_under,
+            total_over_money: l?.total?.total_over_money,
+            total_under_money: l?.total?.total_under_money
+          }
+        }))
+      )
+      consensusCacheRef.set(game.id, consensus)
+      setConsensusData(consensus)
+    } catch {}
+  }, [game.id, game.status])
 
   const formatPct = (p: number | null | undefined) => (p == null ? '-' : `${Math.round(p * 100)}%`)
   const formatSpread = (v: number | null | undefined) => (v == null ? '-' : (v > 0 ? `+${v.toFixed(1)}` : v.toFixed(1)))
@@ -218,7 +222,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
     <>
     <div 
       className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => { setIsHovered(true); if (!consensusData) { loadConsensus() } }}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Dark Header with Team Names */}

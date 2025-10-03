@@ -11,7 +11,6 @@ import { MatchupFilters } from '@/components/matchups/MatchupFilters'
 import { WeekInfo, getCurrentWeek, getWeekDateRange, getSeasonWeekOptions } from '@/lib/utils/week-utils'
 import { useQuery } from 'react-query'
 import { CoversStyleMatchupCard } from '@/components/matchups/CoversStyleMatchupCard'
-import sampleBetting from '@/sportStats.betting_data.json'
 
 interface MatchupFiltersState {
   status?: string

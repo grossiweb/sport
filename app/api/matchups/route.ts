@@ -155,7 +155,27 @@ export async function GET(request: NextRequest) {
     )
     // console.log('Games fetched for date:', fetchDate, 'Total games:', games.length)
     
-    // Generate matchup data for each game with real betting data
+    // Precompute covers summaries for unique team pairs to avoid repeated heavy work
+    const pairKey = (h: string, a: string) => `${h}_${a}`
+    const uniquePairs = Array.from(new Set(games.map(g => pairKey(g.homeTeam.id, g.awayTeam.id))))
+    const coversByPair = new Map<string, any>()
+    await Promise.all(uniquePairs.map(async (key) => {
+      const [homeId, awayId] = key.split('_')
+      try {
+        const summary = await mongoSportsAPI.buildMatchupCoversSummary(
+          sport as SportType,
+          homeId,
+          awayId,
+          undefined,
+          undefined
+        )
+        coversByPair.set(key, summary)
+      } catch (e) {
+        coversByPair.set(key, null)
+      }
+    }))
+
+    // Generate matchup data for each game
     const matchups: Matchup[] = await Promise.all(
       games.map(async (game) => {
         // Generate basic AI predictions (no API calls)
@@ -165,28 +185,13 @@ export async function GET(request: NextRequest) {
         const trends = generateTrends(game.id)
         const injuries = generateInjuries(game.id)
         
-        // Fetch real betting data
-        let bettingData = null
-        try {
-          bettingData = await mongoSportsAPI.getBettingData(sport as SportType, game.id)
-        } catch (error) {
-          console.warn(`Failed to fetch betting data for game ${game.id}:`, error)
-        }
-
-        const coversSummary = bettingData
-          ? await mongoSportsAPI.buildMatchupCoversSummary(
-              sport as SportType,
-              game.homeTeam.id,
-              game.awayTeam.id,
-              game.homeTeam.name,
-              game.awayTeam.name
-            )
-          : null
+        // Use precomputed covers summary for this pair
+        const coversSummary = coversByPair.get(pairKey(game.homeTeam.id, game.awayTeam.id)) || null
 
         return {
           game,
           predictions,
-          bettingData,
+          bettingData: null,
           trends,
           keyPlayers: [], // Will be loaded on demand
           injuries,

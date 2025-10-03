@@ -135,10 +135,10 @@ export async function GET(
       )
     }
 
-    // Generate detailed matchup analysis
+    // Keep predictions/trends/injuries minimal to avoid fake analysis content shown to users
     const detailedPredictions = generateDetailedAIPrediction(gameId)
-    const detailedTrends = generateDetailedTrends(gameId)
-    const detailedInjuries = generateDetailedInjuries(gameId)
+    const detailedTrends: TrendData[] = []
+    const detailedInjuries: InjuryReport[] = []
     
     // Fetch real betting data using the game ID
     let bettingData = null
@@ -156,6 +156,21 @@ export async function GET(
       enrichedGame.awayTeam.name
     )
 
+    // Real data for analysis
+    const [
+      headToHead,
+      homeRecent,
+      awayRecent,
+      homeTeamStats,
+      awayTeamStats
+    ] = await Promise.all([
+      mongoSportsAPI.getHeadToHeadGames(sport as SportType, enrichedGame.homeTeam.id, enrichedGame.awayTeam.id, 10),
+      mongoSportsAPI.getTeamRecentGames(sport as SportType, enrichedGame.homeTeam.id, 10),
+      mongoSportsAPI.getTeamRecentGames(sport as SportType, enrichedGame.awayTeam.id, 10),
+      mongoSportsAPI.getTeamStatsByTeamId(sport as SportType, enrichedGame.homeTeam.id),
+      mongoSportsAPI.getTeamStatsByTeamId(sport as SportType, enrichedGame.awayTeam.id)
+    ])
+
     const detailedMatchup: Matchup = {
       game: enrichedGame,
       predictions: detailedPredictions,
@@ -164,37 +179,15 @@ export async function GET(
       keyPlayers: [], // Would fetch key players
       injuries: detailedInjuries,
       matchupAnalysis: {
-        offensiveMatchup: 'Strong passing offense vs. weak pass defense creates favorable conditions',
-        defensiveMatchup: 'Elite run defense should limit opposing ground game effectively',
-        specialTeams: 'Field goal accuracy could be deciding factor in close game',
-        coaching: 'Experience advantage in high-pressure situations',
-        intangibles: 'Home crowd factor and recent momentum trends favor home team'
+        recentGames: {
+          home: homeRecent,
+          away: awayRecent
+        }
       },
-      headToHead: [
-        {
-          date: '2023-11-15',
-          homeScore: 28,
-          awayScore: 21,
-          result: 'Home win'
-        },
-        {
-          date: '2022-10-20',
-          homeScore: 14,
-          awayScore: 24,
-          result: 'Away win'
-        }
-      ],
+      headToHead: headToHead,
       teamStats: {
-        home: {
-          averagePoints: Math.floor(Math.random() * 15) + 20,
-          averageYards: Math.floor(Math.random() * 100) + 350,
-          turnoverDifferential: Math.floor(Math.random() * 21) - 10
-        },
-        away: {
-          averagePoints: Math.floor(Math.random() * 15) + 20,
-          averageYards: Math.floor(Math.random() * 100) + 350,
-          turnoverDifferential: Math.floor(Math.random() * 21) - 10
-        }
+        home: homeTeamStats,
+        away: awayTeamStats
       },
       coversSummary: coversSummary ?? undefined
     }
