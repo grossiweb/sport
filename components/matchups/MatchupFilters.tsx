@@ -26,10 +26,10 @@ export function MatchupFilters({
         Week Selection & Filters
       </h3>
       
-		{/* All Filters in One Line (scrolls horizontally on small screens) */}
-		<div className="flex flex-row items-center gap-3 md:gap-4 overflow-x-auto whitespace-nowrap">
+		{/* All Filters in One Line; keep WeekSelector outside any overflow to allow dropdown */}
+		<div className="flex flex-row items-center gap-3 md:gap-4">
         {/* Week Selector */}
-			<div className="flex-shrink-0 min-w-[160px]">
+			<div className="flex-shrink-0 min-w-[160px] relative z-10">
           <WeekSelector
             currentWeek={selectedWeek}
             onWeekChange={onWeekChange}
@@ -39,8 +39,8 @@ export function MatchupFilters({
 			{/* Vertical Divider */}
 			<div className="hidden md:block w-px h-12 bg-gray-200 dark:bg-gray-600"></div>
         
-			{/* Other Filters */}
-			<div className="flex flex-row items-center gap-3 md:gap-4 flex-1 min-w-0">
+			{/* Other Filters (scrolls horizontally on narrow screens) */}
+			<div className="flex flex-row items-center gap-3 md:gap-4 flex-1 min-w-0 overflow-x-auto whitespace-nowrap">
 			{/* Search Filter first */}
 			<div className="min-w-0 sm:min-w-[200px] flex-1">
 				<input
