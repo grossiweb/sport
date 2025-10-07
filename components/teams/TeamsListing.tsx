@@ -92,44 +92,43 @@ export function TeamsListing({ teams, sport, isLoading }: TeamsListingProps) {
       </div>
 
       {/* Teams by Division / Conference */}
-      {sport === 'NFL' ? null : sortedDivisions.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">
-            No teams found matching "{searchTerm}"
-          </p>
-        </div>
-      ) : sport === 'NFL' ? null : (
-        sortedDivisions.map((divisionName) => {
-          const divisionTeams = teamsByDivision[divisionName]
-          
-          return (
-            <div key={divisionName} className="space-y-4">
-              {/* Division Header */}
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {divisionName}
-                </h2>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {divisionTeams.length} team{divisionTeams.length !== 1 ? 's' : ''}
-                </span>
-              </div>
-
-              {/* Teams Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-                {divisionTeams
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .map((team) => (
-                    <TeamCard key={team.id} team={team} sport={sport} />
-                  ))}
-              </div>
-            </div>
-          )
-        })
-      )}
-
-      {/* NFL conference layout */}
-      {sport === 'NFL' && (
+      {sport === 'NFL' ? (
         <NFLConferenceTable teams={filteredTeams} sport={sport} />
+      ) : (
+        sortedDivisions.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 dark:text-gray-400">
+              No teams found matching "{searchTerm}"
+            </p>
+          </div>
+        ) : (
+          sortedDivisions.map((divisionName) => {
+            const divisionTeams = teamsByDivision[divisionName]
+            
+            return (
+              <div key={divisionName} className="space-y-4">
+                {/* Division Header */}
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                    {divisionName}
+                  </h2>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {divisionTeams.length} team{divisionTeams.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+
+                {/* Teams Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+                  {divisionTeams
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((team) => (
+                      <TeamCard key={team.id} team={team} sport={sport} />
+                    ))}
+                </div>
+              </div>
+            )
+          })
+        )
       )}
 
       {/* Summary */}
