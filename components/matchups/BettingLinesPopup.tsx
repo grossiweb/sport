@@ -120,7 +120,7 @@ function BettingLinesPopup({
   const formatTime = (dateString: string) => formatToEasternTime(dateString)
 
   const selectedLine = bettingData?.lines?.[selectedSportsbook]
-  const isFinal = gameStatus === 'final' || gameStatus === 'STATUS_FINAL'
+  const isFinal = gameStatus === 'final'
   const availableSportsbooks = bettingData?.lines ? Object.keys(bettingData.lines) : []
 
   if (!isOpen) return null
