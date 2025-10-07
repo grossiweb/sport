@@ -804,12 +804,12 @@ export class MongoDBSportsAPI {
       
       const mongoTeams = await collection.find({ sport_id: sportId }).toArray()
       
-      // Filter CFB teams to only show FBS (division_id: 1) and FCS (division_id: 4)
+      // Filter CFB teams to only show FBS (division_id: 1)
       let filteredTeams = mongoTeams
       if (sport === 'CFB') {
         filteredTeams = mongoTeams.filter(team => {
           const divisionId = team.division?.division_id
-          return divisionId === 1 || divisionId === 4
+          return divisionId === 1
         })
       }
       

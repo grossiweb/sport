@@ -10,51 +10,43 @@ interface TeamCardProps {
 }
 
 export function TeamCard({ team, sport }: TeamCardProps) {
+  const href = `/sport/${sport.toLowerCase()}/teams/${team.id}`
   return (
-    <Link 
-      href={`/sport/${sport.toLowerCase()}/teams/${team.id}`}
-      className="group block"
-    >
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 group-hover:scale-[1.02]">
-        <div className="flex items-center space-x-4">
-          {/* Team Logo */}
-          <div className="flex-shrink-0">
-            <TeamLogo team={team} size="lg" />
-          </div>
-          
-          {/* Team Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  {team.name}
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {team.abbreviation}
-                  {team.mascot && ` • ${team.mascot}`}
-                </p>
-                {team.conference && (
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    {team.conference.name}
-                  </p>
-                )}
-              </div>
-              
-              {/* Basic Stats */}
-              <div className="text-right">
-                {team.record && (
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                    {team.record}
-                  </div>
-                )}
-                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  View Details →
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-2 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200">
+      {/* Logo row */}
+      <div className="w-full flex items-center justify-center mb-1.5">
+        <Link href={href} className="inline-block">
+          <TeamLogo team={team} size="md" className="transition-transform duration-150 hover:scale-[1.03]" />
+        </Link>
       </div>
-    </Link>
+
+      {/* Team name row */}
+      <div className="text-center">
+        <Link href={href} className="block">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            {team.name}
+          </h3>
+        </Link>
+      </div>
+
+      {/* Abbreviation (short name) */}
+      <div className="text-center text-xs text-gray-600 dark:text-gray-300 mt-0.5">
+        {team.abbreviation}
+      </div>
+
+      {/* Mascot */}
+      {team.mascot && (
+        <div className="text-center text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+          {team.mascot}
+        </div>
+      )}
+
+      {/* Conference name */}
+      {team.conference?.name && (
+        <div className="text-center text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
+          {team.conference.name}
+        </div>
+      )}
+    </div>
   )
 }

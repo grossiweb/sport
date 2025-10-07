@@ -398,12 +398,12 @@ export function TeamDetailedStats({
                       </td>
                       <td className="px-3 py-2 text-right" title={stat.stat?.description || ''}>
                         <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                          {stat.display_value || stat.value}
+                          {formatValueDisplay(stat.display_value ?? stat.value)}
                         </div>
                       </td>
                       <td className="px-3 py-2 text-right" title={stat.stat?.description || ''}>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          {stat.per_game_display_value || '-'}
+                          {formatValueDisplay(stat.per_game_display_value ?? '-')}
                         </div>
                       </td>
                       <td className="px-3 py-2 text-right">

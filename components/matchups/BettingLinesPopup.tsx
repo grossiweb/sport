@@ -50,6 +50,7 @@ interface BettingLinesPopupProps {
   homeTeam: { name: string; abbreviation: string }
   awayTeam: { name: string; abbreviation: string }
   sport: SportType
+  gameStatus?: Game['status']
 }
 
 function BettingLinesPopup({ 
@@ -58,7 +59,8 @@ function BettingLinesPopup({
   gameId, 
   homeTeam, 
   awayTeam, 
-  sport 
+  sport,
+  gameStatus
 }: BettingLinesPopupProps) {
   const [bettingData, setBettingData] = useState<BettingData | null>(null)
   const [selectedSportsbook, setSelectedSportsbook] = useState<string>('')
@@ -118,6 +120,7 @@ function BettingLinesPopup({
   const formatTime = (dateString: string) => formatToEasternTime(dateString)
 
   const selectedLine = bettingData?.lines?.[selectedSportsbook]
+  const isFinal = gameStatus === 'final' || gameStatus === 'STATUS_FINAL'
   const availableSportsbooks = bettingData?.lines ? Object.keys(bettingData.lines) : []
 
   if (!isOpen) return null
@@ -229,7 +232,7 @@ function BettingLinesPopup({
                           {awayTeam.abbreviation}
                         </div>
                         <div className="text-base font-bold text-gray-900 dark:text-white">
-                          {formatOdds(selectedLine.moneyline.moneyline_away)}
+                          {formatOdds(isFinal ? (selectedLine as any).moneyline?.moneyline_away_delta ?? selectedLine.moneyline.moneyline_away : selectedLine.moneyline.moneyline_away)}
                         </div>
                       </div>
                       <div className="text-center p-2 bg-white/60 dark:bg-gray-800/60 rounded">
@@ -237,7 +240,7 @@ function BettingLinesPopup({
                           {homeTeam.abbreviation}
                         </div>
                         <div className="text-base font-bold text-gray-900 dark:text-white">
-                          {formatOdds(selectedLine.moneyline.moneyline_home)}
+                          {formatOdds(isFinal ? (selectedLine as any).moneyline?.moneyline_home_delta ?? selectedLine.moneyline.moneyline_home : selectedLine.moneyline.moneyline_home)}
                         </div>
                       </div>
                     </div>
@@ -258,10 +261,10 @@ function BettingLinesPopup({
                           {awayTeam.abbreviation}
                         </div>
                         <div className="text-base font-bold text-gray-900 dark:text-white">
-                          {formatSpread(selectedLine.spread.point_spread_away)}
+                          {formatSpread(isFinal ? (selectedLine as any).spread?.point_spread_away_delta ?? selectedLine.spread.point_spread_away : selectedLine.spread.point_spread_away)}
                         </div>
                         <div className="text-[11px] text-gray-500 dark:text-gray-400">
-                          ({formatOdds(selectedLine.spread.point_spread_away_money)})
+                          ({formatOdds(isFinal ? (selectedLine as any).spread?.point_spread_away_money_delta ?? selectedLine.spread.point_spread_away_money : selectedLine.spread.point_spread_away_money)})
                         </div>
                       </div>
                       <div className="text-center p-2 bg-white/60 dark:bg-gray-800/60 rounded">
@@ -269,10 +272,10 @@ function BettingLinesPopup({
                           {homeTeam.abbreviation}
                         </div>
                         <div className="text-base font-bold text-gray-900 dark:text-white">
-                          {formatSpread(selectedLine.spread.point_spread_home)}
+                          {formatSpread(isFinal ? (selectedLine as any).spread?.point_spread_home_delta ?? selectedLine.spread.point_spread_home : selectedLine.spread.point_spread_home)}
                         </div>
                         <div className="text-[11px] text-gray-500 dark:text-gray-400">
-                          ({formatOdds(selectedLine.spread.point_spread_home_money)})
+                          ({formatOdds(isFinal ? (selectedLine as any).spread?.point_spread_home_money_delta ?? selectedLine.spread.point_spread_home_money : selectedLine.spread.point_spread_home_money)})
                         </div>
                       </div>
                     </div>
@@ -291,19 +294,19 @@ function BettingLinesPopup({
                       <div className="text-center p-2 bg-white/60 dark:bg-gray-800/60 rounded">
                         <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Over</div>
                         <div className="text-base font-bold text-gray-900 dark:text-white">
-                          {selectedLine.total.total_over}
+                          {isFinal ? (selectedLine as any).total?.total_over_delta ?? selectedLine.total.total_over : selectedLine.total.total_over}
                         </div>
                         <div className="text-[11px] text-gray-500 dark:text-gray-400">
-                          ({formatOdds(selectedLine.total.total_over_money)})
+                          ({formatOdds(isFinal ? (selectedLine as any).total?.total_over_money_delta ?? selectedLine.total.total_over_money : selectedLine.total.total_over_money)})
                         </div>
                       </div>
                       <div className="text-center p-2 bg-white/60 dark:bg-gray-800/60 rounded">
                         <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Under</div>
                         <div className="text-base font-bold text-gray-900 dark:text-white">
-                          {selectedLine.total.total_under}
+                          {isFinal ? (selectedLine as any).total?.total_under_delta ?? selectedLine.total.total_under : selectedLine.total.total_under}
                         </div>
                         <div className="text-[11px] text-gray-500 dark:text-gray-400">
-                          ({formatOdds(selectedLine.total.total_under_money)})
+                          ({formatOdds(isFinal ? (selectedLine as any).total?.total_under_money_delta ?? selectedLine.total.total_under_money : selectedLine.total.total_under_money)})
                         </div>
                       </div>
                     </div>

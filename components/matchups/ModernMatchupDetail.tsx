@@ -477,6 +477,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
         homeTeam={game.homeTeam}
         awayTeam={game.awayTeam}
         sport={sport}
+        gameStatus={game.status}
       />
 
       <ScoreByPeriodPopup
