@@ -8,7 +8,7 @@ import {
   ArrowTopRightOnSquareIcon,
   ClockIcon
 } from '@heroicons/react/24/outline'
-import { SportType } from '@/types'
+import { SportType, Game } from '@/types'
 import { formatToEasternTime } from '@/lib/utils/time'
 
 interface BettingLine {
