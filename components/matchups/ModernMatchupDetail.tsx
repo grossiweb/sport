@@ -458,6 +458,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                 awayTeam={game.awayTeam}
                 isLoading={loadingDetailedStats}
                 sport={sport}
+                h2hStyle
               />
             )}
           </div>

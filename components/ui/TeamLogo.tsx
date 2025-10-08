@@ -34,7 +34,8 @@ export function TeamLogo({ team, size = 'md', className = '', fallbackText = tru
   
   // Generate logo path based on sport and team ID
   const getLogoPath = (team: Team) => {
-    const sport = team.league.toLowerCase()
+    const sport = (team?.league as unknown as string | undefined)?.toLowerCase?.() || ''
+    if (!sport) return ''
     // Ensure team ID is a string and remove any extra characters
     const teamId = String(team.id).trim()
     const path = `/${sport}/${sport}-${teamId}.png`
@@ -65,12 +66,15 @@ export function TeamLogo({ team, size = 'md', className = '', fallbackText = tru
   }
 
   // If we already know the image failed or team doesn't have necessary info
-  if (imageError || !team?.id || team.id === 'unknown') {
+  if (imageError || !team?.id || team.id === 'unknown' || !team?.league) {
     return <FallbackLogo />
   }
 
   const logoPath = getLogoPath(team)
-console.log(`from: ${logoPath}`)
+  if (!logoPath) {
+    return <FallbackLogo />
+  }
+  console.log(`from: ${logoPath}`)
   return (
     <div className={`${sizeClasses[size]} ${className} relative`}>
       <Image
