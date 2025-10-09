@@ -108,7 +108,12 @@ export default function MatchupDetailsPage() {
     )
   }
 
-  if (!validSport) {
+  // Only show invalid sport if the URL param is present and truly invalid
+  const sportParamRaw = (params.sport as string) || ''
+  const sportParamUpper = sportParamRaw.toUpperCase()
+  const isParamInvalid = sportParamRaw && !isValidSportType(sportParamUpper)
+
+  if (isParamInvalid) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">

@@ -13,42 +13,46 @@ interface TeamsListingProps {
 
 export function TeamsListing({ teams, sport, isLoading }: TeamsListingProps) {
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedConference, setSelectedConference] = useState<string>('all')
 
-  if (isLoading) {
-    return (
-      <div className="space-y-8">
-        {/* Search skeleton */}
-        <div className="animate-pulse">
-          <div className="h-10 bg-gray-300 dark:bg-gray-600 rounded-lg w-full max-w-md"></div>
-        </div>
-        
-        {/* Division skeletons */}
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="animate-pulse">
-            <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-48 mb-4"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1, 2, 3, 4, 5, 6].map((j) => (
-                <div key={j} className="h-24 bg-gray-300 dark:bg-gray-600 rounded-lg"></div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    )
-  }
 
-  // Filter teams based on search
-  const filteredTeams = teams.filter(team => {
-    if (!searchTerm) return true
-    const search = searchTerm.toLowerCase()
-    return (
-      team.name.toLowerCase().includes(search) ||
-      team.abbreviation.toLowerCase().includes(search) ||
-      team.mascot?.toLowerCase().includes(search) ||
-      team.conference?.name?.toLowerCase().includes(search) ||
-      team.division?.name?.toLowerCase().includes(search)
-    )
-  })
+  // Build conference list for CFB
+  const conferences = useMemo(() => {
+    if (sport !== 'CFB') return [] as string[]
+    const set = new Set<string>()
+    for (const t of teams) {
+      const name = (t.conference?.name || 'Other').trim()
+      if (name) set.add(name)
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b))
+  }, [teams, sport])
+
+  // Filter teams based on sport-specific filters
+  const filteredTeams = useMemo(() => {
+    if (sport === 'CFB') {
+      let list = teams
+      if (selectedConference !== 'all') {
+        list = list.filter(t => (t.conference?.name || 'Other') === selectedConference)
+      }
+      if (searchTerm) {
+        const s = searchTerm.toLowerCase()
+        list = list.filter(t => t.name.toLowerCase().includes(s))
+      }
+      return list
+    }
+    // Default behavior for other sports (keep existing broader search)
+    return teams.filter(team => {
+      if (!searchTerm) return true
+      const search = searchTerm.toLowerCase()
+      return (
+        team.name.toLowerCase().includes(search) ||
+        team.abbreviation.toLowerCase().includes(search) ||
+        team.mascot?.toLowerCase().includes(search) ||
+        team.conference?.name?.toLowerCase().includes(search) ||
+        team.division?.name?.toLowerCase().includes(search)
+      )
+    })
+  }, [teams, sport, selectedConference, searchTerm])
 
   // Group teams by division
   const teamsByDivision = filteredTeams.reduce((acc, team) => {
@@ -75,20 +79,61 @@ export function TeamsListing({ teams, sport, isLoading }: TeamsListingProps) {
     return a.localeCompare(b)
   })
 
+  // Loading state (placed after hooks to keep hooks order stable)
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        {/* Search skeleton */}
+        <div className="animate-pulse">
+          <div className="h-10 bg-gray-300 dark:bg-gray-600 rounded-lg w-full max-w-md"></div>
+        </div>
+        
+        {/* Division skeletons */}
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="animate-pulse">
+            <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-48 mb-4"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((j) => (
+                <div key={j} className="h-24 bg-gray-300 dark:bg-gray-600 rounded-lg"></div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-8">
-      {/* Search Bar */}
-      <div className="relative max-w-md">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+      {/* Filters */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+        <div className="relative w-full sm:w-[28rem] max-w-full">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder={sport === 'CFB' ? 'Search team name...' : `Search ${sport} teams...`}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
         </div>
-        <input
-          type="text"
-          placeholder={sport === 'CFB' ? 'Search CFB teams by team or conference...' : `Search ${sport} teams...`}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        />
+
+        {sport === 'CFB' && (
+          <div className="w-full sm:w-80">
+            <select
+              value={selectedConference}
+              onChange={(e) => setSelectedConference(e.target.value)}
+              className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Conferences</option>
+              {conferences.map((conf) => (
+                <option key={conf} value={conf}>{conf}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Teams by Division / Conference */}
