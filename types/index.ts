@@ -16,7 +16,7 @@ export interface AuthState {
 }
 
 // Sports and League Types - Multi-sport support
-export type SportType = 'CFB' | 'NFL'
+export type SportType = 'CFB' | 'NFL' | 'NBA'
 
 export interface Sport {
   id: string

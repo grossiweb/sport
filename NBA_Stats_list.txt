@@ -1,0 +1,48 @@
+| #  | Stat Name                              | Category  | Description                                                                                                 |
+| -- | -------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------- |
+| 1  | Rebounds Per Game                      | general   | The average rebounds per game.                                                                              |
+| 2  | Assist To Turnover Ratio               | general   | The average number of assists a player or team records per turnover.                                        |
+| 3  | Fouls Per Game                         | general   | The average fouls committed per game.                                                                       |
+| 4  | Games Played                           | general   | Games Played.                                                                                               |
+| 5  | Games Started                          | general   | The number of games started by an athlete.                                                                  |
+| 6  | Minutes                                | general   | The total number of minutes played.                                                                         |
+| 7  | Minutes Per Game                       | general   | The average number of minutes per game.                                                                     |
+| 8  | Rebounds                               | general   | The total number of rebounds for a team or player.                                                          |
+| 9  | Rebounds                               | general   | The total number of rebounds (offensive and defensive).                                                     |
+| 10 | Free Throw %                           | offensive | The ratio of free throws made to free throws attempted: FTM / FTA.                                          |
+| 11 | 3-Point Field Goal Percentage          | offensive | The ratio of 3pt field goals made to 3pt field goals attempted: 3PM / 3PA.                                  |
+| 12 | Average Field Goals Made               | offensive | The average field goals made per game.                                                                      |
+| 13 | Average Field Goals Attempted          | offensive | The average field goals attempted per game.                                                                 |
+| 14 | Average 3-Point Field Goals Made       | offensive | The average three point field goals made per game.                                                          |
+| 15 | Average 3-Point Field Goals Attempted  | offensive | The average three point field goals attempted per game.                                                     |
+| 16 | Average Free Throws Made               | offensive | The average free throw shots made per game.                                                                 |
+| 17 | Average Free Throws Attempted          | offensive | The average free throw shots attempted per game.                                                            |
+| 18 | Points Per Game                        | offensive | The average number of points scored per game.                                                               |
+| 19 | Offensive Rebounds Per Game            | offensive | The average offensive rebounds per game.                                                                    |
+| 20 | Assists Per Game                       | offensive | The average assists per game.                                                                               |
+| 21 | Turnovers Per Game                     | offensive | The average turnovers committed per game.                                                                   |
+| 22 | 2-Point Field Goal Percentage          | offensive | The percentage of 2-points fields goals made by a team or player.                                           |
+| 23 | Scoring Efficiency                     | offensive | The efficiency with which a team or player scores the basketball.                                           |
+| 24 | Shooting Efficiency                    | offensive | The efficiency with which a team or player shoots the basketball.                                           |
+| 25 | Field Goal %                           | offensive | The ratio of field goals made to field goals attempted: FGM / FGA.                                          |
+| 26 | 2-Point Field Goals Made               | offensive | The number of 2-point field goals made for a team or player.                                                |
+| 27 | 2-Point Field Goals Attempted          | offensive | The number of 2-point field goals attempted for a team or player.                                           |
+| 28 | Points                                 | offensive | The number of points scored.                                                                                |
+| 29 | Offensive Rebounds                     | offensive | The number of times when the offense obtains the possession of the ball after a missed shot.                |
+| 30 | Assists                                | offensive | The number of times a player passes the ball to a teammate leading to a score by field goal.                |
+| 31 | Turnovers                              | offensive | The number of times a player loses possession to the other team.                                            |
+| 32 | Field Goals Made                       | offensive | The number of times a 2pt field goal was made.                                                              |
+| 33 | Field Goals Attempted                  | offensive | The number of times a 2pt field goal was attempted.                                                         |
+| 34 | Free Throws Made                       | offensive | The number of times a free throw was made.                                                                  |
+| 35 | Free Throws Attempted                  | offensive | The number of times a free throw was attempted.                                                             |
+| 36 | 3-Point Field Goals Made               | offensive | The number of times a 3pt field goal was made.                                                              |
+| 37 | 3-Point Field Goals Attempted          | offensive | The number of times a 3pt field goal was attempted.                                                         |
+| 38 | Three Point %                          | offensive | The ratio of 3pt field goals made to 3pt field goals attempted: 3PM / 3PA.                                  |
+| 39 | 2-Point Field Goals Made per Game      | offensive | The number of 2-point field goals made per game for a team or player.                                       |
+| 40 | 2-Point Field Goals Attempted per Game | offensive | The number of 2-point field goals attempted per game for a team or player.                                  |
+| 41 | Defensive Rebounds Per Game            | defensive | The average defensive rebounds per game.                                                                    |
+| 42 | Blocks Per Game                        | defensive | The average blocks per game.                                                                                |
+| 43 | Steals Per Game                        | defensive | The average steals per game.                                                                                |
+| 44 | Defensive Rebounds                     | defensive | The number of times when the defense obtains the possession of the ball after a missed shot by the offense. |
+| 45 | Steals                                 | defensive | The number of times a defensive player forced a turnover by intercepting or deflecting a pass or dribble.   |
+| 46 | Blocks                                 | defensive | Short for blocked shot; number of times when a defensive player legally deflects a field goal attempt.      |

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { DetailedTeamStat } from '@/types'
+import { DetailedTeamStat, SportType } from '@/types'
 import { ChartBarIcon, TrophyIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline'
 import { filterAndSortStats, STAT_CATEGORIES, mapCfbStatToCategory } from '@/lib/constants/team-stats-config'
 import { TeamLogo } from '@/components/ui/TeamLogo'
@@ -14,7 +14,7 @@ interface TeamDetailedStatsProps {
   homeTeam?: any // Full team object for logo
   awayTeam?: any // Full team object for logo
   isLoading?: boolean
-  sport?: 'CFB' | 'NFL'
+  sport?: SportType
   viewMode?: 'comparison' | 'single' // New prop to control view mode
   h2hStyle?: boolean // Apply head-to-head visual style (scoped for matchup detail)
 }

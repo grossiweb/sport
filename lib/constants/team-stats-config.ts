@@ -78,13 +78,69 @@ export const NFL_PREFERRED_STATS: StatConfig[] = [
   { stat_id: 35, abbreviation: 'DIFF', display_name: 'Turnover Differential', category: 'Efficiency', description: 'Turnover differential', priority: 17 },
 ]
 
+// NBA Preferred Stats Configuration (from NBA_Stats_list.txt)
+export const NBA_PREFERRED_STATS: StatConfig[] = [
+  // General
+  { stat_id: -1, abbreviation: '', display_name: 'Rebounds Per Game', category: 'General', description: 'The average rebounds per game.', priority: 1 },
+  { stat_id: -1, abbreviation: '', display_name: 'Assist To Turnover Ratio', category: 'General', description: 'Assists per turnover.', priority: 2 },
+  { stat_id: -1, abbreviation: '', display_name: 'Fouls Per Game', category: 'General', description: 'The average fouls committed per game.', priority: 3 },
+  { stat_id: -1, abbreviation: '', display_name: 'Games Played', category: 'General', description: 'Games Played.', priority: 4 },
+  { stat_id: -1, abbreviation: '', display_name: 'Games Started', category: 'General', description: 'The number of games started.', priority: 5 },
+  { stat_id: -1, abbreviation: '', display_name: 'Minutes', category: 'General', description: 'The total number of minutes played.', priority: 6 },
+  { stat_id: -1, abbreviation: '', display_name: 'Minutes Per Game', category: 'General', description: 'The average number of minutes per game.', priority: 7 },
+  { stat_id: -1, abbreviation: '', display_name: 'Rebounds', category: 'General', description: 'Total rebounds.', priority: 8 },
+  
+  // Offense
+  { stat_id: -1, abbreviation: '', display_name: 'Free Throw %', category: 'Offense', description: 'FTM / FTA.', priority: 20 },
+  { stat_id: -1, abbreviation: '', display_name: '3-Point Field Goal Percentage', category: 'Offense', description: '3PM / 3PA.', priority: 21 },
+  { stat_id: -1, abbreviation: '', display_name: 'Average Field Goals Made', category: 'Offense', description: 'FGM per game.', priority: 22 },
+  { stat_id: -1, abbreviation: '', display_name: 'Average Field Goals Attempted', category: 'Offense', description: 'FGA per game.', priority: 23 },
+  { stat_id: -1, abbreviation: '', display_name: 'Average 3-Point Field Goals Made', category: 'Offense', description: '3PM per game.', priority: 24 },
+  { stat_id: -1, abbreviation: '', display_name: 'Average 3-Point Field Goals Attempted', category: 'Offense', description: '3PA per game.', priority: 25 },
+  { stat_id: -1, abbreviation: '', display_name: 'Average Free Throws Made', category: 'Offense', description: 'FTM per game.', priority: 26 },
+  { stat_id: -1, abbreviation: '', display_name: 'Average Free Throws Attempted', category: 'Offense', description: 'FTA per game.', priority: 27 },
+  { stat_id: -1, abbreviation: '', display_name: 'Points Per Game', category: 'Offense', description: 'Average points per game.', priority: 28 },
+  { stat_id: -1, abbreviation: '', display_name: 'Offensive Rebounds Per Game', category: 'Offense', description: 'Average offensive rebounds per game.', priority: 29 },
+  { stat_id: -1, abbreviation: '', display_name: 'Assists Per Game', category: 'Offense', description: 'Average assists per game.', priority: 30 },
+  { stat_id: -1, abbreviation: '', display_name: 'Turnovers Per Game', category: 'Offense', description: 'Average turnovers per game.', priority: 31 },
+  { stat_id: -1, abbreviation: '', display_name: '2-Point Field Goal Percentage', category: 'Offense', description: 'Two-point FG%.', priority: 32 },
+  { stat_id: -1, abbreviation: '', display_name: 'Scoring Efficiency', category: 'Offense', description: 'Scoring efficiency.', priority: 33 },
+  { stat_id: -1, abbreviation: '', display_name: 'Shooting Efficiency', category: 'Offense', description: 'Shooting efficiency.', priority: 34 },
+  { stat_id: -1, abbreviation: '', display_name: 'Field Goal %', category: 'Offense', description: 'FGM / FGA.', priority: 35 },
+  { stat_id: -1, abbreviation: '', display_name: '2-Point Field Goals Made', category: 'Offense', description: '2PM.', priority: 36 },
+  { stat_id: -1, abbreviation: '', display_name: '2-Point Field Goals Attempted', category: 'Offense', description: '2PA.', priority: 37 },
+  { stat_id: -1, abbreviation: '', display_name: 'Points', category: 'Offense', description: 'Total points.', priority: 38 },
+  { stat_id: -1, abbreviation: '', display_name: 'Offensive Rebounds', category: 'Offense', description: 'Offensive rebounds total.', priority: 39 },
+  { stat_id: -1, abbreviation: '', display_name: 'Assists', category: 'Offense', description: 'Assists total.', priority: 40 },
+  { stat_id: -1, abbreviation: '', display_name: 'Turnovers', category: 'Offense', description: 'Turnovers total.', priority: 41 },
+  { stat_id: -1, abbreviation: '', display_name: 'Field Goals Made', category: 'Offense', description: 'FGM.', priority: 42 },
+  { stat_id: -1, abbreviation: '', display_name: 'Field Goals Attempted', category: 'Offense', description: 'FGA.', priority: 43 },
+  { stat_id: -1, abbreviation: '', display_name: 'Free Throws Made', category: 'Offense', description: 'FTM.', priority: 44 },
+  { stat_id: -1, abbreviation: '', display_name: 'Free Throws Attempted', category: 'Offense', description: 'FTA.', priority: 45 },
+  { stat_id: -1, abbreviation: '', display_name: '3-Point Field Goals Made', category: 'Offense', description: '3PM.', priority: 46 },
+  { stat_id: -1, abbreviation: '', display_name: '3-Point Field Goals Attempted', category: 'Offense', description: '3PA.', priority: 47 },
+  { stat_id: -1, abbreviation: '', display_name: 'Three Point %', category: 'Offense', description: '3PM / 3PA.', priority: 48 },
+  { stat_id: -1, abbreviation: '', display_name: '2-Point Field Goals Made per Game', category: 'Offense', description: '2PM per game.', priority: 49 },
+  { stat_id: -1, abbreviation: '', display_name: '2-Point Field Goals Attempted per Game', category: 'Offense', description: '2PA per game.', priority: 50 },
+
+  // Defense
+  { stat_id: -1, abbreviation: '', display_name: 'Defensive Rebounds Per Game', category: 'Defense', description: 'Average defensive rebounds per game.', priority: 60 },
+  { stat_id: -1, abbreviation: '', display_name: 'Blocks Per Game', category: 'Defense', description: 'Average blocks per game.', priority: 61 },
+  { stat_id: -1, abbreviation: '', display_name: 'Steals Per Game', category: 'Defense', description: 'Average steals per game.', priority: 62 },
+  { stat_id: -1, abbreviation: '', display_name: 'Defensive Rebounds', category: 'Defense', description: 'Defensive rebounds total.', priority: 63 },
+  { stat_id: -1, abbreviation: '', display_name: 'Steals', category: 'Defense', description: 'Steals total.', priority: 64 },
+  { stat_id: -1, abbreviation: '', display_name: 'Blocks', category: 'Defense', description: 'Blocks total.', priority: 65 },
+]
+
 // Helper function to get preferred stats by sport
-export function getPreferredStats(sport: 'CFB' | 'NFL'): StatConfig[] {
-  return sport === 'NFL' ? NFL_PREFERRED_STATS : CFB_PREFERRED_STATS
+export function getPreferredStats(sport: 'CFB' | 'NFL' | 'NBA'): StatConfig[] {
+  if (sport === 'NFL') return NFL_PREFERRED_STATS
+  if (sport === 'NBA') return NBA_PREFERRED_STATS
+  return CFB_PREFERRED_STATS
 }
 
 // Helper function to filter and sort stats based on preferred configuration
-export function filterAndSortStats(stats: any[], sport: 'CFB' | 'NFL'): any[] {
+export function filterAndSortStats(stats: any[], sport: 'CFB' | 'NFL' | 'NBA'): any[] {
   const preferredStats = getPreferredStats(sport)
   // For CFB, prefer matching by display_name keywords since stat_ids vary
   if (sport === 'CFB') {
@@ -92,6 +148,18 @@ export function filterAndSortStats(stats: any[], sport: 'CFB' | 'NFL'): any[] {
       const name = (stat?.stat?.display_name || stat?.stat?.name || '').toLowerCase()
       const entry = preferredStats.find(p => name.includes(p.display_name.toLowerCase().replace('%', '')))
       return entry?.priority ?? 999
+    }
+    const filtered = stats.filter(stat => byPriority(stat) !== 999)
+    return filtered.sort((a, b) => byPriority(a) - byPriority(b))
+  }
+
+  if (sport === 'NBA') {
+    const loweredToPriority = new Map<string, number>()
+    preferredStats.forEach(p => loweredToPriority.set(p.display_name.toLowerCase(), p.priority))
+    const byPriority = (stat: any): number => {
+      const name = (stat?.stat?.display_name || stat?.stat?.name || '').toLowerCase()
+      if (!name) return 999
+      return loweredToPriority.get(name) ?? 999
     }
     const filtered = stats.filter(stat => byPriority(stat) !== 999)
     return filtered.sort((a, b) => byPriority(a) - byPriority(b))
@@ -155,4 +223,17 @@ export function mapCfbStatToCategory(stat: any): string {
 
   // Offense by default
   return STAT_CATEGORIES.OFFENSE
+}
+
+// Map an NBA stat to categories using the configured list
+export function mapNbaStatToCategory(stat: any): string {
+  const label = (stat?.stat?.display_name || stat?.stat?.name || '').trim().toLowerCase()
+  if (!label) return 'Offense'
+  const pref = NBA_PREFERRED_STATS.find(p => p.display_name.toLowerCase() === label)
+  if (pref) return pref.category
+  // Heuristics fallback
+  if (/rebound|assist|turnover|foul|minutes|games?\s+(played|started)/i.test(label)) return 'General'
+  if (/point|field goal|free throw|scoring|shooting|offensive/i.test(label)) return 'Offense'
+  if (/defensive|steal|block/i.test(label)) return 'Defense'
+  return 'Offense'
 }

@@ -38,7 +38,19 @@ export default function SportMatchupsPage() {
   // Align initial selectedWeek to current season-relative week if season data exists
   useEffect(() => {
     const alignToSeason = async () => {
-      const sportId = (validSport || currentSport) === 'CFB' ? 1 : (validSport || currentSport) === 'NFL' ? 2 : undefined
+      const s = (validSport || currentSport)
+      // For NBA, always use provided season dates
+      if (s === 'NBA') {
+        const start = new Date('2025-10-09')
+        const endDate = new Date('2026-04-12')
+        const weeks = getSeasonWeekOptions({ startDate: start, endDate })
+        const now = new Date()
+        const current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+        if (current) setSelectedWeek(current.weekInfo)
+        return
+      }
+
+      const sportId = s === 'CFB' ? 1 : s === 'NFL' ? 2 : undefined
       if (!sportId) return
       const year = new Date().getFullYear()
       try {
@@ -49,7 +61,6 @@ export default function SportMatchupsPage() {
         const start = new Date(season.start_date)
         const endDate = season.end_date ? new Date(season.end_date) : undefined
         const weeks = getSeasonWeekOptions({ startDate: start, endDate })
-        // Find current date week within season
         const now = new Date()
         const current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
         if (current) setSelectedWeek(current.weekInfo)

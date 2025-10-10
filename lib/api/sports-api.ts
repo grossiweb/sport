@@ -87,16 +87,16 @@ class TheRundownAPI {
           name: event.home_team || 'Home Team',
           city: '', // ❌ Not provided in response
           abbreviation: event.home_team_abbreviation || event.home_team?.substring(0, 3).toUpperCase() || 'HOM',
-          league: (this.sportId === '2' ? 'NFL' : 'CFB') as SportType
+          league: (this.sportId === '2' ? 'NFL' : this.sportId === '4' ? 'NBA' : 'CFB') as SportType
         },
         awayTeam: {
           id: event.away_team_id != null ? String(event.away_team_id) : 'unknown',
           name: event.away_team || 'Away Team',
           city: '', // ❌ Not provided in response
           abbreviation: event.away_team_abbreviation || event.away_team?.substring(0, 3).toUpperCase() || 'AWY',
-          league: (this.sportId === '2' ? 'NFL' : 'CFB') as SportType
+          league: (this.sportId === '2' ? 'NFL' : this.sportId === '4' ? 'NBA' : 'CFB') as SportType
         },
-        league: (this.sportId === '2' ? 'NFL' : 'CFB') as SportType,
+        league: (this.sportId === '2' ? 'NFL' : this.sportId === '4' ? 'NBA' : 'CFB') as SportType,
         gameDate: new Date(event.date_event),
         status: this.mapEventStatus(event.event_status),
         statusDetail: event.event_status_detail || '', // ✅ Added for better UI
@@ -266,7 +266,7 @@ class TheRundownAPI {
       name: team.name,
       city: team.mascot || '',
       abbreviation: team.abbreviation,
-      league: (this.sportId === '2' ? 'NFL' : 'CFB') as SportType,
+      league: (this.sportId === '2' ? 'NFL' : this.sportId === '4' ? 'NBA' : 'CFB') as SportType,
       logoUrl: team.logo_url,
       primaryColor: team.primary_color,
       secondaryColor: team.secondary_color,
@@ -786,11 +786,13 @@ class TheRundownAPI {
 export class SportsAPI {
   private theRundownCFB: TheRundownAPI
   private theRundownNFL: TheRundownAPI
+  private theRundownNBA: TheRundownAPI
 
   constructor() {
     const apiKey = process.env.THERUNDOWN_API_KEY || 'daebc01578mshf1b6929ad17a9f8p19c30bjsn5ab4b86b16e7'
     this.theRundownCFB = new TheRundownAPI(apiKey, '1') // College Football
     this.theRundownNFL = new TheRundownAPI(apiKey, '2') // NFL
+    this.theRundownNBA = new TheRundownAPI(apiKey, '4') // NBA
   }
 
   private getAPIClient(sport: SportType): TheRundownAPI {
@@ -799,6 +801,8 @@ export class SportsAPI {
         return this.theRundownCFB
       case 'NFL':
         return this.theRundownNFL
+      case 'NBA':
+        return this.theRundownNBA
       default:
         return this.theRundownCFB
     }

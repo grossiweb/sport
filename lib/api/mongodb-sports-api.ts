@@ -18,6 +18,32 @@ export class MongoDBSportsAPI {
   private teamSeasonGamesCache = new Map<string, { seasonYear: number; games: Game[]; createdAt: number }>()
   private coversSummaryCache = new Map<string, { seasonYear: number; summary: MatchupCoversSummary; createdAt: number }>()
   
+  private mapSportTypeToSportId(sport: SportType): number {
+    switch (sport) {
+      case 'CFB':
+        return 1
+      case 'NFL':
+        return 2
+      case 'NBA':
+        return 4
+      default:
+        return 1
+    }
+  }
+
+  private mapSportIdToSportType(sportId: number): SportType {
+    switch (sportId) {
+      case 1:
+        return 'CFB'
+      case 2:
+        return 'NFL'
+      case 4:
+        return 'NBA'
+      default:
+        return 'CFB'
+    }
+  }
+  
   // Convert MongoDB player to our Player interface
   private mapMongoPlayerToPlayer(mongoPlayer: MongoPlayer): Player {
     return {
@@ -41,7 +67,7 @@ export class MongoDBSportsAPI {
   ): Promise<Array<{ date: string; homeTeamId: string; awayTeamId: string; homeTeamName?: string; awayTeamName?: string; homeScore: number; awayScore: number; result: string }>> {
     try {
       const collection = await getGamesCollection()
-      const sportId = sport === 'NFL' ? 2 : 1
+      const sportId = this.mapSportTypeToSportId(sport)
 
       const numericA = parseInt(teamIdA, 10)
       const numericB = parseInt(teamIdB, 10)
@@ -115,7 +141,7 @@ export class MongoDBSportsAPI {
 
       // Fetch teams for names
       const teamsCollection = await getTeamsCollection()
-      const sportId = sport === 'NFL' ? 2 : 1
+      const sportId = this.mapSportTypeToSportId(sport)
       const allTeams = await teamsCollection.find({ sport_id: sportId }).toArray()
       const teamsMap = new Map(allTeams.map(t => [t.team_id.toString(), t.name]))
 
@@ -163,7 +189,7 @@ export class MongoDBSportsAPI {
       name: mongoTeam.name,
       city: mongoTeam.mascot || '',
       abbreviation: mongoTeam.abbreviation,
-      league: (mongoTeam.sport_id === 2 ? 'NFL' : 'CFB') as SportType,
+      league: this.mapSportIdToSportType(mongoTeam.sport_id),
       logoUrl: undefined, // Not in MongoDB schema
       primaryColor: undefined, // Not in MongoDB schema
       secondaryColor: undefined, // Not in MongoDB schema
@@ -218,16 +244,16 @@ export class MongoDBSportsAPI {
         name: mongoGame.home_team,
         city: '',
         abbreviation: homeTeam?.abbreviation || mongoGame.home_team?.substring(0, 3).toUpperCase(),
-        league: (mongoGame.sport_id === 2 ? 'NFL' : 'CFB') as SportType
+        league: this.mapSportIdToSportType(mongoGame.sport_id)
       },
       awayTeam: {
         id: mongoGame.away_team_id.toString(),
         name: mongoGame.away_team,
         city: '',
         abbreviation: awayTeam?.abbreviation || mongoGame.away_team?.substring(0, 3).toUpperCase(),
-        league: (mongoGame.sport_id === 2 ? 'NFL' : 'CFB') as SportType
+        league: this.mapSportIdToSportType(mongoGame.sport_id)
       },
-      league: (mongoGame.sport_id === 2 ? 'NFL' : 'CFB') as SportType,
+      league: this.mapSportIdToSportType(mongoGame.sport_id),
       gameDate: new Date(mongoGame.date_event),
       status: this.mapEventStatus(mongoGame.event_status),
       statusDetail: mongoGame.event_status_detail || '',
@@ -656,7 +682,7 @@ export class MongoDBSportsAPI {
   ): Promise<Map<string, Game[]>> {
     const result = new Map<string, Game[]>()
     if (teamIds.length === 0) return result
-    const sportId = sport === 'NFL' ? 2 : 1
+    const sportId = this.mapSportTypeToSportId(sport)
     const numericTeamIds = teamIds.map(id => parseInt(id, 10))
 
     const [gamesCollection, teamsCollection] = await Promise.all([
@@ -800,7 +826,7 @@ export class MongoDBSportsAPI {
   async getTeams(sport: SportType = 'CFB'): Promise<Team[]> {
     try {
       const collection = await getTeamsCollection()
-      const sportId = sport === 'NFL' ? 2 : 1
+      const sportId = this.mapSportTypeToSportId(sport)
       
       const mongoTeams = await collection.find({ sport_id: sportId }).toArray()
       
@@ -886,7 +912,7 @@ export class MongoDBSportsAPI {
   async getGames(sport: SportType = 'CFB', date?: string, limit?: number, endDate?: string): Promise<Game[]> {
     try {
       const collection = await getGamesCollection()
-      const sportId = sport === 'NFL' ? 2 : 1
+      const sportId = this.mapSportTypeToSportId(sport)
       
       let query: any = { sport_id: sportId }
       
@@ -1048,7 +1074,7 @@ export class MongoDBSportsAPI {
   async getPlayers(sport: SportType = 'CFB', teamId?: string): Promise<Player[]> {
     try {
       const collection = await getPlayersCollection()
-      const sportId = sport === 'NFL' ? 2 : 1
+      const sportId = this.mapSportTypeToSportId(sport)
       
       let query: any = { sport_id: sportId, active: true }
       

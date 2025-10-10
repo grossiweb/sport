@@ -27,6 +27,16 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
 
   // Load season start date from API based on sport and year, then compute weeks dynamically
   useEffect(() => {
+    // For NBA, always use provided season dates
+    if (currentSport === 'NBA') {
+      const start = new Date('2025-10-09')
+      const endDate = new Date('2026-04-12')
+      setSeasonStart(start)
+      const weeks = getSeasonWeekOptions({ startDate: start, endDate })
+      setSeasonWeeks(weeks)
+      return
+    }
+
     const sportId = currentSport === 'CFB' ? 1 : currentSport === 'NFL' ? 2 : undefined
     if (!sportId) return
     const loadSeason = async () => {
@@ -35,12 +45,6 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
         const res = await fetch(`/api/seasons?sport_id=${sportId}&season=${selectedYear}`)
         const json = await res.json()
         const season = Array.isArray(json.data) ? json.data[0] : null
-
-        if (!season?.start_date) {
-          setSeasonStart(null)
-          setSeasonWeeks([])
-          return
-        }
 
         const start = new Date(season.start_date)
         // Prefer explicit end_date if provided; otherwise fall back to next season's start

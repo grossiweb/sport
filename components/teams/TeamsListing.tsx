@@ -139,6 +139,8 @@ export function TeamsListing({ teams, sport, isLoading }: TeamsListingProps) {
       {/* Teams by Division / Conference */}
       {sport === 'NFL' ? (
         <NFLConferenceTable teams={filteredTeams} sport={sport} />
+      ) : sport === 'NBA' ? (
+        <NBADivisionsVertical teams={filteredTeams} sport={sport} />
       ) : (
         sortedDivisions.length === 0 ? (
           <div className="text-center py-12">
@@ -268,6 +270,64 @@ function NFLConferenceTable({ teams, sport }: { teams: Team[]; sport: SportType 
           ))}
         </div>
       </div>
+    </div>
+  )
+}
+
+function NBADivisionsVertical({ teams, sport }: { teams: Team[]; sport: SportType }) {
+  const groups = useMemo(() => {
+    const orderedDivisions = ['Atlantic', 'Central', 'Northwest', 'Pacific', 'Southeast', 'Southwest'] as const
+    const map: Record<string, Team[]> = {}
+    orderedDivisions.forEach(d => { map[d] = [] })
+    map['Other'] = []
+
+    const detectDivision = (t: Team): string => {
+      const ref = `${t.conference?.name || ''} ${t.division?.name || ''}`.toLowerCase()
+      if (/atlantic/.test(ref)) return 'Atlantic'
+      if (/central/.test(ref)) return 'Central'
+      if (/north\s*west|northwest/.test(ref)) return 'Northwest'
+      if (/pacific/.test(ref)) return 'Pacific'
+      if (/south\s*east|southeast/.test(ref)) return 'Southeast'
+      if (/south\s*west|southwest/.test(ref)) return 'Southwest'
+      return 'Other'
+    }
+
+    for (const team of teams) {
+      const d = detectDivision(team)
+      if (!map[d]) map[d] = []
+      map[d].push(team)
+    }
+
+    Object.keys(map).forEach(key => {
+      map[key] = map[key].sort((a, b) => a.name.localeCompare(b.name))
+    })
+
+    return map
+  }, [teams])
+
+  const orderedKeys = ['Atlantic', 'Central', 'Northwest', 'Pacific', 'Southeast', 'Southwest']
+  const keysToRender = orderedKeys.filter(k => (groups[k] || []).length > 0)
+
+  if (keysToRender.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500 dark:text-gray-400">No teams found.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+      {orderedKeys.map(division => (
+        <div key={division} className="space-y-3">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{division}</h2>
+          <div className="space-y-2">
+            {(groups[division] || []).map(team => (
+              <TeamCard key={team.id} team={team} sport={sport} />
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

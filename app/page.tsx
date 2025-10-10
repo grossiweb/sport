@@ -10,6 +10,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { DailyMatchups } from '@/components/dashboard/DailyMatchups'
 import { RecentMatchups } from '@/components/dashboard/RecentMatchups'
 import { UpcomingMatchups } from '@/components/dashboard/UpcomingMatchups'
+import { UpcomingScroller } from '@/components/dashboard/UpcomingScroller'
 import { useSport } from '@/contexts/SportContext'
 import toast from 'react-hot-toast'
 
@@ -55,6 +56,13 @@ export default function HomePage() {
       <section>
         <Suspense fallback={<LoadingSpinner />}>
           <UpcomingMatchups />
+        </Suspense>
+      </section>
+
+      {/* Upcoming Scroller */}
+      <section>
+        <Suspense fallback={<LoadingSpinner />}>
+          <UpcomingScroller />
         </Suspense>
       </section>
 
