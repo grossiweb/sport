@@ -15,6 +15,7 @@ import { ScoreByPeriodPopup } from './ScoreByPeriodPopup'
 import { formatToEasternTime, formatToEasternDate, formatToEasternWeekday } from '@/lib/utils/time'
 import { useScoreByPeriod } from '@/hooks/useScoreByPeriod'
 import { computeConsensus, computeAtsFromConsensus } from '@/lib/utils/consensus'
+import { formatSpread as formatSpreadUtil, formatTotal as formatTotalUtil, formatPercentage } from '@/lib/utils/betting-format'
 
 interface ModernMatchupCardProps {
   matchup: Matchup
@@ -194,9 +195,9 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
     }
   }, [game.id])
 
-  const formatPct = (p: number | null | undefined) => (p == null ? '-' : `${Math.round(p * 100)}%`)
-  const formatSpread = (v: number | null | undefined) => (v == null ? '-' : (v > 0 ? `+${v.toFixed(1)}` : v.toFixed(1)))
-  const formatTotal = (v: number | null | undefined) => (v == null ? '-' : v.toFixed(1))
+  const formatPct = (p: number | null | undefined) => formatPercentage(p)
+  const formatSpread = (v: number | null | undefined) => formatSpreadUtil(v)
+  const formatTotal = (v: number | null | undefined) => formatTotalUtil(v)
 
   const pctBadgeClass = (p: number | null | undefined) => {
     if (p == null) return 'bg-gray-100 text-gray-600 dark:bg-gray-700/40 dark:text-gray-300'

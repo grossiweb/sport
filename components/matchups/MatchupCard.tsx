@@ -15,6 +15,7 @@ import {
   FireIcon
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
+import { formatSpread, formatTotal, formatOdds } from '@/lib/utils/betting-format'
 
 interface MatchupCardProps {
   matchup: Matchup
@@ -137,10 +138,10 @@ export function MatchupCard({ matchup, sport }: MatchupCardProps) {
             <div className="text-center">
               <div className="text-green-600 dark:text-green-400 font-medium mb-1">Spread</div>
               <div className="text-gray-900 dark:text-white font-semibold text-xs">
-                {game.homeTeam.abbreviation} {bettingData.spread.home > 0 ? '+' : ''}{bettingData.spread.home}
+                {game.homeTeam.abbreviation} {formatSpread(bettingData.spread.home)}
               </div>
               <div className="text-gray-500 dark:text-gray-400 text-xs">
-                ({bettingData.spread.juice > 0 ? '+' : ''}{bettingData.spread.juice})
+                ({formatOdds(bettingData.spread.juice)})
               </div>
             </div>
 
@@ -148,10 +149,10 @@ export function MatchupCard({ matchup, sport }: MatchupCardProps) {
             <div className="text-center">
               <div className="text-green-600 dark:text-green-400 font-medium mb-1">Total</div>
               <div className="text-gray-900 dark:text-white font-semibold text-xs">
-                {bettingData.total.points}
+                {formatTotal(bettingData.total.points)}
               </div>
               <div className="text-gray-500 dark:text-gray-400 text-xs">
-                O{bettingData.total.over} / U{bettingData.total.under}
+                O{formatOdds(bettingData.total.over)} / U{formatOdds(bettingData.total.under)}
               </div>
             </div>
 
@@ -162,10 +163,10 @@ export function MatchupCard({ matchup, sport }: MatchupCardProps) {
               </div>
               <div className="space-y-1 text-[11px]">
                 <div className="text-gray-900 dark:text-white text-xs">
-                  {game.homeTeam.abbreviation}: {bettingData.moneyLine.home > 0 ? '+' : ''}{bettingData.moneyLine.home}
+                  {game.homeTeam.abbreviation}: {formatOdds(bettingData.moneyLine.home)}
                 </div>
                 <div className="text-gray-900 dark:text-white text-xs">
-                  {game.awayTeam.abbreviation}: {bettingData.moneyLine.away > 0 ? '+' : ''}{bettingData.moneyLine.away}
+                  {game.awayTeam.abbreviation}: {formatOdds(bettingData.moneyLine.away)}
                 </div>
               </div>
             </div>

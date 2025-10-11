@@ -26,6 +26,7 @@ import { ScoreByPeriodPopup } from '@/components/matchups/ScoreByPeriodPopup'
 import { ScoreByPeriodSummary } from '@/components/matchups/ScoreByPeriodSummary'
 import { formatToEasternTime, formatToEasternDate, formatToEasternWeekday } from '@/lib/utils/time'
 import { useScoreByPeriod } from '@/hooks/useScoreByPeriod'
+import { formatSpread as formatSpreadUtil, formatOdds as formatOddsUtil } from '@/lib/utils/betting-format'
 
 interface ModernMatchupDetailProps {
   matchup: Matchup
@@ -528,8 +529,8 @@ function DetailedBettingSection({ game, sport }: { game: Matchup['game']; sport:
   const selectedLine = bettingData?.lines?.[selectedSportsbook]
   const availableSportsbooks = bettingData?.lines ? Object.keys(bettingData.lines) : []
 
-  const formatOdds = (odds: number) => (odds > 0 ? `+${odds}` : `${odds}`)
-  const formatSpread = (spread: number) => (spread > 0 ? `+${spread}` : `${spread}`)
+  const formatOdds = (odds: number | null | undefined) => formatOddsUtil(odds)
+  const formatSpread = (spread: number | null | undefined) => formatSpreadUtil(spread)
   const formatTime = (dateString: string) => formatToEasternTime(dateString)
 
   return (

@@ -3,6 +3,7 @@
 import React from 'react'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 import { americanToImpliedProbability, computeConsensus, computeAtsFromConsensus } from '@/lib/utils/consensus'
+import { formatSpread as formatSpreadUtil, formatTotal as formatTotalUtil, formatPercentage } from '@/lib/utils/betting-format'
 
 interface TeamSide {
 	name: string
@@ -53,9 +54,9 @@ export function CoversStyleMatchupCard({ away, home, lines }: CoversStyleMatchup
 		spreadHome: consensus.spreadHome ?? 0
 	})
 
-	const formatPct = (p: number | null) => p == null ? '—' : `${Math.round(p * 100)}%`
-	const formatSpread = (v: number | null) => v == null ? '—' : (v > 0 ? `+${v.toFixed(1)}` : v.toFixed(1))
-	const formatTotal = (v: number | null) => v == null ? '—' : v.toFixed(1)
+	const formatPct = (p: number | null) => formatPercentage(p === null ? undefined : p)
+	const formatSpread = (v: number | null) => formatSpreadUtil(v === null ? undefined : v)
+	const formatTotal = (v: number | null) => formatTotalUtil(v === null ? undefined : v)
 
 	return (
 		<div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">

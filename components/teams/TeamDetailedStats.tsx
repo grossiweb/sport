@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { DetailedTeamStat, SportType } from '@/types'
 import { ChartBarIcon, TrophyIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline'
-import { filterAndSortStats, STAT_CATEGORIES, mapCfbStatToCategory } from '@/lib/constants/team-stats-config'
+import { filterAndSortStats, STAT_CATEGORIES, mapCfbStatToCategory, getPreferredStats } from '@/lib/constants/team-stats-config'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 
 interface TeamDetailedStatsProps {
@@ -88,6 +88,28 @@ export function TeamDetailedStats({
     return Array.from(map.values())
   }
 
+  // Get the appropriate display value based on configuration
+  const getStatDisplayValue = (stat: DetailedTeamStat): any => {
+    const statName = (stat.stat?.display_name || stat.stat?.name || '').trim().toLowerCase()
+    const preferredStats = getPreferredStats(sport)
+    
+    // Find the config for this stat
+    const config = preferredStats.find(p => 
+      statName.includes(p.display_name.toLowerCase().replace('%', ''))
+    )
+    
+    // If config specifies a display_field, use that field
+    if (config?.display_field) {
+      const value = (stat as any)[config.display_field]
+      if (value !== undefined && value !== null) {
+        return value
+      }
+    }
+    
+    // Default fallback: prefer per_game_display_value, then display_value, then value
+    return stat.per_game_display_value ?? stat.display_value ?? stat.value
+  }
+
   if (isLoading) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
@@ -117,7 +139,7 @@ export function TeamDetailedStats({
       if (key) {
         comparisonMap.set(key, {
           ...stat,
-          homeValue: stat.display_value || stat.value,
+          homeValue: getStatDisplayValue(stat),
           homePerGame: stat.per_game_display_value || null,
           homeRank: stat.rank_display_value || stat.rank,
           awayValue: null,
@@ -133,7 +155,7 @@ export function TeamDetailedStats({
       if (key) {
         const existing = comparisonMap.get(key)
         if (existing) {
-          existing.awayValue = stat.display_value || stat.value
+          existing.awayValue = getStatDisplayValue(stat)
           existing.awayPerGame = stat.per_game_display_value || null
           existing.awayRank = stat.rank_display_value || stat.rank
         } else {
@@ -142,7 +164,7 @@ export function TeamDetailedStats({
             homeValue: null,
             homePerGame: null,
             homeRank: undefined,
-            awayValue: stat.display_value || stat.value,
+            awayValue: getStatDisplayValue(stat),
             awayPerGame: stat.per_game_display_value || null,
             awayRank: stat.rank_display_value || stat.rank
           })
@@ -228,20 +250,37 @@ export function TeamDetailedStats({
     return { left: adjHome / total, right: adjAway / total }
   }
 
-  // Format display value with integer rounding only; preserve percent sign if present
+  // Format display value with max 2 decimal places; show 0 instead of 0.00
   const formatValueDisplay = (value: any): string => {
     if (value === null || value === undefined) return '-'
+    
+    // Handle numeric values
     if (typeof value === 'number') {
-      return String(Math.round(value))
+      if (value === 0) return '0'
+      // Round to 2 decimal places max, but don't show trailing zeros
+      const rounded = Math.round(value * 100) / 100
+      return String(rounded)
     }
+    
+    // Handle string values
     const str = String(value).trim()
     if (!str) return '-'
+    
+    // Check if it's a percentage
     const hasPercent = str.includes('%')
-    const numeric = parseFloat(str.replace(/%/g, '').replace(/,/g, ''))
-    if (!isNaN(numeric)) {
-      const rounded = String(Math.round(numeric))
-      return hasPercent ? `${rounded}%` : rounded
+    
+    // Try to parse as number
+    const cleanStr = str.replace(/%/g, '').replace(/,/g, '').trim()
+    const numericValue = parseFloat(cleanStr)
+    
+    if (!isNaN(numericValue)) {
+      if (numericValue === 0) return hasPercent ? '0%' : '0'
+      // Round to 2 decimal places max, but don't show trailing zeros
+      const rounded = Math.round(numericValue * 100) / 100
+      return hasPercent ? `${rounded}%` : String(rounded)
     }
+    
+    // Return as-is if not numeric
     return str
   }
 
@@ -320,11 +359,11 @@ export function TeamDetailedStats({
               </div>
 
               {filteredData.map((stat, index) => {
-                const winner = getWinnerIndicator(stat.homePerGame || stat.homeValue, stat.awayPerGame || stat.awayValue, stat.stat?.display_name)
+                const winner = getWinnerIndicator(stat.homeValue, stat.awayValue, stat.stat?.display_name)
                 const statLabel = stat.stat?.display_name || stat.stat?.name || '—'
                 const statDesc = stat.stat?.description || ''
-                const awayRaw = stat.awayPerGame ?? stat.awayValue
-                const homeRaw = stat.homePerGame ?? stat.homeValue
+                const awayRaw = stat.awayValue
+                const homeRaw = stat.homeValue
                 const awayDisplay = formatValueDisplay(awayRaw)
                 const homeDisplay = formatValueDisplay(homeRaw)
                 const awayRankText = formatRankDisplay(stat.awayRank)
@@ -420,8 +459,8 @@ export function TeamDetailedStats({
                 {grouped[cat]!.map((stat, index) => {
                   const statLabel = stat.stat?.display_name || stat.stat?.name || '—'
                   const statDesc = stat.stat?.description || ''
-                  const awayRaw = stat.awayPerGame ?? stat.awayValue
-                  const homeRaw = stat.homePerGame ?? stat.homeValue
+                  const awayRaw = stat.awayValue
+                  const homeRaw = stat.homeValue
                   const awayDisplay = formatValueDisplay(awayRaw)
                   const homeDisplay = formatValueDisplay(homeRaw)
                   const awayRankText = formatRankDisplay(stat.awayRank)
@@ -434,22 +473,22 @@ export function TeamDetailedStats({
                   return (
                     <div
                       key={`${stat.stat?.id}-${index}`}
-                      className="grid grid-cols-3 gap-3 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
+                      className="grid grid-cols-3 gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
                       title={statDesc}
                     >
-                      {/* Home value */}
-                      <div className="text-left">
-                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {/* Home value and rank */}
+                      <div className="text-left flex items-center gap-1.5">
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
                           {homeDisplay}
-                          {homeRankText && getNumeric(homeRaw) !== 0 && (
-                            <span className="ml-1 text-[10px] text-gray-500 dark:text-gray-400">{homeRankText}</span>
-                          )}
-                        </div>
+                        </span>
+                        {homeRankText && getNumeric(homeRaw) !== 0 && (
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400">{homeRankText}</span>
+                        )}
                       </div>
 
-                      {/* Center stat label + green bar */}
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="text-[12px] md:text-sm font-semibold text-gray-800 dark:text-gray-200 text-center truncate max-w-full mb-1">
+                      {/* Center stat label with progress bar underneath */}
+                      <div className="flex flex-col items-center justify-center gap-1">
+                        <div className="text-[12px] md:text-sm font-semibold text-gray-800 dark:text-gray-200 text-center truncate max-w-full">
                           {statLabel}
                         </div>
                         <div className="w-full h-2 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
@@ -466,14 +505,14 @@ export function TeamDetailedStats({
                         </div>
                       </div>
 
-                      {/* Away value */}
-                      <div className="text-right">
-                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {/* Away rank and value */}
+                      <div className="text-right flex items-center justify-end gap-1.5">
+                        {awayRankText && getNumeric(awayRaw) !== 0 && (
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400">{awayRankText}</span>
+                        )}
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
                           {awayDisplay}
-                          {awayRankText && getNumeric(awayRaw) !== 0 && (
-                            <span className="ml-1 text-[10px] text-gray-500 dark:text-gray-400">{awayRankText}</span>
-                          )}
-                        </div>
+                        </span>
                       </div>
                     </div>
                   )

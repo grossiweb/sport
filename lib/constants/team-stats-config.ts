@@ -8,6 +8,8 @@ export interface StatConfig {
   category: string
   description: string
   priority: number // Lower number = higher priority
+  stat_key?: string // Key to identify the stat in team_stats collection (e.g., 'totalPoints')
+  display_field?: string // Field to use for display value (e.g., 'per_game_display_value')
 }
 
 // CFB/NCAAF Preferred Stats Configuration (based on Excel file)
@@ -15,13 +17,10 @@ export interface StatConfig {
 // Note: IDs in Mongo vary per stat; we prioritize by display_name patterns for CFB
 export const CFB_PREFERRED_STATS: StatConfig[] = [
   // Key Factors
-  { stat_id: -1, abbreviation: '', display_name: 'Total Points Per Game', category: 'Key Factors', description: 'Points per game', priority: 1 },
-  { stat_id: -1, abbreviation: '', display_name: 'Scoring Margin', category: 'Key Factors', description: 'Average scoring margin', priority: 2 },
-  { stat_id: -1, abbreviation: '', display_name: 'Third Down', category: 'Key Factors', description: 'Third down efficiency metrics', priority: 3 },
-  { stat_id: -1, abbreviation: '', display_name: 'Fourth Down', category: 'Key Factors', description: 'Fourth down efficiency metrics', priority: 4 },
-  { stat_id: -1, abbreviation: '', display_name: 'Red Zone', category: 'Key Factors', description: 'Red zone efficiency metrics', priority: 5 },
-  { stat_id: -1, abbreviation: '', display_name: 'Yards Per Play', category: 'Key Factors', description: 'Yards gained per offensive play', priority: 6 },
-  { stat_id: -1, abbreviation: '', display_name: 'Turnover Ratio', category: 'Key Factors', description: 'Turnover margin/ratio', priority: 7 },
+  { stat_id: -1, abbreviation: 'PTS', display_name: 'Total Points Per Game', category: 'Key Factors', description: 'Points per game', priority: 1, stat_key: 'totalPoints', display_field: 'display_value' },
+  { stat_id: -1, abbreviation: '', display_name: 'Third Down Conversions', category: 'Key Factors', description: 'Third down conversion percentage', priority: 2 },
+  { stat_id: -1, abbreviation: '', display_name: 'Red Zone Efficiency Percentage', category: 'Key Factors', description: 'Red zone scoring efficiency', priority: 3 },
+  { stat_id: -1, abbreviation: '', display_name: 'Turnover Ratio', category: 'Key Factors', description: 'Turnover ratio', priority: 4 },
 
   // Offense
   { stat_id: -1, abbreviation: '', display_name: 'Total Touchdowns', category: 'Offense', description: 'Touchdowns per game', priority: 10 },
@@ -46,36 +45,40 @@ export const CFB_PREFERRED_STATS: StatConfig[] = [
   { stat_id: -1, abbreviation: '', display_name: 'Fumbles Lost', category: 'Turnovers & Penalties', description: 'Fumbles lost per game', priority: 50 },
   { stat_id: -1, abbreviation: '', display_name: 'Fumbles', category: 'Turnovers & Penalties', description: 'Total fumbles per game', priority: 51 },
   { stat_id: -1, abbreviation: '', display_name: 'Interceptions', category: 'Turnovers & Penalties', description: 'Thrown interceptions per game', priority: 52 },
-  { stat_id: -1, abbreviation: '', display_name: 'Total Penalties', category: 'Turnovers & Penalties', description: 'Penalties per game', priority: 53 },
-  { stat_id: -1, abbreviation: '', display_name: 'Total Penalty Yards', category: 'Turnovers & Penalties', description: 'Penalty yards per game', priority: 54 }
+  { stat_id: -1, abbreviation: '', display_name: 'TO Margin', category: 'Turnovers & Penalties', description: 'Turnover margin', priority: 53 },
+  { stat_id: -1, abbreviation: '', display_name: 'Total Penalties', category: 'Turnovers & Penalties', description: 'Penalties per game', priority: 54 },
+  { stat_id: -1, abbreviation: '', display_name: 'Total Penalty Yards', category: 'Turnovers & Penalties', description: 'Penalty yards per game', priority: 55 }
 ]
 
 // NFL Preferred Stats Configuration (similar structure but different priorities)
 export const NFL_PREFERRED_STATS: StatConfig[] = [
+  // Key Factors
+  { stat_id: 1, abbreviation: 'PTS', display_name: 'Total Points Per Game', category: 'Key Factors', description: 'Points per game', priority: 1 },
+  { stat_id: 32, abbreviation: '3RDC%', display_name: 'Third Down Conversions', category: 'Key Factors', description: 'Third down conversion percentage', priority: 2 },
+  { stat_id: 33, abbreviation: 'RZ%', display_name: 'Red Zone Efficiency Percentage', category: 'Key Factors', description: 'Red zone scoring percentage', priority: 3 },
+  { stat_id: 34, abbreviation: 'TO', display_name: 'Turnover Ratio', category: 'Key Factors', description: 'Turnover ratio', priority: 4 },
+  
   // Offense
-  { stat_id: 1, abbreviation: 'PTS', display_name: 'Points', category: 'Offense', description: 'Total points scored', priority: 1 },
-  { stat_id: 2, abbreviation: 'YDS', display_name: 'Total Yards', category: 'Offense', description: 'Total offensive yards', priority: 2 },
-  { stat_id: 3, abbreviation: 'PYDS', display_name: 'Passing Yards', category: 'Offense', description: 'Total passing yards', priority: 3 },
-  { stat_id: 4, abbreviation: 'RYDS', display_name: 'Rushing Yards', category: 'Offense', description: 'Total rushing yards', priority: 4 },
-  { stat_id: 5, abbreviation: 'TD', display_name: 'Touchdowns', category: 'Offense', description: 'Total touchdowns scored', priority: 5 },
+  { stat_id: 2, abbreviation: 'YDS', display_name: 'Total Yards', category: 'Offense', description: 'Total offensive yards', priority: 10 },
+  { stat_id: 3, abbreviation: 'PYDS', display_name: 'Passing Yards', category: 'Offense', description: 'Total passing yards', priority: 11 },
+  { stat_id: 4, abbreviation: 'RYDS', display_name: 'Rushing Yards', category: 'Offense', description: 'Total rushing yards', priority: 12 },
+  { stat_id: 5, abbreviation: 'TD', display_name: 'Touchdowns', category: 'Offense', description: 'Total touchdowns scored', priority: 13 },
   
   // Defense
-  { stat_id: 10, abbreviation: 'SACKS', display_name: 'Sacks', category: 'Defense', description: 'Total sacks', priority: 6 },
-  { stat_id: 11, abbreviation: 'INT', display_name: 'Interceptions', category: 'Defense', description: 'Total interceptions', priority: 7 },
-  { stat_id: 12, abbreviation: 'FUM', display_name: 'Fumbles Recovered', category: 'Defense', description: 'Total fumbles recovered', priority: 8 },
+  { stat_id: 10, abbreviation: 'SACKS', display_name: 'Sacks', category: 'Defense', description: 'Total sacks', priority: 20 },
+  { stat_id: 11, abbreviation: 'INT', display_name: 'Interceptions', category: 'Defense', description: 'Total interceptions', priority: 21 },
+  { stat_id: 12, abbreviation: 'FUM', display_name: 'Fumbles Recovered', category: 'Defense', description: 'Total fumbles recovered', priority: 22 },
   
   // Special Teams
-  { stat_id: 20, abbreviation: 'FGM', display_name: 'Field Goals Made', category: 'Special Teams', description: 'Field goals made', priority: 9 },
-  { stat_id: 21, abbreviation: 'FGA', display_name: 'Field Goals Attempted', category: 'Special Teams', description: 'Field goals attempted', priority: 10 },
-  { stat_id: 22, abbreviation: 'FG%', display_name: 'Field Goal %', category: 'Special Teams', description: 'Field goal percentage', priority: 11 },
+  { stat_id: 20, abbreviation: 'FGM', display_name: 'Field Goals Made', category: 'Special Teams', description: 'Field goals made', priority: 30 },
+  { stat_id: 21, abbreviation: 'FGA', display_name: 'Field Goals Attempted', category: 'Special Teams', description: 'Field goals attempted', priority: 31 },
+  { stat_id: 22, abbreviation: 'FG%', display_name: 'Field Goal %', category: 'Special Teams', description: 'Field goal percentage', priority: 32 },
   
-  // Advanced Metrics
-  { stat_id: 30, abbreviation: '3RDC', display_name: '3rd Down Conversions', category: 'Efficiency', description: '3rd down conversions', priority: 12 },
-  { stat_id: 31, abbreviation: '3RDA', display_name: '3rd Down Attempts', category: 'Efficiency', description: '3rd down attempts', priority: 13 },
-  { stat_id: 32, abbreviation: '3RDC%', display_name: '3rd Down %', category: 'Efficiency', description: '3rd down conversion percentage', priority: 14 },
-  { stat_id: 33, abbreviation: 'RZ%', display_name: 'Red Zone %', category: 'Efficiency', description: 'Red zone scoring percentage', priority: 15 },
-  { stat_id: 34, abbreviation: 'TO', display_name: 'Turnovers', category: 'Efficiency', description: 'Total turnovers', priority: 16 },
-  { stat_id: 35, abbreviation: 'DIFF', display_name: 'Turnover Differential', category: 'Efficiency', description: 'Turnover differential', priority: 17 },
+  // Efficiency
+  { stat_id: 30, abbreviation: '3RDC', display_name: '3rd Down Conversions', category: 'Efficiency', description: '3rd down conversions', priority: 40 },
+  { stat_id: 31, abbreviation: '3RDA', display_name: '3rd Down Attempts', category: 'Efficiency', description: '3rd down attempts', priority: 41 },
+  { stat_id: 34, abbreviation: 'TO', display_name: 'Turnovers', category: 'Efficiency', description: 'Total turnovers', priority: 42 },
+  { stat_id: 35, abbreviation: 'DIFF', display_name: 'TO Margin', category: 'Efficiency', description: 'Turnover differential', priority: 43 },
 ]
 
 // NBA Preferred Stats Configuration (from NBA_Stats_list.txt)
@@ -204,13 +207,11 @@ export function mapCfbStatToCategory(stat: any): string {
   const label = (stat?.stat?.display_name || stat?.stat?.name || '').toLowerCase()
   if (!label) return STAT_CATEGORIES.OFFENSE
 
-  // Key Factors
+  // Key Factors (only 4 stats)
   if (label.includes('points per game') || label.includes('total points per game')) return STAT_CATEGORIES.KEY_FACTORS
-  if (label.includes('scoring margin')) return STAT_CATEGORIES.KEY_FACTORS
-  if (label.includes('third down') || label.includes('fourth down')) return STAT_CATEGORIES.KEY_FACTORS
-  if (label.includes('red zone')) return STAT_CATEGORIES.KEY_FACTORS
-  if (label.includes('yards per play')) return STAT_CATEGORIES.KEY_FACTORS
-  if (label.includes('turnover ratio') || label.includes('turnover margin')) return STAT_CATEGORIES.KEY_FACTORS
+  if (label.includes('third down conversion')) return STAT_CATEGORIES.KEY_FACTORS
+  if (label.includes('red zone efficiency') || (label.includes('red zone') && label.includes('percentage'))) return STAT_CATEGORIES.KEY_FACTORS
+  if (label.includes('turnover ratio')) return STAT_CATEGORIES.KEY_FACTORS
 
   // Special Teams
   if (label.includes('field goal') || label.includes('punting') || label.includes('punt')) return STAT_CATEGORIES.SPECIAL_TEAMS

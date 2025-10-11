@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { SportType, Game } from '@/types'
 import { formatToEasternTime } from '@/lib/utils/time'
+import { formatSpread as formatSpreadUtil, formatOdds as formatOddsUtil } from '@/lib/utils/betting-format'
 
 interface BettingLine {
   affiliate: {
@@ -109,13 +110,9 @@ function BettingLinesPopup({
     }
   }
 
-  const formatOdds = (odds: number) => {
-    return odds > 0 ? `+${odds}` : `${odds}`
-  }
+  const formatOdds = (odds: number | null | undefined) => formatOddsUtil(odds)
 
-  const formatSpread = (spread: number) => {
-    return spread > 0 ? `+${spread}` : `${spread}`
-  }
+  const formatSpread = (spread: number | null | undefined) => formatSpreadUtil(spread)
 
   const formatTime = (dateString: string) => formatToEasternTime(dateString)
 

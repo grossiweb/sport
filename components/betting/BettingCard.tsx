@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { clsx } from 'clsx'
 import { formatToEasternTime } from '@/lib/utils/time'
+import { formatSpread, formatTotal, formatOdds } from '@/lib/utils/betting-format'
 
 interface BettingCardProps {
   bettingData: BettingData
@@ -88,10 +89,10 @@ export function BettingCard({ bettingData, game }: BettingCardProps) {
           <div className="text-center">
             <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Spread</div>
             <div className="font-bold text-lg text-gray-900 dark:text-white">
-              {bettingData.spread.home > 0 ? '+' : ''}{bettingData.spread.home}
+              {formatSpread(bettingData.spread.home)}
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
-              ({bettingData.spread.juice > 0 ? '+' : ''}{bettingData.spread.juice})
+              ({formatOdds(bettingData.spread.juice)})
             </div>
           </div>
 
@@ -99,10 +100,10 @@ export function BettingCard({ bettingData, game }: BettingCardProps) {
           <div className="text-center">
             <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total</div>
             <div className="font-bold text-lg text-gray-900 dark:text-white">
-              {bettingData.total.points}
+              {formatTotal(bettingData.total.points)}
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
-              O {bettingData.total.over} / U {bettingData.total.under}
+              O {formatOdds(bettingData.total.over)} / U {formatOdds(bettingData.total.under)}
             </div>
           </div>
 
@@ -110,10 +111,10 @@ export function BettingCard({ bettingData, game }: BettingCardProps) {
           <div className="text-center">
             <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Money Line</div>
             <div className="font-bold text-lg text-gray-900 dark:text-white">
-              {bettingData.moneyLine.home > 0 ? '+' : ''}{bettingData.moneyLine.home}
+              {formatOdds(bettingData.moneyLine.home)}
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
-              Away: {bettingData.moneyLine.away > 0 ? '+' : ''}{bettingData.moneyLine.away}
+              Away: {formatOdds(bettingData.moneyLine.away)}
             </div>
           </div>
         </div>
