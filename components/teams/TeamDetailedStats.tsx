@@ -623,9 +623,11 @@ export function TeamDetailedStats({
                     <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Value
                     </th>
+                    {/*}
                     <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Per Game
                     </th>
+                    */}
                     <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Rank
                     </th>
@@ -647,6 +649,7 @@ export function TeamDetailedStats({
                           )}
                         </div>
                       </td>
+                      {/*}
                       <td className="px-3 py-2 text-right" title={stat.stat?.description || ''}>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
                           {withPercentIfNeeded(
@@ -654,7 +657,7 @@ export function TeamDetailedStats({
                             isPercentageStat(stat)
                           )}
                         </div>
-                      </td>
+                      </td>{*/}
                       <td className="px-3 py-2 text-right">
                         {(() => {
                           const valRaw = stat.per_game_display_value ?? stat.display_value ?? stat.value
