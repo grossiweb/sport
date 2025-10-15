@@ -21,6 +21,7 @@ import {
 import Link from 'next/link'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 import { TeamDetailedStats } from '@/components/teams/TeamDetailedStats'
+// removed dynamic import as Offense vs Defense section is no longer used
 import { BettingLinesPopup } from '@/components/matchups/BettingLinesPopup'
 import { ScoreByPeriodPopup } from '@/components/matchups/ScoreByPeriodPopup'
 import { ScoreByPeriodSummary } from '@/components/matchups/ScoreByPeriodSummary'
@@ -41,6 +42,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
   const [loadingDetailedStats, setLoadingDetailedStats] = useState(false)
   const [showBettingPopup, setShowBettingPopup] = useState(false)
   const [showScorePopup, setShowScorePopup] = useState(false)
+  
 
   const gameTime = formatToEasternTime(game.gameDate)
   const gameDate = formatToEasternDate(game.gameDate, { month: 'short', day: 'numeric', year: 'numeric' })
@@ -49,7 +51,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
   // Fetch detailed stats when stats tab is active
   useEffect(() => {
     const fetchDetailedStats = async () => {
-      if (activeTab === 'stats' && homeTeamDetailedStats.length === 0 && awayTeamDetailedStats.length === 0) {
+      if ((activeTab === 'stats') && homeTeamDetailedStats.length === 0 && awayTeamDetailedStats.length === 0) {
         setLoadingDetailedStats(true)
         try {
           const [homeResponse, awayResponse] = await Promise.all([
@@ -464,6 +466,8 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
             )}
           </div>
         )}
+
+        
 
         {activeTab === 'betting' && (
           <div className="space-y-6">

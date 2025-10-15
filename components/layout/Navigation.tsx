@@ -83,13 +83,15 @@ export function Navigation() {
 
           {/* Sport selector, user menu and theme toggle */}
           <div className="flex items-center space-x-4">
-            {/* Sport selector */}
-            <SportSelector />
+            {/* Sport selector (hidden on mobile) */}
+            <div className="hidden sm:block">
+              <SportSelector />
+            </div>
             
             {/* Theme toggle */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="rounded-lg p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200"
+              className="hidden sm:inline-flex rounded-lg p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200"
             >
               {theme === 'dark' ? (
                 <SunIcon className="h-5 w-5" />
@@ -100,7 +102,7 @@ export function Navigation() {
 
             {/* User menu */}
             {user ? (
-              <div className="relative">
+              <div className="relative hidden sm:block">
                 <div className="flex items-center space-x-3">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     {user.name}
@@ -131,7 +133,7 @@ export function Navigation() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="hidden sm:flex items-center space-x-2">
                 <Link
                   href="/login"
                   className="text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"

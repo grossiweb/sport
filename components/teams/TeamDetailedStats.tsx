@@ -110,6 +110,25 @@ export function TeamDetailedStats({
     return stat.per_game_display_value ?? stat.display_value ?? stat.value
   }
 
+  // Determine if a stat represents a percentage based on its metadata
+  const isPercentageStat = (statLike: any): boolean => {
+    const meta = statLike?.stat || statLike
+    const texts = [meta?.abbreviation, meta?.display_name, meta?.description, meta?.name]
+      .map((v: any) => (v ? String(v).toLowerCase() : ''))
+    return texts.some((t) => t.includes('%') || t.includes('percent'))
+  }
+
+  // Append % to numeric displays for percent stats when missing
+  const withPercentIfNeeded = (display: string, isPercent: boolean): string => {
+    if (!isPercent) return display
+    if (!display) return display
+    const numeric = parseFloat(String(display).replace(/[^0-9.-]/g, ''))
+    if (!isFinite(numeric)) return display
+    // For zero values, do not show %
+    if (numeric === 0) return '0'
+    return display.includes('%') ? display : `${display}%`
+  }
+
   if (isLoading) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
@@ -364,8 +383,9 @@ export function TeamDetailedStats({
                 const statDesc = stat.stat?.description || ''
                 const awayRaw = stat.awayValue
                 const homeRaw = stat.homeValue
-                const awayDisplay = formatValueDisplay(awayRaw)
-                const homeDisplay = formatValueDisplay(homeRaw)
+                const isPercent = isPercentageStat(stat)
+                const awayDisplay = withPercentIfNeeded(formatValueDisplay(awayRaw), isPercent)
+                const homeDisplay = withPercentIfNeeded(formatValueDisplay(homeRaw), isPercent)
                 const awayRankText = formatRankDisplay(stat.awayRank)
                 const homeRankText = formatRankDisplay(stat.homeRank)
                 const awayNum = getNumeric(awayRaw)
@@ -457,18 +477,24 @@ export function TeamDetailedStats({
                   </div>
                 )}
                 {grouped[cat]!.map((stat, index) => {
-                  const statLabel = stat.stat?.display_name || stat.stat?.name || '—'
+                const baseLabel = stat.stat?.display_name || stat.stat?.name || '—'
                   const statDesc = stat.stat?.description || ''
                   const awayRaw = stat.awayValue
                   const homeRaw = stat.homeValue
-                  const awayDisplay = formatValueDisplay(awayRaw)
-                  const homeDisplay = formatValueDisplay(homeRaw)
+                const isPercent = isPercentageStat(stat)
+                const awayDisplay = withPercentIfNeeded(formatValueDisplay(awayRaw), isPercent)
+                const homeDisplay = withPercentIfNeeded(formatValueDisplay(homeRaw), isPercent)
                   const awayRankText = formatRankDisplay(stat.awayRank)
                   const homeRankText = formatRankDisplay(stat.homeRank)
 
-                  const { left, right } = getBarPercents(homeRaw, awayRaw, statLabel)
-                  const leftIsWinner = left > right
-                  const rightIsWinner = right > left
+                // Append "Per Game" in label when values represent per-game and label lacks it
+                const hasPerGameInLabel = /per\s*game/i.test(baseLabel)
+                const isPerGameStat = (stat.homePerGame != null || stat.awayPerGame != null)
+                const statLabel = !hasPerGameInLabel && isPerGameStat ? `${baseLabel} Per Game` : baseLabel
+
+                const { left, right } = getBarPercents(homeRaw, awayRaw, statLabel)
+                const leftIsWinner = left > right
+                const rightIsWinner = right > left
 
                   return (
                     <div
@@ -580,12 +606,18 @@ export function TeamDetailedStats({
                       </td>
                       <td className="px-3 py-2 text-right" title={stat.stat?.description || ''}>
                         <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                          {formatValueDisplay(stat.display_value ?? stat.value)}
+                          {withPercentIfNeeded(
+                            formatValueDisplay(stat.display_value ?? stat.value),
+                            isPercentageStat(stat)
+                          )}
                         </div>
                       </td>
                       <td className="px-3 py-2 text-right" title={stat.stat?.description || ''}>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          {formatValueDisplay(stat.per_game_display_value ?? '-')}
+                          {withPercentIfNeeded(
+                            formatValueDisplay(stat.per_game_display_value ?? '-'),
+                            isPercentageStat(stat)
+                          )}
                         </div>
                       </td>
                       <td className="px-3 py-2 text-right">

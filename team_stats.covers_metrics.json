@@ -1,0 +1,110 @@
+{
+  "categories": [
+    {
+      "name": "Passing Defense",
+      "metrics": [
+        "Opponent Average Team Passer Rating",
+        "Opponent Completion Percentage",
+        "Opponent Completions per Game",
+        "Opponent Passing Yards per Game",
+        "Sacks per Game"
+      ]
+    },
+    {
+      "name": "Passing Offense",
+      "metrics": [
+        "Average Team Passer Rating",
+        "Completion Percentage",
+        "Passing Yards per Game",
+        "Yards per Completion",
+        "Completions per Game",
+        "Passing Play Percentage",
+        "Passing Yards Percentage",
+        "QB Sacked per Game"
+      ]
+    },
+    {
+      "name": "Penalties",
+      "metrics": [
+        "Penalties per Game",
+        "Penalty Yards per Game",
+        "Opponent Penalties per Game",
+        "Opponent Penalty Yards per Game"
+      ]
+    },
+    {
+      "name": "Rushing Defense",
+      "metrics": [
+        "Opponent Rushing Yards per Game",
+        "Opponent Yards per Rush Attempt"
+      ]
+    },
+    {
+      "name": "Rushing Offense",
+      "metrics": [
+        "Rushing Yards per Game",
+        "Yards per Rush Attempt",
+        "Rushing Play Percentage",
+        "Rushing Yards Percentage"
+      ]
+    },
+    {
+      "name": "Scoring Defense",
+      "metrics": [
+        "Opponent Red Zone Scoring Percentage (TDs & FGs)",
+        "Opponent Points per Game",
+        "Opponent Offensive Touchdowns per Game"
+      ]
+    },
+    {
+      "name": "Scoring Offense",
+      "metrics": [
+        "Points per Game",
+        "Touchdowns per Game",
+        "Average Scoring Margin",
+        "Red Zone Scoring Percentage (TD only)"
+      ]
+    },
+    {
+      "name": "Special Teams Offense",
+      "metrics": [
+        "Field Goal Conversion Percentage",
+        "Gross Punt Yards per Game"
+      ]
+    },
+    {
+      "name": "Total Defense",
+      "metrics": [
+        "Opponent Yards per Play",
+        "Opponent Third Down Conversion Percentage",
+        "Opponent Fourth Down Conversion Percentage",
+        "Opponent Yards per Game"
+      ]
+    },
+    {
+      "name": "Total Offense",
+      "metrics": [
+        "Yards per Play",
+        "Third Down Conversion Percentage",
+        "Fourth Down Conversion Percentage",
+        "Yards per Game",
+        "Fourth Down Conversions per Game",
+        "Third Down Conversions per Game",
+        "Time of Possession Percentage (Excluding OT)"
+      ]
+    },
+    {
+      "name": "Turnovers",
+      "metrics": [
+        "Interceptions Thrown per Game",
+        "Fumbles Lost per Game",
+        "Fumbles per Game",
+        "Fumble Recovery Percentage",
+        "Turnover Margin per Game",
+        "College FB Team Interceptions per Game"
+      ]
+    }
+  ]
+}
+
+
