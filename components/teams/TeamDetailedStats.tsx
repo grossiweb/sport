@@ -310,8 +310,8 @@ export function TeamDetailedStats({
       <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 mb-6">
         {[
           { id: 'comparison', name: 'Head-to-Head', icon: ChartBarIcon },
-          { id: 'home', name: homeTeamName, icon: TrophyIcon },
-          { id: 'away', name: awayTeamName, icon: TrophyIcon }
+          { id: 'away', name: awayTeamName, icon: TrophyIcon },
+          { id: 'home', name: homeTeamName, icon: TrophyIcon }
         ].map((view) => {
           const Icon = view.icon
           return (
@@ -448,11 +448,11 @@ export function TeamDetailedStats({
           </div>
         ) : (
           <>
-            {/* Header: [Home] [Category] [Away] */}
+            {/* Header: [Away] [Category] [Home] to match matchup header order */}
             <div className="grid grid-cols-3 gap-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg font-semibold text-xs text-gray-700 dark:text-gray-300">
               <div className="flex items-center justify-start truncate">
-                {homeTeam && <TeamLogo team={homeTeam} size="xs" className="mr-1" />}
-                <span className="truncate">{homeTeamName}</span>
+                {awayTeam && <TeamLogo team={awayTeam} size="xs" className="mr-1" />}
+                <span className="truncate">{awayTeamName}</span>
               </div>
               <div className="flex items-center justify-center truncate">
                 <span className="uppercase tracking-wide">
@@ -460,8 +460,8 @@ export function TeamDetailedStats({
                 </span>
               </div>
               <div className="flex items-center justify-end truncate">
-                <span className="truncate mr-1">{awayTeamName}</span>
-                {awayTeam && <TeamLogo team={awayTeam} size="xs" />}
+                <span className="truncate mr-1">{homeTeamName}</span>
+                {homeTeam && <TeamLogo team={homeTeam} size="xs" />}
               </div>
             </div>
 
@@ -492,7 +492,7 @@ export function TeamDetailedStats({
                 const isPerGameStat = (stat.homePerGame != null || stat.awayPerGame != null)
                 const statLabel = !hasPerGameInLabel && isPerGameStat ? `${baseLabel} Per Game` : baseLabel
 
-                const { left, right } = getBarPercents(homeRaw, awayRaw, statLabel)
+                  const { left, right } = getBarPercents(awayRaw, homeRaw, statLabel)
                 const leftIsWinner = left > right
                 const rightIsWinner = right > left
 
@@ -502,13 +502,13 @@ export function TeamDetailedStats({
                       className="grid grid-cols-3 gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
                       title={statDesc}
                     >
-                      {/* Home value and rank */}
+                      {/* Away value and rank (left) */}
                       <div className="text-left flex items-center gap-1.5">
                         <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                          {homeDisplay}
+                          {awayDisplay}
                         </span>
-                        {homeRankText && getNumeric(homeRaw) !== 0 && (
-                          <span className="text-[10px] text-gray-500 dark:text-gray-400">{homeRankText}</span>
+                        {awayRankText && getNumeric(awayRaw) !== 0 && (
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400">{awayRankText}</span>
                         )}
                       </div>
 
@@ -531,13 +531,13 @@ export function TeamDetailedStats({
                         </div>
                       </div>
 
-                      {/* Away rank and value */}
+                      {/* Home rank and value (right) */}
                       <div className="text-right flex items-center justify-end gap-1.5">
-                        {awayRankText && getNumeric(awayRaw) !== 0 && (
-                          <span className="text-[10px] text-gray-500 dark:text-gray-400">{awayRankText}</span>
+                        {homeRankText && getNumeric(homeRaw) !== 0 && (
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400">{homeRankText}</span>
                         )}
                         <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                          {awayDisplay}
+                          {homeDisplay}
                         </span>
                       </div>
                     </div>
