@@ -493,8 +493,8 @@ export function TeamDetailedStats({
                 const statLabel = !hasPerGameInLabel && isPerGameStat ? `${baseLabel} Per Game` : baseLabel
 
                   const { left, right } = getBarPercents(awayRaw, homeRaw, statLabel)
-                const leftIsWinner = left > right
-                const rightIsWinner = right > left
+                  const leftIsWinner = left > right
+                  const rightIsWinner = right > left
 
                   return (
                     <div
@@ -578,7 +578,42 @@ export function TeamDetailedStats({
           </div>
         ) : (
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="overflow-x-auto">
+            {/* Mobile stacked layout (no horizontal scroll) */}
+            <div className="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
+              {categoryStats.map((stat, index) => {
+                const isPercent = isPercentageStat(stat)
+                const mainDisplay = withPercentIfNeeded(
+                  formatValueDisplay(stat.display_value ?? stat.value),
+                  isPercent
+                )
+                const perGameDisplay = withPercentIfNeeded(
+                  formatValueDisplay(stat.per_game_display_value ?? '-'),
+                  isPercent
+                )
+                const valRaw = stat.per_game_display_value ?? stat.display_value ?? stat.value
+                const valNum = getNumeric(valRaw)
+                const rankText = formatRankDisplay(stat.rank_display_value || stat.rank)
+                return (
+                  <div key={`${stat.team_id}-${stat.stat_id}-${index}`} className="p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white truncate" title={stat.stat?.description || ''}>
+                        {stat.stat?.display_name || stat.stat?.name}
+                      </div>
+                      <div className="text-sm font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">
+                        {mainDisplay}
+                      </div>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                      <div className="truncate">Per Game: {perGameDisplay}</div>
+                      <div className="ml-3 whitespace-nowrap">{rankText && valNum !== 0 ? rankText : '—'}</div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Desktop table layout */}
+            <div className="hidden sm:block">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
