@@ -116,7 +116,7 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
   return (
     <div className={`relative ${className}`}>
       {/* Week Navigation */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center justify-between sm:justify-start sm:space-x-4">
         {/* Previous Week Button */}
         <button
           onClick={handlePreviousWeek}
@@ -127,7 +127,7 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
         </button>
 
         {/* Current Week Display */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 absolute left-1/2 -translate-x-1/2 sm:static sm:transform-none">
           <div className="text-center">
             <div className="text-lg font-semibold text-gray-900 dark:text-white">
               {seasonWeeks.length > 0 ? (() => {

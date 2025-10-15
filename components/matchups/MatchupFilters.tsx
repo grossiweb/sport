@@ -27,17 +27,18 @@ export function MatchupFilters({
       </h3>
       
 		{/* Responsive: Row 1 = Week; Row 2 = Search (left) + Status (right) */}
-		<div className="flex flex-col gap-3">
+		<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
 			{/* Row 1: Week Selector */}
 			<div className="relative z-10">
 				<WeekSelector
 					currentWeek={selectedWeek}
 					onWeekChange={onWeekChange}
+					className="w-full"
 				/>
 			</div>
 
 			{/* Row 2: Search + Status */}
-			<div className="flex items-stretch sm:items-center gap-3">
+			<div className="flex items-stretch sm:items-center gap-3 sm:flex-1">
 				{/* Search (left) */}
 				<div className="flex-1 min-w-0">
 					<input
