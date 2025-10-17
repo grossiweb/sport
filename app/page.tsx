@@ -14,8 +14,8 @@ import { UpcomingScroller } from '@/components/dashboard/UpcomingScroller'
 import { useSport } from '@/contexts/SportContext'
 import toast from 'react-hot-toast'
 
-export default function HomePage() {
-  const { currentSportData } = useSport()
+// Component to handle subscription success notification
+function SubscriptionSuccessHandler() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
@@ -32,6 +32,12 @@ export default function HomePage() {
       window.history.replaceState({}, '', url.toString())
     }
   }, [searchParams])
+
+  return null
+}
+
+function HomePageContent() {
+  const { currentSportData } = useSport()
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
@@ -74,5 +80,16 @@ export default function HomePage() {
         <QuickAccess />
       </section>
     </div>
+  )
+}
+
+export default function HomePage() {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <SubscriptionSuccessHandler />
+      </Suspense>
+      <HomePageContent />
+    </>
   )
 }
