@@ -1,6 +1,12 @@
 // Team Stats Configuration based on team_363__detail_stats.xlsx
 // This configuration determines which stats to display and in what order
 
+// Stats to explicitly exclude by their internal name
+export const EXCLUDED_STAT_NAMES = [
+  'redzoneFieldGoalPct',
+  'netPassingYardsPerGame'
+]
+
 export interface StatConfig {
   stat_id: number
   abbreviation: string
@@ -19,7 +25,7 @@ export const CFB_PREFERRED_STATS: StatConfig[] = [
   // Key Factors
   { stat_id: -1, abbreviation: 'PTS', display_name: 'Total Points Per Game', category: 'Key Factors', description: 'Points per game', priority: 1, stat_key: 'totalPoints', display_field: 'display_value' },
   { stat_id: -1, abbreviation: '', display_name: 'Third Down Conversions', category: 'Key Factors', description: 'Third down conversion percentage', priority: 2 },
-  { stat_id: -1, abbreviation: '', display_name: 'Red Zone Efficiency Percentage', category: 'Key Factors', description: 'Red zone scoring efficiency', priority: 3 },
+  { stat_id: -1, abbreviation: '', display_name: 'Red Zone Efficiency Percentage', category: 'Key Factors', description: 'Red zone scoring efficiency', priority: 3, display_field: 'per_game_display_value' },
   { stat_id: -1, abbreviation: '', display_name: 'Turnover Ratio', category: 'Key Factors', description: 'Turnover ratio', priority: 4 },
 
   // Offense
@@ -31,7 +37,6 @@ export const CFB_PREFERRED_STATS: StatConfig[] = [
   { stat_id: -1, abbreviation: '', display_name: 'Completions', category: 'Offense', description: 'Completions per game', priority: 15 },
   { stat_id: -1, abbreviation: '', display_name: 'Yards Per Pass Attempt', category: 'Offense', description: 'Yards per completion/attempt', priority: 16 },
   { stat_id: -1, abbreviation: '', display_name: 'Yards Per Rushing Attempt', category: 'Offense', description: 'Yards per rush attempt', priority: 17 },
-  { stat_id: -1, abbreviation: '', display_name: 'Net Passing Yards Per Game', category: 'Offense', description: 'Net passing yards per game', priority: 18 },
   { stat_id: -1, abbreviation: '', display_name: 'Sacks', category: 'Offense', description: 'QB sacks per game (allowed)', priority: 19 },
 
   // Defensive (best-effort mapping based on available fields)
@@ -144,6 +149,12 @@ export function getPreferredStats(sport: 'CFB' | 'NFL' | 'NBA'): StatConfig[] {
 
 // Helper function to filter and sort stats based on preferred configuration
 export function filterAndSortStats(stats: any[], sport: 'CFB' | 'NFL' | 'NBA'): any[] {
+  // First, filter out explicitly excluded stats
+  const nonExcluded = stats.filter(stat => {
+    const statName = stat?.stat?.name
+    return !statName || !EXCLUDED_STAT_NAMES.includes(statName)
+  })
+  
   const preferredStats = getPreferredStats(sport)
   // For CFB, prefer matching by display_name keywords since stat_ids vary
   if (sport === 'CFB') {
@@ -152,7 +163,7 @@ export function filterAndSortStats(stats: any[], sport: 'CFB' | 'NFL' | 'NBA'): 
       const entry = preferredStats.find(p => name.includes(p.display_name.toLowerCase().replace('%', '')))
       return entry?.priority ?? 999
     }
-    const filtered = stats.filter(stat => byPriority(stat) !== 999)
+    const filtered = nonExcluded.filter(stat => byPriority(stat) !== 999)
     return filtered.sort((a, b) => byPriority(a) - byPriority(b))
   }
 
@@ -164,14 +175,14 @@ export function filterAndSortStats(stats: any[], sport: 'CFB' | 'NFL' | 'NBA'): 
       if (!name) return 999
       return loweredToPriority.get(name) ?? 999
     }
-    const filtered = stats.filter(stat => byPriority(stat) !== 999)
+    const filtered = nonExcluded.filter(stat => byPriority(stat) !== 999)
     return filtered.sort((a, b) => byPriority(a) - byPriority(b))
   }
 
   // NFL legacy behavior: by stat_id/abbreviation
   const preferredStatIds = new Set(preferredStats.map(s => s.stat_id))
   const preferredAbbreviations = new Set(preferredStats.map(s => s.abbreviation))
-  const filteredStats = stats.filter(stat => 
+  const filteredStats = nonExcluded.filter(stat => 
     preferredStatIds.has(stat.stat_id) || 
     preferredAbbreviations.has(stat.stat?.abbreviation)
   )

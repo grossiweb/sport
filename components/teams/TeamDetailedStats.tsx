@@ -582,8 +582,19 @@ export function TeamDetailedStats({
             <div className="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
               {categoryStats.map((stat, index) => {
                 const isPercent = isPercentageStat(stat)
+                const baseLabel = (stat.stat?.display_name || stat.stat?.name || '').trim()
+                const isRedZoneEfficiency =
+                  (stat.stat?.name && String(stat.stat.name).toLowerCase() === 'redzoneefficiencypct') ||
+                  (/red\s*zone/i.test(baseLabel) && /efficiency/i.test(baseLabel) && /percent/i.test(baseLabel))
+                const labelText = !/per\s*game/i.test(baseLabel) && isRedZoneEfficiency
+                  ? `${baseLabel} Per Game`
+                  : baseLabel
+
+                const mainRaw = isRedZoneEfficiency
+                  ? (stat.per_game_display_value ?? stat.display_value ?? stat.value)
+                  : (stat.display_value ?? stat.value)
                 const mainDisplay = withPercentIfNeeded(
-                  formatValueDisplay(stat.display_value ?? stat.value),
+                  formatValueDisplay(mainRaw),
                   isPercent
                 )
                 const perGameDisplay = withPercentIfNeeded(
@@ -597,7 +608,7 @@ export function TeamDetailedStats({
                   <div key={`${stat.team_id}-${stat.stat_id}-${index}`} className="p-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="text-sm font-medium text-gray-900 dark:text-white truncate" title={stat.stat?.description || ''}>
-                        {stat.stat?.display_name || stat.stat?.name}
+                        {labelText}
                       </div>
                       <div className="text-sm font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">
                         {mainDisplay}
@@ -637,17 +648,39 @@ export function TeamDetailedStats({
                   {categoryStats.map((stat, index) => (
                     <tr key={`${stat.team_id}-${stat.stat_id}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="px-3 py-2" title={stat.stat?.description || ''}>
-                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                          {stat.stat?.display_name || stat.stat?.name}
-                        </div>
+                        {(() => {
+                          const baseLabel = (stat.stat?.display_name || stat.stat?.name || '').trim()
+                          const isRedZoneEfficiency =
+                            (stat.stat?.name && String(stat.stat.name).toLowerCase() === 'redzoneefficiencypct') ||
+                            (/red\s*zone/i.test(baseLabel) && /efficiency/i.test(baseLabel) && /percent/i.test(baseLabel))
+                          const labelText = !/per\s*game/i.test(baseLabel) && isRedZoneEfficiency
+                            ? `${baseLabel} Per Game`
+                            : baseLabel
+                          return (
+                            <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {labelText}
+                            </div>
+                          )
+                        })()}
                       </td>
                       <td className="px-3 py-2 text-right" title={stat.stat?.description || ''}>
-                        <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                          {withPercentIfNeeded(
-                            formatValueDisplay(stat.display_value ?? stat.value),
-                            isPercentageStat(stat)
-                          )}
-                        </div>
+                        {(() => {
+                          const baseLabel = (stat.stat?.display_name || stat.stat?.name || '').trim()
+                          const isRedZoneEfficiency =
+                            (stat.stat?.name && String(stat.stat.name).toLowerCase() === 'redzoneefficiencypct') ||
+                            (/red\s*zone/i.test(baseLabel) && /efficiency/i.test(baseLabel) && /percent/i.test(baseLabel))
+                          const valueRaw = isRedZoneEfficiency
+                            ? (stat.per_game_display_value ?? stat.display_value ?? stat.value)
+                            : (stat.display_value ?? stat.value)
+                          return (
+                            <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                              {withPercentIfNeeded(
+                                formatValueDisplay(valueRaw),
+                                isPercentageStat(stat)
+                              )}
+                            </div>
+                          )
+                        })()}
                       </td>
                       {/*}
                       <td className="px-3 py-2 text-right" title={stat.stat?.description || ''}>

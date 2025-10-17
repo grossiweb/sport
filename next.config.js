@@ -14,6 +14,53 @@ const nextConfig = {
     WORDPRESS_ADMIN_USER: process.env.WORDPRESS_ADMIN_USER || 'stefano',
     WORDPRESS_ADMIN_PASS: process.env.WORDPRESS_ADMIN_PASS || 'sfg6678$$',
   },
+  webpack: (config, { isServer }) => {
+    // Fix for MongoDB driver optional dependencies
+    if (isServer) {
+      // Mark these as external to prevent bundling
+      config.externals = config.externals || [];
+      config.externals.push(
+        'mongodb-client-encryption',
+        'aws4',
+        '@mongodb-js/zstd',
+        'kerberos',
+        'snappy',
+        'bson-ext',
+        '@aws-sdk/credential-providers',
+        'gcp-metadata',
+        'socks',
+        '@mongodb-js/saslprep'
+      );
+    }
+
+    // Add module resolution aliases to ignore missing optional dependencies
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'mongodb-client-encryption': false,
+      'aws4': false,
+      '@mongodb-js/zstd': false,
+      'kerberos': false,
+      'snappy': false,
+      'bson-ext': false,
+      '@aws-sdk/credential-providers': false,
+      'gcp-metadata': false,
+      'socks': false,
+    };
+
+    // Ignore errors from missing optional dependencies
+    config.ignoreWarnings = [
+      /Critical dependency/,
+      /Module not found/,
+      { module: /mongodb/ },
+      { module: /node_modules\/mongodb/ },
+    ];
+
+    return config;
+  },
+  // Suppress experimental warnings
+  experimental: {
+    serverComponentsExternalPackages: ['mongodb'],
+  },
 }
 
 module.exports = nextConfig
