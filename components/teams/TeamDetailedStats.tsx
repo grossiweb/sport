@@ -269,16 +269,14 @@ export function TeamDetailedStats({
     return { left: adjHome / total, right: adjAway / total }
   }
 
-  // Format display value with max 2 decimal places; show 0 instead of 0.00
+  // Format display value with exactly 1 decimal place for consistency
   const formatValueDisplay = (value: any): string => {
     if (value === null || value === undefined) return '-'
     
     // Handle numeric values
     if (typeof value === 'number') {
-      if (value === 0) return '0'
-      // Round to 2 decimal places max, but don't show trailing zeros
-      const rounded = Math.round(value * 100) / 100
-      return String(rounded)
+      // Always format with exactly 1 decimal place
+      return value.toFixed(1)
     }
     
     // Handle string values
@@ -293,10 +291,9 @@ export function TeamDetailedStats({
     const numericValue = parseFloat(cleanStr)
     
     if (!isNaN(numericValue)) {
-      if (numericValue === 0) return hasPercent ? '0%' : '0'
-      // Round to 2 decimal places max, but don't show trailing zeros
-      const rounded = Math.round(numericValue * 100) / 100
-      return hasPercent ? `${rounded}%` : String(rounded)
+      // Always format with exactly 1 decimal place
+      const formatted = numericValue.toFixed(1)
+      return hasPercent ? `${formatted}%` : formatted
     }
     
     // Return as-is if not numeric
