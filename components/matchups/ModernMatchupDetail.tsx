@@ -42,6 +42,8 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
   const [loadingDetailedStats, setLoadingDetailedStats] = useState(false)
   const [showBettingPopup, setShowBettingPopup] = useState(false)
   const [showScorePopup, setShowScorePopup] = useState(false)
+  const [homeOpponentStats, setHomeOpponentStats] = useState<any>(null)
+  const [awayOpponentStats, setAwayOpponentStats] = useState<any>(null)
   
 
   const gameTime = formatToEasternTime(game.gameDate)
@@ -54,9 +56,11 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
       if ((activeTab === 'stats') && homeTeamDetailedStats.length === 0 && awayTeamDetailedStats.length === 0) {
         setLoadingDetailedStats(true)
         try {
-          const [homeResponse, awayResponse] = await Promise.all([
+          const [homeResponse, awayResponse, homeOppResponse, awayOppResponse] = await Promise.all([
             fetch(`/api/teams/${game.homeTeam.id}/stats?sport=${sport}`),
-            fetch(`/api/teams/${game.awayTeam.id}/stats?sport=${sport}`)
+            fetch(`/api/teams/${game.awayTeam.id}/stats?sport=${sport}`),
+            fetch(`/api/teams/${game.homeTeam.id}/opponent-stats?sport=${sport}`),
+            fetch(`/api/teams/${game.awayTeam.id}/opponent-stats?sport=${sport}`)
           ])
 
           if (homeResponse.ok && awayResponse.ok) {
@@ -65,6 +69,14 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
             
             setHomeTeamDetailedStats(homeData.data || [])
             setAwayTeamDetailedStats(awayData.data || [])
+          }
+
+          if (homeOppResponse.ok && awayOppResponse.ok) {
+            const homeOppData = await homeOppResponse.json()
+            const awayOppData = await awayOppResponse.json()
+            
+            setHomeOpponentStats(homeOppData.data || null)
+            setAwayOpponentStats(awayOppData.data || null)
           }
         } catch (error) {
           console.error('Failed to fetch detailed team stats:', error)
@@ -462,6 +474,8 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                 isLoading={loadingDetailedStats}
                 sport={sport}
                 h2hStyle
+                homeOpponentStats={homeOpponentStats}
+                awayOpponentStats={awayOpponentStats}
               />
             )}
           </div>

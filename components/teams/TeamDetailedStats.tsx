@@ -17,6 +17,8 @@ interface TeamDetailedStatsProps {
   sport?: SportType
   viewMode?: 'comparison' | 'single' // New prop to control view mode
   h2hStyle?: boolean // Apply head-to-head visual style (scoped for matchup detail)
+  homeOpponentStats?: any // Opponent stats for home team
+  awayOpponentStats?: any // Opponent stats for away team
 }
 
 export function TeamDetailedStats({ 
@@ -29,7 +31,9 @@ export function TeamDetailedStats({
   isLoading,
   sport = 'CFB',
   viewMode = 'comparison',
-  h2hStyle = false
+  h2hStyle = false,
+  homeOpponentStats,
+  awayOpponentStats
 }: TeamDetailedStatsProps) {
   const [activeView, setActiveView] = useState<'comparison' | 'home' | 'away'>(
     viewMode === 'single' ? 'home' : 'comparison'
@@ -115,7 +119,11 @@ export function TeamDetailedStats({
     const meta = statLike?.stat || statLike
     const texts = [meta?.abbreviation, meta?.display_name, meta?.description, meta?.name]
       .map((v: any) => (v ? String(v).toLowerCase() : ''))
-    return texts.some((t) => t.includes('%') || t.includes('percent'))
+    const hasPercentWords = texts.some((t) => t.includes('%') || t.includes('percent'))
+    if (hasPercentWords) return true
+    const internalName = (meta?.name ? String(meta.name).toLowerCase() : '')
+    // Treat internal names ending with 'pct' as percentages (e.g., completionPct)
+    return internalName.endsWith('pct')
   }
 
   // Append % to numeric displays for percent stats when missing
@@ -190,6 +198,69 @@ export function TeamDetailedStats({
         }
       }
     })
+    
+    // Inject calculated opponent stats for Key Factors (if available)
+    if (homeOpponentStats || awayOpponentStats) {
+      // Opponent Third Down Conversion Percentage
+      if (homeOpponentStats?.opponentThirdDownConvPct !== null || awayOpponentStats?.opponentThirdDownConvPct !== null) {
+        comparisonMap.set('Opponent Third Down Conversion Percentage', {
+          stat: {
+            id: -1,
+            name: 'opponentThirdDownConvPct',
+            category: 'Key Factors',
+            display_name: 'Opponent Third Down Conversion Percentage',
+            abbreviation: 'OPP 3RDC%',
+            description: 'Average third down conversion percentage of opponents faced',
+            sport_id: 1
+          },
+          homeValue: homeOpponentStats?.opponentThirdDownConvPct?.toFixed(1) || null,
+          homePerGame: null,
+          homeRank: undefined,
+          awayValue: awayOpponentStats?.opponentThirdDownConvPct?.toFixed(1) || null,
+          awayPerGame: null,
+          awayRank: undefined,
+          team_id: 0,
+          stat_id: -1,
+          season_year: new Date().getFullYear(),
+          season_type: 2,
+          season_type_name: 'Regular Season',
+          value: 0,
+          display_value: '',
+          updated_at: new Date().toISOString()
+        })
+      }
+
+      // Defensive Third Down Conversion Percentage — removed per request
+
+      // Opponent Red Zone Efficiency Percentage
+      if (homeOpponentStats?.opponentRedZoneEfficiencyPct !== null || awayOpponentStats?.opponentRedZoneEfficiencyPct !== null) {
+        comparisonMap.set('Opponent Red Zone Efficiency Percentage', {
+          stat: {
+            id: -3,
+            name: 'opponentRedZoneEfficiencyPct',
+            category: 'Key Factors',
+            display_name: 'Opponent Red Zone Efficiency Percentage',
+            abbreviation: 'OPP RZ%',
+            description: 'Average red zone efficiency percentage of opponents faced',
+            sport_id: 1
+          },
+          homeValue: homeOpponentStats?.opponentRedZoneEfficiencyPct?.toFixed(1) || null,
+          homePerGame: null,
+          homeRank: undefined,
+          awayValue: awayOpponentStats?.opponentRedZoneEfficiencyPct?.toFixed(1) || null,
+          awayPerGame: null,
+          awayRank: undefined,
+          team_id: 0,
+          stat_id: -3,
+          season_year: new Date().getFullYear(),
+          season_type: 2,
+          season_type_name: 'Regular Season',
+          value: 0,
+          display_value: '',
+          updated_at: new Date().toISOString()
+        })
+      }
+    }
     
     return Array.from(comparisonMap.values())
   }
@@ -298,6 +369,14 @@ export function TeamDetailedStats({
     
     // Return as-is if not numeric
     return str
+  }
+
+  // Format tooltip display with exactly 2 decimals (append % for percent stats)
+  const formatTooltipValue = (value: any, isPercent: boolean): string | undefined => {
+    const num = getNumeric(value)
+    if (num === null) return undefined
+    const formatted = num.toFixed(2)
+    return isPercent ? `${formatted}%` : formatted
   }
 
   const ViewToggle = () => {
@@ -419,14 +498,23 @@ export function TeamDetailedStats({
     const getCategory = (stat: any) => (
       sport === 'CFB' ? mapCfbStatToCategory(stat) : (stat.stat?.category || 'Other')
     )
+    // Exclude certain stats in H2H view (e.g., Sacks, and removed defensive 3rd down label if present)
+    const h2hFiltered = filteredData.filter((s) => {
+      const label = (s?.stat?.display_name || s?.stat?.name || '').toLowerCase()
+      if (!label) return true
+      if (label.includes('sacks')) return false
+      if (label.includes('defensive third down conversion')) return false
+      return true
+    })
+
     const grouped = selectedCategory === 'all'
-      ? filteredData.reduce((acc: Record<string, any[]>, s) => {
+      ? h2hFiltered.reduce((acc: Record<string, any[]>, s) => {
           const c = getCategory(s)
           if (!acc[c]) acc[c] = []
           acc[c].push(s)
           return acc
         }, {})
-      : { [selectedCategory]: filteredData }
+      : { [selectedCategory]: h2hFiltered }
 
     const orderedCategories = selectedCategory === 'all'
       ? (sport === 'CFB' ? (
@@ -491,11 +579,27 @@ export function TeamDetailedStats({
                     <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
                   </div>
                 )}
-                {(cat === STAT_CATEGORIES.KEY_FACTORS ? [...grouped[cat]!].sort((a, b) => keyFactorPriority(a) - keyFactorPriority(b)) : grouped[cat]!).map((stat, index) => {
+                {(
+                  cat === STAT_CATEGORIES.KEY_FACTORS
+                    ? [...grouped[cat]!].sort((a, b) => keyFactorPriority(a) - keyFactorPriority(b))
+                    : cat === STAT_CATEGORIES.SPECIAL_TEAMS
+                      ? [...grouped[cat]!].sort((a, b) => {
+                          const aLabel = (a?.stat?.display_name || a?.stat?.name || '').toLowerCase()
+                          const bLabel = (b?.stat?.display_name || b?.stat?.name || '').toLowerCase()
+                          const aIsFgPct = /field\s*goal\s*%|field\s*goal\s*percentage/i.test(a?.stat?.display_name || a?.stat?.name || '')
+                          const bIsFgPct = /field\s*goal\s*%|field\s*goal\s*percentage/i.test(b?.stat?.display_name || b?.stat?.name || '')
+                          if (aIsFgPct && !bIsFgPct) return -1
+                          if (!aIsFgPct && bIsFgPct) return 1
+                          return aLabel.localeCompare(bLabel)
+                        })
+                      : grouped[cat]!
+                ).map((stat, index) => {
                 const baseLabel = (() => {
                   const raw = stat.stat?.display_name || stat.stat?.name || '—'
-                  const lowered = String(raw).toLowerCase()
-                  if (lowered.includes('3rd down %') || lowered.includes('third down conversion percentage')) {
+                  const internal = (stat.stat?.name || '').toLowerCase()
+                  const abbr = (stat.stat?.abbreviation || '').toUpperCase()
+                  // Only override native team 3rd down pct label; keep Opponent/Defensive labels intact
+                  if ((internal === 'thirddownconvpct' || abbr === '3RDC%') && !/opponent|defensive/i.test(String(raw))) {
                     return 'Third Down Conversion Percentage'
                   }
                   return raw
@@ -509,10 +613,8 @@ export function TeamDetailedStats({
                   const awayRankText = formatRankDisplay(stat.awayRank)
                   const homeRankText = formatRankDisplay(stat.homeRank)
 
-                // Append "Per Game" in label when values represent per-game and label lacks it
-                const hasPerGameInLabel = /per\s*game/i.test(baseLabel)
-                const isPerGameStat = (stat.homePerGame != null || stat.awayPerGame != null)
-                const statLabel = !hasPerGameInLabel && isPerGameStat ? `${baseLabel} Per Game` : baseLabel
+                // For H2H, remove any "Per Game" suffix from labels
+                const statLabel = String(baseLabel).replace(/\s*Per\s*Game/i, '').trim()
 
                   const { left, right } = getBarPercents(awayRaw, homeRaw, statLabel)
                   const leftIsWinner = left > right
@@ -526,7 +628,7 @@ export function TeamDetailedStats({
                     >
                       {/* Away value and rank (left) */}
                       <div className="text-left flex items-center gap-1.5">
-                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white" title={formatTooltipValue(awayRaw, isPercent)}>
                           {awayDisplay}
                         </span>
                         {awayRankText && getNumeric(awayRaw) !== 0 && (
@@ -558,7 +660,7 @@ export function TeamDetailedStats({
                         {homeRankText && getNumeric(homeRaw) !== 0 && (
                           <span className="text-[10px] text-gray-500 dark:text-gray-400">{homeRankText}</span>
                         )}
-                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white" title={formatTooltipValue(homeRaw, isPercent)}>
                           {homeDisplay}
                         </span>
                       </div>

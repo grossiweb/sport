@@ -1,0 +1,35 @@
+[{
+  "_id": {
+    "$oid": "68deb1b6e9d62de0f6f1a8e7"
+  },
+  "event_id": "7c8d50d6aee819efc995137adf5b6d91",
+  "attendance": 47221,
+  "away_score": 24,
+  "away_team": "Iowa State",
+  "away_team_id": 161,
+  "broadcast": "ESPN",
+  "conference_competition": true,
+  "createdAt": "2025-10-02 10:09:10",
+  "date_event": "2025-08-23T16:00:00Z",
+  "event_location": "Aviva Stadium",
+  "event_name": "Aer Lingus College Football Classic - Iowa State at Kansas State - 2025-08-23T16:00:00Z",
+  "event_status": "STATUS_FINAL",
+  "event_status_detail": "Final",
+  "event_uuid": "11f0-803a-38ed0000-8fb5-15f947ab3516",
+  "home_score": 21,
+  "home_team": "Kansas State",
+  "home_team_id": 163,
+  "id": "4462975",
+  "league_name": "NCAA - Football",
+  "meta": {
+    "sourceUrl": "https://therundown-therundown-v1.p.rapidapi.com/sports/1/schedule?from=2025-08-22&limit=500&include=scores&season_year=2025&division_id=1,4",
+    "fetchedAt": "2025-10-02 10:09:10"
+  },
+  "neutral_site": true,
+  "season_type": "Regular Season",
+  "season_year": 2025,
+  "sport_id": 1,
+  "updatedAt": "2025-10-03GMT05:08:360",
+  "updated_at": "2025-08-23EDT15:33:21-14400",
+  "betting_data_last_checked_at": "2025-10-03GMT05:08:360"
+}]

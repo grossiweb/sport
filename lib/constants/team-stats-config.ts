@@ -28,6 +28,10 @@ export const CFB_PREFERRED_STATS: StatConfig[] = [
   { stat_id: -1, abbreviation: '3RDC%', display_name: 'Third Down Conversion Percentage', category: 'Key Factors', description: 'Third down conversion percentage', priority: 2, display_field: 'per_game_display_value' },
   { stat_id: -1, abbreviation: '', display_name: 'Red Zone Efficiency Percentage', category: 'Key Factors', description: 'Red zone scoring efficiency', priority: 3, display_field: 'per_game_display_value' },
   { stat_id: -1, abbreviation: '', display_name: 'Turnover Ratio', category: 'Key Factors', description: 'Turnover ratio', priority: 4, display_field: 'per_game_display_value' },
+  // Calculated opponent/defensive stats
+  { stat_id: -1, abbreviation: 'OPP 3RDC%', display_name: 'Opponent Third Down Conversion Percentage', category: 'Key Factors', description: 'Average third down conversion percentage of opponents faced', priority: 5 },
+  { stat_id: -2, abbreviation: 'DEF 3RDC%', display_name: 'Defensive Third Down Conversion Percentage', category: 'Key Factors', description: 'Third down conversion percentage allowed to opponents', priority: 6 },
+  { stat_id: -3, abbreviation: 'OPP RZ%', display_name: 'Opponent Red Zone Efficiency Percentage', category: 'Key Factors', description: 'Average red zone efficiency percentage of opponents faced', priority: 7 },
 
   // Offense
   { stat_id: -1, abbreviation: '', display_name: 'Total Touchdowns', category: 'Offense', description: 'Touchdowns per game', priority: 10 },

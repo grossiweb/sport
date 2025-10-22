@@ -1134,6 +1134,178 @@ export class MongoDBSportsAPI {
         return 'scheduled'
     }
   }
+
+  /**
+   * Calculate opponent stats for a team (offensive stats of opponents faced)
+   * This represents the offensive performance of teams this team has played against
+   */
+  async calculateOpponentStats(sport: SportType, teamId: string, seasonYear?: number): Promise<{
+    opponentThirdDownConvPct: number | null
+    opponentRedZoneEfficiencyPct: number | null
+  }> {
+    try {
+      const currentYear = seasonYear || new Date().getFullYear()
+      const sportId = this.mapSportTypeToSportId(sport)
+      const numericTeamId = parseInt(teamId, 10)
+
+      // Get all completed games for this team
+      const gamesCollection = await getGamesCollection()
+      const completedGames = await gamesCollection.find({
+        sport_id: sportId,
+        season_year: currentYear,
+        event_status: 'STATUS_FINAL',
+        $or: [
+          { home_team_id: numericTeamId },
+          { away_team_id: numericTeamId }
+        ]
+      }).toArray()
+
+      if (completedGames.length === 0) {
+        return {
+          opponentThirdDownConvPct: null,
+          opponentRedZoneEfficiencyPct: null
+        }
+      }
+
+      // Extract opponent team IDs
+      const opponentIds = completedGames.map(game => {
+        return game.home_team_id === numericTeamId ? game.away_team_id : game.home_team_id
+      })
+
+      if (opponentIds.length === 0) {
+        return {
+          opponentThirdDownConvPct: null,
+          opponentRedZoneEfficiencyPct: null
+        }
+      }
+
+      // Get stats for all opponents
+      const teamStatsCollection = await getTeamStatsCollection()
+      const opponentStats = await teamStatsCollection.find({
+        team_id: { $in: opponentIds },
+        season_year: currentYear
+      }).toArray()
+
+      // Calculate cumulative third down conversion percentage
+      let totalThirdDownConvs = 0
+      let totalThirdDownAttempts = 0
+      let redZoneEffPctSum = 0
+      let redZoneEffPctCount = 0
+
+      for (const opponentStat of opponentStats) {
+        // Find third down conversions (stat_id 1662)
+        const thirdDownConvsStat = opponentStat.stats?.find((s: any) => s.stat_id === 1662)
+        if (thirdDownConvsStat?.value) {
+          totalThirdDownConvs += thirdDownConvsStat.value
+        }
+
+        // Find third down attempts (stat_id 1663)
+        const thirdDownAttemptsStat = opponentStat.stats?.find((s: any) => s.stat_id === 1663)
+        if (thirdDownAttemptsStat?.value) {
+          totalThirdDownAttempts += thirdDownAttemptsStat.value
+        }
+
+        // Find red zone efficiency percentage (stat_id 1673)
+        const redZoneEffPctStat = opponentStat.stats?.find((s: any) => s.stat_id === 1673)
+        if (redZoneEffPctStat?.value) {
+          redZoneEffPctSum += redZoneEffPctStat.value
+          redZoneEffPctCount++
+        }
+      }
+
+      const opponentThirdDownConvPct = totalThirdDownAttempts > 0 
+        ? (totalThirdDownConvs / totalThirdDownAttempts) * 100 
+        : null
+
+      const opponentRedZoneEfficiencyPct = redZoneEffPctCount > 0
+        ? redZoneEffPctSum / redZoneEffPctCount
+        : null
+
+      return {
+        opponentThirdDownConvPct,
+        opponentRedZoneEfficiencyPct
+      }
+    } catch (error) {
+      console.error('Error calculating opponent stats:', error)
+      return {
+        opponentThirdDownConvPct: null,
+        opponentRedZoneEfficiencyPct: null
+      }
+    }
+  }
+
+  /**
+   * Calculate defensive stats for a team (stats allowed to opponents)
+   * This represents how well this team's defense performs
+   */
+  async calculateDefensiveStats(sport: SportType, teamId: string, seasonYear?: number): Promise<{
+    defensiveThirdDownConvPct: number | null
+  }> {
+    try {
+      const currentYear = seasonYear || new Date().getFullYear()
+      const sportId = this.mapSportTypeToSportId(sport)
+      const numericTeamId = parseInt(teamId, 10)
+
+      // Get all completed games for this team
+      const gamesCollection = await getGamesCollection()
+      const completedGames = await gamesCollection.find({
+        sport_id: sportId,
+        season_year: currentYear,
+        event_status: 'STATUS_FINAL',
+        $or: [
+          { home_team_id: numericTeamId },
+          { away_team_id: numericTeamId }
+        ]
+      }).toArray()
+
+      if (completedGames.length === 0) {
+        return { defensiveThirdDownConvPct: null }
+      }
+
+      // Extract opponent team IDs
+      const opponentIds = completedGames.map(game => {
+        return game.home_team_id === numericTeamId ? game.away_team_id : game.home_team_id
+      })
+
+      if (opponentIds.length === 0) {
+        return { defensiveThirdDownConvPct: null }
+      }
+
+      // Get stats for all opponents (their offensive performance against this team)
+      const teamStatsCollection = await getTeamStatsCollection()
+      const opponentStats = await teamStatsCollection.find({
+        team_id: { $in: opponentIds },
+        season_year: currentYear
+      }).toArray()
+
+      // Sum up third down conversions and attempts by opponents
+      let totalThirdDownConvsByOpponents = 0
+      let totalThirdDownAttemptsByOpponents = 0
+
+      for (const opponentStat of opponentStats) {
+        // Find third down conversions (stat_id 1662)
+        const thirdDownConvsStat = opponentStat.stats?.find((s: any) => s.stat_id === 1662)
+        if (thirdDownConvsStat?.value) {
+          totalThirdDownConvsByOpponents += thirdDownConvsStat.value
+        }
+
+        // Find third down attempts (stat_id 1663)
+        const thirdDownAttemptsStat = opponentStat.stats?.find((s: any) => s.stat_id === 1663)
+        if (thirdDownAttemptsStat?.value) {
+          totalThirdDownAttemptsByOpponents += thirdDownAttemptsStat.value
+        }
+      }
+
+      const defensiveThirdDownConvPct = totalThirdDownAttemptsByOpponents > 0
+        ? (totalThirdDownConvsByOpponents / totalThirdDownAttemptsByOpponents) * 100
+        : null
+
+      return { defensiveThirdDownConvPct }
+    } catch (error) {
+      console.error('Error calculating defensive stats:', error)
+      return { defensiveThirdDownConvPct: null }
+    }
+  }
 }
 
 // Export singleton instance
