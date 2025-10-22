@@ -437,6 +437,24 @@ export function TeamDetailedStats({
         ))
       : [selectedCategory]
 
+    // Ensure Key Factors are ordered by configured preference (PTS first, then 3rd down %, etc.)
+    const preferredForSport = getPreferredStats(sport)
+    const keyFactorPriority = (statLike: any): number => {
+      const labelLower = (statLike?.stat?.display_name || statLike?.stat?.name || '').toLowerCase()
+      const abbrLower = (statLike?.stat?.abbreviation || '').toLowerCase()
+      const internalNameLower = (statLike?.stat?.name || '').toLowerCase()
+      const match = preferredForSport.find(p => {
+        const prefLabel = p.display_name.toLowerCase().replace('%', '')
+        const prefAbbr = (p.abbreviation || '').toLowerCase()
+        return (
+          (prefLabel && labelLower.includes(prefLabel)) ||
+          (prefAbbr && abbrLower === prefAbbr) ||
+          internalNameLower === 'thirddownconvpct'
+        )
+      })
+      return match?.priority ?? 999
+    }
+
     return (
       <div className="space-y-4">
         {filteredData.length === 0 ? (
@@ -473,8 +491,15 @@ export function TeamDetailedStats({
                     <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
                   </div>
                 )}
-                {grouped[cat]!.map((stat, index) => {
-                const baseLabel = stat.stat?.display_name || stat.stat?.name || '—'
+                {(cat === STAT_CATEGORIES.KEY_FACTORS ? [...grouped[cat]!].sort((a, b) => keyFactorPriority(a) - keyFactorPriority(b)) : grouped[cat]!).map((stat, index) => {
+                const baseLabel = (() => {
+                  const raw = stat.stat?.display_name || stat.stat?.name || '—'
+                  const lowered = String(raw).toLowerCase()
+                  if (lowered.includes('3rd down %') || lowered.includes('third down conversion percentage')) {
+                    return 'Third Down Conversion Percentage'
+                  }
+                  return raw
+                })()
                   const statDesc = stat.stat?.description || ''
                   const awayRaw = stat.awayValue
                   const homeRaw = stat.homeValue

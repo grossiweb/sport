@@ -24,9 +24,10 @@ export interface StatConfig {
 export const CFB_PREFERRED_STATS: StatConfig[] = [
   // Key Factors
   { stat_id: -1, abbreviation: 'PTS', display_name: 'Total Points Per Game', category: 'Key Factors', description: 'Points per game', priority: 1, stat_key: 'totalPoints', display_field: 'display_value' },
-  { stat_id: -1, abbreviation: '', display_name: 'Third Down Conversions', category: 'Key Factors', description: 'Third down conversion percentage', priority: 2 },
+  // Use percentage stat and prefer per-game display for H2H
+  { stat_id: -1, abbreviation: '3RDC%', display_name: 'Third Down Conversion Percentage', category: 'Key Factors', description: 'Third down conversion percentage', priority: 2, display_field: 'per_game_display_value' },
   { stat_id: -1, abbreviation: '', display_name: 'Red Zone Efficiency Percentage', category: 'Key Factors', description: 'Red zone scoring efficiency', priority: 3, display_field: 'per_game_display_value' },
-  { stat_id: -1, abbreviation: '', display_name: 'Turnover Ratio', category: 'Key Factors', description: 'Turnover ratio', priority: 4 },
+  { stat_id: -1, abbreviation: '', display_name: 'Turnover Ratio', category: 'Key Factors', description: 'Turnover ratio', priority: 4, display_field: 'per_game_display_value' },
 
   // Offense
   { stat_id: -1, abbreviation: '', display_name: 'Total Touchdowns', category: 'Offense', description: 'Touchdowns per game', priority: 10 },
@@ -59,9 +60,10 @@ export const CFB_PREFERRED_STATS: StatConfig[] = [
 export const NFL_PREFERRED_STATS: StatConfig[] = [
   // Key Factors
   { stat_id: 1, abbreviation: 'PTS', display_name: 'Total Points Per Game', category: 'Key Factors', description: 'Points per game', priority: 1 },
-  { stat_id: 32, abbreviation: '3RDC%', display_name: 'Third Down Conversions', category: 'Key Factors', description: 'Third down conversion percentage', priority: 2 },
-  { stat_id: 33, abbreviation: 'RZ%', display_name: 'Red Zone Efficiency Percentage', category: 'Key Factors', description: 'Red zone scoring percentage', priority: 3 },
-  { stat_id: 34, abbreviation: 'TO', display_name: 'Turnover Ratio', category: 'Key Factors', description: 'Turnover ratio', priority: 4 },
+  // NFL: prefer percentage and show per-game value
+  { stat_id: 32, abbreviation: '3RDC%', display_name: 'Third Down Conversion Percentage', category: 'Key Factors', description: 'Third down conversion percentage', priority: 2, display_field: 'per_game_display_value' },
+  { stat_id: 33, abbreviation: 'RZ%', display_name: 'Red Zone Efficiency Percentage', category: 'Key Factors', description: 'Red zone scoring percentage', priority: 3, display_field: 'per_game_display_value' },
+  { stat_id: 34, abbreviation: 'TO', display_name: 'Turnover Ratio', category: 'Key Factors', description: 'Turnover ratio', priority: 4, display_field: 'per_game_display_value' },
   
   // Offense
   { stat_id: 2, abbreviation: 'YDS', display_name: 'Total Yards', category: 'Offense', description: 'Total offensive yards', priority: 10 },
@@ -159,8 +161,28 @@ export function filterAndSortStats(stats: any[], sport: 'CFB' | 'NFL' | 'NBA'): 
   // For CFB, prefer matching by display_name keywords since stat_ids vary
   if (sport === 'CFB') {
     const byPriority = (stat: any): number => {
-      const name = (stat?.stat?.display_name || stat?.stat?.name || '').toLowerCase()
-      const entry = preferredStats.find(p => name.includes(p.display_name.toLowerCase().replace('%', '')))
+      const labelLower = (stat?.stat?.display_name || stat?.stat?.name || '').toLowerCase()
+      const abbrLower = (stat?.stat?.abbreviation || '').toLowerCase()
+      const internalNameLower = (stat?.stat?.name || '').toLowerCase()
+      
+      // Try exact internal name matches first
+      if (internalNameLower === 'thirddownconvpct') {
+        const match = preferredStats.find(p => p.abbreviation?.toLowerCase() === '3rdc%')
+        return match?.priority ?? 999
+      }
+      if (internalNameLower === 'totalpointspergame') {
+        const match = preferredStats.find(p => p.abbreviation?.toLowerCase() === 'pts')
+        return match?.priority ?? 999
+      }
+      
+      const entry = preferredStats.find(p => {
+        const prefLabel = p.display_name.toLowerCase().replace('%', '')
+        const prefAbbr = (p.abbreviation || '').toLowerCase()
+        return (
+          (prefLabel && labelLower.includes(prefLabel)) ||
+          (prefAbbr && abbrLower === prefAbbr)
+        )
+      })
       return entry?.priority ?? 999
     }
     const filtered = nonExcluded.filter(stat => byPriority(stat) !== 999)
@@ -220,7 +242,7 @@ export function mapCfbStatToCategory(stat: any): string {
 
   // Key Factors (only 4 stats)
   if (label.includes('points per game') || label.includes('total points per game')) return STAT_CATEGORIES.KEY_FACTORS
-  if (label.includes('third down conversion')) return STAT_CATEGORIES.KEY_FACTORS
+  if (label.includes('third down conversion') || label.includes('3rd down %') || label.includes('third down conversion percentage')) return STAT_CATEGORIES.KEY_FACTORS
   if (label.includes('red zone efficiency') || (label.includes('red zone') && label.includes('percentage'))) return STAT_CATEGORIES.KEY_FACTORS
   if (label.includes('turnover ratio')) return STAT_CATEGORIES.KEY_FACTORS
 
