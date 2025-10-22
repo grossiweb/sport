@@ -1186,7 +1186,7 @@ export class MongoDBSportsAPI {
         season_year: currentYear
       }).toArray()
 
-      // Calculate cumulative third down conversion percentage
+      // Calculate cumulative third down conversion percentage and opponent RZ% (avg of per-game values)
       let totalThirdDownConvs = 0
       let totalThirdDownAttempts = 0
       let redZoneEffPctSum = 0
@@ -1207,9 +1207,13 @@ export class MongoDBSportsAPI {
 
         // Find red zone efficiency percentage (stat_id 1673)
         const redZoneEffPctStat = opponentStat.stats?.find((s: any) => s.stat_id === 1673)
-        if (redZoneEffPctStat?.value) {
-          redZoneEffPctSum += redZoneEffPctStat.value
-          redZoneEffPctCount++
+        if (redZoneEffPctStat) {
+          const rzValRaw = (redZoneEffPctStat as any).per_game_value ?? redZoneEffPctStat.value
+          const rzValNum = typeof rzValRaw === 'string' ? parseFloat(rzValRaw) : rzValRaw
+          if (typeof rzValNum === 'number' && isFinite(rzValNum)) {
+            redZoneEffPctSum += rzValNum
+            redZoneEffPctCount++
+          }
         }
       }
 

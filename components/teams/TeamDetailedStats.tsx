@@ -199,11 +199,10 @@ export function TeamDetailedStats({
       }
     })
     
-    // Inject calculated opponent stats for Key Factors (if available)
-    if (homeOpponentStats || awayOpponentStats) {
+    // Inject calculated opponent stats for Key Factors (always add rows; values may be null if unavailable)
+    {
       // Opponent Third Down Conversion Percentage
-      if (homeOpponentStats?.opponentThirdDownConvPct !== null || awayOpponentStats?.opponentThirdDownConvPct !== null) {
-        comparisonMap.set('Opponent Third Down Conversion Percentage', {
+      comparisonMap.set('Opponent Third Down Conversion Percentage', {
           stat: {
             id: -1,
             name: 'opponentThirdDownConvPct',
@@ -228,13 +227,11 @@ export function TeamDetailedStats({
           display_value: '',
           updated_at: new Date().toISOString()
         })
-      }
 
       // Defensive Third Down Conversion Percentage — removed per request
 
       // Opponent Red Zone Efficiency Percentage
-      if (homeOpponentStats?.opponentRedZoneEfficiencyPct !== null || awayOpponentStats?.opponentRedZoneEfficiencyPct !== null) {
-        comparisonMap.set('Opponent Red Zone Efficiency Percentage', {
+      comparisonMap.set('Opponent Red Zone Efficiency Percentage', {
           stat: {
             id: -3,
             name: 'opponentRedZoneEfficiencyPct',
@@ -259,7 +256,6 @@ export function TeamDetailedStats({
           display_value: '',
           updated_at: new Date().toISOString()
         })
-      }
     }
     
     return Array.from(comparisonMap.values())
@@ -581,7 +577,18 @@ export function TeamDetailedStats({
                 )}
                 {(
                   cat === STAT_CATEGORIES.KEY_FACTORS
-                    ? [...grouped[cat]!].sort((a, b) => keyFactorPriority(a) - keyFactorPriority(b))
+                    ? (() => {
+                        const arr = [...grouped[cat]!].sort((a, b) => keyFactorPriority(a) - keyFactorPriority(b))
+                        // Ensure Opponent RZ % appears immediately after Red Zone Efficiency %
+                        const labelOf = (s: any) => (s?.stat?.display_name || s?.stat?.name || '').toLowerCase()
+                        const idxRZ = arr.findIndex(s => /red\s*zone\s*efficiency\s*percentage/i.test(s?.stat?.display_name || s?.stat?.name || ''))
+                        const idxOppRZ = arr.findIndex(s => /opponent\s+red\s*zone\s*efficiency\s*percentage/i.test(s?.stat?.display_name || s?.stat?.name || ''))
+                        if (idxRZ !== -1 && idxOppRZ !== -1 && idxOppRZ !== idxRZ + 1) {
+                          const [oppItem] = arr.splice(idxOppRZ, 1)
+                          arr.splice(idxRZ + 1, 0, oppItem)
+                        }
+                        return arr
+                      })()
                     : cat === STAT_CATEGORIES.SPECIAL_TEAMS
                       ? [...grouped[cat]!].sort((a, b) => {
                           const aLabel = (a?.stat?.display_name || a?.stat?.name || '').toLowerCase()

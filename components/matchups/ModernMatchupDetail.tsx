@@ -71,12 +71,18 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
             setAwayTeamDetailedStats(awayData.data || [])
           }
 
-          if (homeOppResponse.ok && awayOppResponse.ok) {
+          // Set opponent stats individually if available
+          if (homeOppResponse.ok) {
             const homeOppData = await homeOppResponse.json()
-            const awayOppData = await awayOppResponse.json()
-            
             setHomeOpponentStats(homeOppData.data || null)
+          } else {
+            setHomeOpponentStats(null)
+          }
+          if (awayOppResponse.ok) {
+            const awayOppData = await awayOppResponse.json()
             setAwayOpponentStats(awayOppData.data || null)
+          } else {
+            setAwayOpponentStats(null)
           }
         } catch (error) {
           console.error('Failed to fetch detailed team stats:', error)
