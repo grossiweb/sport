@@ -57,7 +57,13 @@ export function DailyMatchups() {
       {games.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {games.map((game) => (
-            <FeaturedGameCard key={game.id} game={game} />
+            <Link
+              key={game.id}
+              href={`/sport/${currentSport.toLowerCase()}/matchups/${game.id}`}
+              className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+            >
+              <FeaturedGameCard game={game} />
+            </Link>
           ))}
         </div>
       ) : (
@@ -83,7 +89,7 @@ export function DailyMatchups() {
 
 function FeaturedGameCard({ game }: { game: Game }) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-all duration-200 group-hover:border-primary-300 dark:group-hover:border-primary-600">
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
           {game.status}
