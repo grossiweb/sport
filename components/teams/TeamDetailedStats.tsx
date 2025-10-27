@@ -96,6 +96,15 @@ export function TeamDetailedStats({
   const getStatDisplayValue = (stat: DetailedTeamStat): any => {
     const statName = (stat.stat?.display_name || stat.stat?.name || '').trim().toLowerCase()
     const preferredStats = getPreferredStats(sport)
+    const internalName = (stat.stat?.name || '').trim().toLowerCase()
+    const displayName = (stat.stat?.display_name || '').trim().toLowerCase()
+
+    // Special-case: Turnover Ratio (turnOverDifferential) should always use display_value
+    if (internalName === 'turnoverdifferential' || displayName.includes('turnover ratio')) {
+      const dv = (stat as any).display_value
+      if (dv !== undefined && dv !== null && dv !== '') return dv
+      return stat.value
+    }
     
     // Find the config for this stat
     const config = preferredStats.find(p => 
@@ -124,6 +133,13 @@ export function TeamDetailedStats({
     const internalName = (meta?.name ? String(meta.name).toLowerCase() : '')
     // Treat internal names ending with 'pct' as percentages (e.g., completionPct)
     return internalName.endsWith('pct')
+  }
+
+  // Identify Turnover Ratio stat for display overrides
+  const isTurnoverRatioStat = (statLike: any): boolean => {
+    const name = (statLike?.stat?.name || '').toLowerCase()
+    const disp = (statLike?.stat?.display_name || '').toLowerCase()
+    return name === 'turnoverdifferential' || disp.includes('turnover ratio')
   }
 
   // Append % to numeric displays for percent stats when missing
@@ -456,8 +472,13 @@ export function TeamDetailedStats({
                 const awayRaw = stat.awayValue
                 const homeRaw = stat.homeValue
                 const isPercent = isPercentageStat(stat)
-                const awayDisplay = withPercentIfNeeded(formatValueDisplay(awayRaw), isPercent)
-                const homeDisplay = withPercentIfNeeded(formatValueDisplay(homeRaw), isPercent)
+                const isTurnover = isTurnoverRatioStat(stat)
+                const awayDisplay = isTurnover
+                  ? formatValueDisplay(awayRaw)
+                  : withPercentIfNeeded(formatValueDisplay(awayRaw), isPercent)
+                const homeDisplay = isTurnover
+                  ? formatValueDisplay(homeRaw)
+                  : withPercentIfNeeded(formatValueDisplay(homeRaw), isPercent)
                 const awayRankText = formatRankDisplay(stat.awayRank)
                 const homeRankText = formatRankDisplay(stat.homeRank)
                 const awayNum = getNumeric(awayRaw)
@@ -615,8 +636,13 @@ export function TeamDetailedStats({
                   const awayRaw = stat.awayValue
                   const homeRaw = stat.homeValue
                 const isPercent = isPercentageStat(stat)
-                const awayDisplay = withPercentIfNeeded(formatValueDisplay(awayRaw), isPercent)
-                const homeDisplay = withPercentIfNeeded(formatValueDisplay(homeRaw), isPercent)
+                const isTurnover = isTurnoverRatioStat(stat)
+                const awayDisplay = isTurnover
+                  ? formatValueDisplay(awayRaw)
+                  : withPercentIfNeeded(formatValueDisplay(awayRaw), isPercent)
+                const homeDisplay = isTurnover
+                  ? formatValueDisplay(homeRaw)
+                  : withPercentIfNeeded(formatValueDisplay(homeRaw), isPercent)
                   const awayRankText = formatRankDisplay(stat.awayRank)
                   const homeRankText = formatRankDisplay(stat.homeRank)
 
@@ -724,10 +750,13 @@ export function TeamDetailedStats({
                 const mainRaw = isRedZoneEfficiency
                   ? (stat.per_game_display_value ?? stat.display_value ?? stat.value)
                   : (stat.display_value ?? stat.value)
-                const mainDisplay = withPercentIfNeeded(
-                  formatValueDisplay(mainRaw),
-                  isPercent
-                )
+                const isTurnover = isTurnoverRatioStat(stat)
+                const mainDisplay = isTurnover
+                  ? formatValueDisplay((stat as any).display_value ?? stat.value)
+                  : withPercentIfNeeded(
+                      formatValueDisplay(mainRaw),
+                      isPercent
+                    )
                 const perGameDisplay = withPercentIfNeeded(
                   formatValueDisplay(stat.per_game_display_value ?? '-'),
                   isPercent
@@ -800,15 +829,18 @@ export function TeamDetailedStats({
                           const isRedZoneEfficiency =
                             (stat.stat?.name && String(stat.stat.name).toLowerCase() === 'redzoneefficiencypct') ||
                             (/red\s*zone/i.test(baseLabel) && /efficiency/i.test(baseLabel) && /percent/i.test(baseLabel))
-                          const valueRaw = isRedZoneEfficiency
+                      const valueRaw = isRedZoneEfficiency
                             ? (stat.per_game_display_value ?? stat.display_value ?? stat.value)
                             : (stat.display_value ?? stat.value)
+                          const isTurnover = isTurnoverRatioStat(stat)
                           return (
                             <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                              {withPercentIfNeeded(
-                                formatValueDisplay(valueRaw),
-                                isPercentageStat(stat)
-                              )}
+                              {isTurnover
+                                ? formatValueDisplay((stat as any).display_value ?? stat.value)
+                                : withPercentIfNeeded(
+                                    formatValueDisplay(valueRaw),
+                                    isPercentageStat(stat)
+                                  )}
                             </div>
                           )
                         })()}
