@@ -1186,6 +1186,29 @@ export class MongoDBSportsAPI {
         season_year: currentYear
       }).toArray()
 
+      // Helper: find a stat object by stat_id OR by name/display_name keywords
+      const findStatByIdOrName = (statsArr: any[] | undefined | null, opts: { ids?: number[]; nameIncludes?: string[]; displayIncludes?: string[] }) => {
+        if (!Array.isArray(statsArr)) return undefined
+        const ids = new Set((opts.ids || []).map(n => Number(n)))
+        const nameNeedles = (opts.nameIncludes || []).map(s => s.toLowerCase())
+        const displayNeedles = (opts.displayIncludes || []).map(s => s.toLowerCase())
+        // Prefer exact id matches first
+        let found = statsArr.find((s: any) => typeof s?.stat_id === 'number' && ids.has(Number(s.stat_id)))
+        if (found) return found
+        // Fallback: match by internal name
+        found = statsArr.find((s: any) => {
+          const nm = (s?.name || '').toString().toLowerCase()
+          return nameNeedles.some(n => n && nm.includes(n))
+        })
+        if (found) return found
+        // Fallback: match by display name
+        found = statsArr.find((s: any) => {
+          const dn = (s?.display_name || '').toString().toLowerCase()
+          return displayNeedles.some(n => n && dn.includes(n))
+        })
+        return found
+      }
+
       // Calculate cumulative third down conversion percentage and opponent RZ% (avg of per-game values)
       let totalThirdDownConvs = 0
       let totalThirdDownAttempts = 0
@@ -1193,20 +1216,32 @@ export class MongoDBSportsAPI {
       let redZoneEffPctCount = 0
 
       for (const opponentStat of opponentStats) {
-        // Find third down conversions (stat_id 1662)
-        const thirdDownConvsStat = opponentStat.stats?.find((s: any) => s.stat_id === 1662)
+        // Third down conversions: prefer stat_id 1662 but fallback to name patterns
+        const thirdDownConvsStat = findStatByIdOrName(opponentStat.stats, {
+          ids: [1662],
+          nameIncludes: ['thirddownconvs', 'third down conv', '3rd down conv'],
+          displayIncludes: ['third down conv']
+        })
         if (thirdDownConvsStat?.value) {
           totalThirdDownConvs += thirdDownConvsStat.value
         }
 
-        // Find third down attempts (stat_id 1663)
-        const thirdDownAttemptsStat = opponentStat.stats?.find((s: any) => s.stat_id === 1663)
+        // Third down attempts: prefer stat_id 1663 but fallback to name patterns
+        const thirdDownAttemptsStat = findStatByIdOrName(opponentStat.stats, {
+          ids: [1663],
+          nameIncludes: ['thirddownattempts', 'third down attempt', '3rd down attempt'],
+          displayIncludes: ['third down attempt']
+        })
         if (thirdDownAttemptsStat?.value) {
           totalThirdDownAttempts += thirdDownAttemptsStat.value
         }
 
-        // Find red zone efficiency percentage (stat_id 1673)
-        const redZoneEffPctStat = opponentStat.stats?.find((s: any) => s.stat_id === 1673)
+        // Red zone efficiency percentage: prefer stat_id 1673 but fallback to name patterns
+        const redZoneEffPctStat = findStatByIdOrName(opponentStat.stats, {
+          ids: [1673],
+          nameIncludes: ['redzoneefficiencypct', 'red zone efficiency pct', 'red zone eff %'],
+          displayIncludes: ['red zone efficiency percentage', 'red zone efficiency %']
+        })
         if (redZoneEffPctStat) {
           const rzValRaw = (redZoneEffPctStat as any).per_game_value ?? redZoneEffPctStat.value
           const rzValNum = typeof rzValRaw === 'string' ? parseFloat(rzValRaw) : rzValRaw
@@ -1287,14 +1322,42 @@ export class MongoDBSportsAPI {
       let totalThirdDownAttemptsByOpponents = 0
 
       for (const opponentStat of opponentStats) {
-        // Find third down conversions (stat_id 1662)
-        const thirdDownConvsStat = opponentStat.stats?.find((s: any) => s.stat_id === 1662)
+        // Helper: find a stat by id or name
+        const findStatByIdOrName = (statsArr: any[] | undefined | null, opts: { ids?: number[]; nameIncludes?: string[]; displayIncludes?: string[] }) => {
+          if (!Array.isArray(statsArr)) return undefined
+          const ids = new Set((opts.ids || []).map(n => Number(n)))
+          const nameNeedles = (opts.nameIncludes || []).map(s => s.toLowerCase())
+          const displayNeedles = (opts.displayIncludes || []).map(s => s.toLowerCase())
+          let found = statsArr.find((s: any) => typeof s?.stat_id === 'number' && ids.has(Number(s.stat_id)))
+          if (found) return found
+          found = statsArr.find((s: any) => {
+            const nm = (s?.name || '').toString().toLowerCase()
+            return nameNeedles.some(n => n && nm.includes(n))
+          })
+          if (found) return found
+          found = statsArr.find((s: any) => {
+            const dn = (s?.display_name || '').toString().toLowerCase()
+            return displayNeedles.some(n => n && dn.includes(n))
+          })
+          return found
+        }
+
+        // Third down conversions
+        const thirdDownConvsStat = findStatByIdOrName(opponentStat.stats, {
+          ids: [1662],
+          nameIncludes: ['thirddownconvs', 'third down conv', '3rd down conv'],
+          displayIncludes: ['third down conv']
+        })
         if (thirdDownConvsStat?.value) {
           totalThirdDownConvsByOpponents += thirdDownConvsStat.value
         }
 
-        // Find third down attempts (stat_id 1663)
-        const thirdDownAttemptsStat = opponentStat.stats?.find((s: any) => s.stat_id === 1663)
+        // Third down attempts
+        const thirdDownAttemptsStat = findStatByIdOrName(opponentStat.stats, {
+          ids: [1663],
+          nameIncludes: ['thirddownattempts', 'third down attempt', '3rd down attempt'],
+          displayIncludes: ['third down attempt']
+        })
         if (thirdDownAttemptsStat?.value) {
           totalThirdDownAttemptsByOpponents += thirdDownAttemptsStat.value
         }

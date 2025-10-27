@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { DetailedTeamStat, SportType } from '@/types'
 import { ChartBarIcon, TrophyIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline'
-import { filterAndSortStats, STAT_CATEGORIES, mapCfbStatToCategory, getPreferredStats } from '@/lib/constants/team-stats-config'
+import { filterAndSortStats, STAT_CATEGORIES, mapCfbStatToCategory, mapNflStatToCategory, getPreferredStats } from '@/lib/constants/team-stats-config'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 
 interface TeamDetailedStatsProps {
@@ -279,12 +279,16 @@ export function TeamDetailedStats({
 
   const comparisonData = createComparisonData()
 
-  // Get unique categories (use CFB-specific mapping if applicable)
-  const computedCategories = comparisonData.map(stat => (
-    sport === 'CFB' ? mapCfbStatToCategory(stat) : (stat.stat?.category || STAT_CATEGORIES.OFFENSE)
-  ))
-  const categoryOrder = sport === 'CFB'
-    ? [
+  // Get unique categories (use sport-specific mapping)
+  const computedCategories = comparisonData.map(stat => {
+    if (sport === 'CFB') return mapCfbStatToCategory(stat)
+    if (sport === 'NFL') return mapNflStatToCategory(stat)
+    return stat.stat?.category || STAT_CATEGORIES.OFFENSE
+  })
+  
+  const categories = (() => {
+    if (sport === 'CFB') {
+      const order = [
         'all',
         STAT_CATEGORIES.KEY_FACTORS,
         STAT_CATEGORIES.OFFENSE,
@@ -292,19 +296,31 @@ export function TeamDetailedStats({
         STAT_CATEGORIES.SPECIAL_TEAMS,
         STAT_CATEGORIES.TURNOVERS_PENALTIES
       ]
-    : ['all', ...Array.from(new Set(comparisonData.map(stat => stat.stat?.category).filter(Boolean)))]
-  const categories = sport === 'CFB'
-    ? categoryOrder.filter((c, idx) => idx === 0 || computedCategories.includes(c as any))
-    : categoryOrder
+      return order.filter((c, idx) => idx === 0 || computedCategories.includes(c as any))
+    }
+    if (sport === 'NFL') {
+      // For NFL, surface all unique mapped categories (e.g., Kicking, Punting, Receiving) plus Key Factors
+      const unique = Array.from(new Set(computedCategories.filter(Boolean))) as string[]
+      // Ensure Key Factors appears first if present
+      const withoutKey = unique.filter(c => c !== STAT_CATEGORIES.KEY_FACTORS)
+      const ordered = [STAT_CATEGORIES.KEY_FACTORS, ...withoutKey]
+      // Remove Defensive/Defense category button per request
+      const cleaned = ordered.filter(c => !/^defen(sive|se)$/i.test(String(c)))
+      return ['all', ...cleaned]
+    }
+    // Fallback (e.g., NBA): use raw categories detected from data
+    const raw = Array.from(new Set(comparisonData.map(stat => stat.stat?.category).filter(Boolean))) as string[]
+    return ['all', ...raw]
+  })()
 
   // Filter by category
   const filteredData = selectedCategory === 'all' 
     ? comparisonData 
-    : comparisonData.filter(stat => (
-        sport === 'CFB' 
-          ? mapCfbStatToCategory(stat) === selectedCategory 
-          : stat.stat?.category === selectedCategory
-      ))
+    : comparisonData.filter(stat => {
+        if (sport === 'CFB') return mapCfbStatToCategory(stat) === selectedCategory
+        if (sport === 'NFL') return mapNflStatToCategory(stat) === selectedCategory
+        return stat.stat?.category === selectedCategory
+      })
 
   // Helper function to compare values and determine winner
   const getWinnerIndicator = (homeValue: any, awayValue: any, statLabel: string) => {
@@ -421,6 +437,11 @@ export function TeamDetailedStats({
     )
   }
 
+  const capitalizeLabel = (label: string): string => {
+    if (!label) return label
+    return label.charAt(0).toUpperCase() + label.slice(1)
+  }
+
   const CategoryFilter = () => (
     <div className="mb-6">
       <div className="flex flex-wrap gap-2">
@@ -434,7 +455,7 @@ export function TeamDetailedStats({
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
             }`}
           >
-            {category === 'all' ? 'All Stats' : category}
+            {category === 'all' ? 'All Stats' : capitalizeLabel(String(category))}
           </button>
         ))}
       </div>
@@ -512,15 +533,22 @@ export function TeamDetailedStats({
     }
 
     // H2H visual style: header with teams/category, stat label above green bar, grouped categories on All
-    const getCategory = (stat: any) => (
-      sport === 'CFB' ? mapCfbStatToCategory(stat) : (stat.stat?.category || 'Other')
-    )
+    const getCategory = (stat: any) => {
+      if (sport === 'CFB') return mapCfbStatToCategory(stat)
+      if (sport === 'NFL') return mapNflStatToCategory(stat)
+      return stat.stat?.category || 'Other'
+    }
     // Exclude certain stats in H2H view (e.g., Sacks, and removed defensive 3rd down label if present)
     const h2hFiltered = filteredData.filter((s) => {
       const label = (s?.stat?.display_name || s?.stat?.name || '').toLowerCase()
       if (!label) return true
       if (label.includes('sacks')) return false
       if (label.includes('defensive third down conversion')) return false
+      // For NFL, exclude Third Down Conversions and Third Down Attempts from H2H
+      if (sport === 'NFL') {
+        if ((label === 'third down conversions' || label === '3rd down conversions') && !label.includes('percentage')) return false
+        if (label === 'third down attempts' || label === '3rd down attempts') return false
+      }
       return true
     })
 
@@ -712,11 +740,11 @@ export function TeamDetailedStats({
     const filteredStats = filterAndSortStats(stats, sport)
     const categoryStatsRaw = selectedCategory === 'all' 
       ? filteredStats 
-      : filteredStats.filter(stat => (
-          sport === 'CFB' 
-            ? mapCfbStatToCategory(stat) === selectedCategory 
-            : stat.stat?.category === selectedCategory
-        ))
+      : filteredStats.filter(stat => {
+          if (sport === 'CFB') return mapCfbStatToCategory(stat) === selectedCategory
+          if (sport === 'NFL') return mapNflStatToCategory(stat) === selectedCategory
+          return stat.stat?.category === selectedCategory
+        })
     const categoryStats = deduplicateByDisplayName(categoryStatsRaw)
 
     return (

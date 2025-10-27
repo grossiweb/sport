@@ -62,12 +62,17 @@ export const CFB_PREFERRED_STATS: StatConfig[] = [
 
 // NFL Preferred Stats Configuration (similar structure but different priorities)
 export const NFL_PREFERRED_STATS: StatConfig[] = [
-  // Key Factors
-  { stat_id: 1, abbreviation: 'PTS', display_name: 'Total Points Per Game', category: 'Key Factors', description: 'Points per game', priority: 1 },
-  // NFL: prefer percentage and show per-game value
+  // Key Factors - for NFL H2H (Third Down Conversions & Attempts excluded from H2H view)
+  // Turnover Ratio is last in the list
+  { stat_id: 1106, abbreviation: 'PTS', display_name: 'Total Points', category: 'Key Factors', description: 'Total points scored', priority: 1 },
   { stat_id: 32, abbreviation: '3RDC%', display_name: 'Third Down Conversion Percentage', category: 'Key Factors', description: 'Third down conversion percentage', priority: 2, display_field: 'per_game_display_value' },
-  { stat_id: 33, abbreviation: 'RZ%', display_name: 'Red Zone Efficiency Percentage', category: 'Key Factors', description: 'Red zone scoring percentage', priority: 3, display_field: 'per_game_display_value' },
-  { stat_id: 34, abbreviation: 'TO', display_name: 'Turnover Ratio', category: 'Key Factors', description: 'Turnover ratio', priority: 4, display_field: 'per_game_display_value' },
+  { stat_id: -101, abbreviation: 'OPP 3RDC%', display_name: 'Opponent Third Down Conversion Percentage', category: 'Key Factors', description: 'Average third down conversion percentage of opponents faced', priority: 3 },
+  { stat_id: 1155, abbreviation: 'RZ%', display_name: 'Red Zone Scoring Percentage', category: 'Key Factors', description: 'Red zone scoring percentage', priority: 4, display_field: 'per_game_display_value' },
+  { stat_id: -103, abbreviation: 'OPP RZ%', display_name: 'Opponent Red Zone Efficiency Percentage', category: 'Key Factors', description: 'Average red zone efficiency percentage of opponents faced', priority: 5 },
+  { stat_id: 34, abbreviation: 'TO', display_name: 'Turnover Ratio', category: 'Key Factors', description: 'Turnover ratio', priority: 9, display_field: 'per_game_display_value' },
+  // Third Down raw counts (excluded from H2H but available in config)
+  { stat_id: 30, abbreviation: '3RDC', display_name: 'Third Down Conversions', category: 'Key Factors', description: '3rd down conversions', priority: 50 },
+  { stat_id: 31, abbreviation: '3RDA', display_name: 'Third Down Attempts', category: 'Key Factors', description: '3rd down attempts', priority: 51 },
   
   // Offense
   { stat_id: 2, abbreviation: 'YDS', display_name: 'Total Yards', category: 'Offense', description: 'Total offensive yards', priority: 10 },
@@ -261,6 +266,55 @@ export function mapCfbStatToCategory(stat: any): string {
 
   // Offense by default
   return STAT_CATEGORIES.OFFENSE
+}
+
+// Map an NFL stat to categories using Key Factors and other groupings
+export function mapNflStatToCategory(stat: any): string {
+  const label = (stat?.stat?.display_name || stat?.stat?.name || '').toLowerCase()
+  const internalName = (stat?.stat?.name || '').toLowerCase()
+  const originalCategory = stat.stat?.category || 'Offense'
+  
+  if (!label) return originalCategory === 'miscellaneous' ? 'Offense' : originalCategory
+
+  // Key Factors (8 stats in exact order) - match by display name or internal name
+  // 1. Total Points (not "per game")
+  if (label === 'total points' || internalName === 'totalpoints') return STAT_CATEGORIES.KEY_FACTORS
+  // 2. Third Down Conversion Percentage (includes "3rd down %")
+  if ((label.includes('third down conversion percentage') || label.includes('3rd down conversion percentage') || label.includes('3rd down %') || internalName === 'thirddownconvpct') && !label.includes('opponent')) return STAT_CATEGORIES.KEY_FACTORS
+  // 3. Opponent Third Down Conversion Percentage
+  if (label.includes('opponent third down conversion percentage') || label.includes('opponent 3rd down conversion percentage')) return STAT_CATEGORIES.KEY_FACTORS
+  // 4. Third Down Conversions
+  if ((label === 'third down conversions' || label === '3rd down conversions' || internalName === 'thirddownconvs') && !label.includes('percentage') && !label.includes('%')) return STAT_CATEGORIES.KEY_FACTORS
+  // 5. Third Down Attempts
+  if (label === 'third down attempts' || label === '3rd down attempts' || internalName === 'thirddownattempts') return STAT_CATEGORIES.KEY_FACTORS
+  // 6. Red Zone Scoring Percentage (not "efficiency")
+  if ((label.includes('red zone scoring percentage') || internalName === 'redzonescoringpct') && !label.includes('opponent')) return STAT_CATEGORIES.KEY_FACTORS
+  // 7. Opponent Red Zone Efficiency Percentage
+  if (label.includes('opponent red zone') && (label.includes('efficiency') || label.includes('scoring')) && label.includes('percentage')) return STAT_CATEGORIES.KEY_FACTORS
+  // 8. Turnover Ratio
+  if (label.includes('turnover ratio') || internalName === 'turnoverdifferential') return STAT_CATEGORIES.KEY_FACTORS
+
+  // Remap other miscellaneous stats to appropriate categories
+  if (originalCategory === 'miscellaneous') {
+    // First downs → Offense
+    if (label.includes('first down') || label.includes('1st down')) return STAT_CATEGORIES.OFFENSE
+    // Fourth down stats → Offense
+    if (label.includes('fourth down') || label.includes('4th down')) return STAT_CATEGORIES.OFFENSE
+    // Penalties → Turnovers & Penalties
+    if (label.includes('penalty') || label.includes('penalties')) return STAT_CATEGORIES.TURNOVERS_PENALTIES
+    // Possession time → Offense
+    if (label.includes('possession')) return STAT_CATEGORIES.OFFENSE
+    // Red zone stats (non-Key Factors) → Offense
+    if (label.includes('red zone')) return STAT_CATEGORIES.OFFENSE
+    // Turnovers (non-Key Factors) → Turnovers & Penalties
+    if (label.includes('takeaway') || label.includes('giveaway') || label.includes('fumbles lost')) return STAT_CATEGORIES.TURNOVERS_PENALTIES
+    
+    // Default: remap to Offense instead of miscellaneous
+    return STAT_CATEGORIES.OFFENSE
+  }
+
+  // Use original category for non-miscellaneous stats
+  return originalCategory
 }
 
 // Map an NBA stat to categories using the configured list
