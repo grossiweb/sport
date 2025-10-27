@@ -562,12 +562,25 @@ export function TeamDetailedStats({
       : { [selectedCategory]: h2hFiltered }
 
     const orderedCategories = selectedCategory === 'all'
-      ? (sport === 'CFB' ? (
-          [STAT_CATEGORIES.KEY_FACTORS, STAT_CATEGORIES.OFFENSE, STAT_CATEGORIES.DEFENSIVE, STAT_CATEGORIES.SPECIAL_TEAMS, STAT_CATEGORIES.TURNOVERS_PENALTIES]
-            .filter(c => grouped[c]?.length)
-        ) : (
-          Object.keys(grouped)
-        ))
+      ? (
+          sport === 'CFB'
+            ? [
+                STAT_CATEGORIES.KEY_FACTORS,
+                STAT_CATEGORIES.OFFENSE,
+                STAT_CATEGORIES.DEFENSIVE,
+                STAT_CATEGORIES.SPECIAL_TEAMS,
+                STAT_CATEGORIES.TURNOVERS_PENALTIES
+              ].filter(c => grouped[c]?.length)
+            : sport === 'NFL'
+              ? (() => {
+                  const keys = Object.keys(grouped)
+                  const rest = keys.filter(k => k !== STAT_CATEGORIES.KEY_FACTORS)
+                  return grouped[STAT_CATEGORIES.KEY_FACTORS]
+                    ? [STAT_CATEGORIES.KEY_FACTORS, ...rest]
+                    : keys
+                })()
+              : Object.keys(grouped)
+        )
       : [selectedCategory]
 
     // Ensure Key Factors are ordered by configured preference (PTS first, then 3rd down %, etc.)

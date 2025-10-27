@@ -210,18 +210,44 @@ export function filterAndSortStats(stats: any[], sport: 'CFB' | 'NFL' | 'NBA'): 
     return filtered.sort((a, b) => byPriority(a) - byPriority(b))
   }
 
-  // NFL legacy behavior: by stat_id/abbreviation
+  if (sport === 'NFL') {
+    const byPriority = (stat: any): number => {
+      const labelLower = (stat?.stat?.display_name || stat?.stat?.name || '').toLowerCase()
+      const abbrLower = (stat?.stat?.abbreviation || '').toLowerCase()
+      const internalNameLower = (stat?.stat?.name || '').toLowerCase()
+
+      // Helpful exact internal name matches
+      if (internalNameLower === 'thirddownconvpct') {
+        const match = preferredStats.find(p => (p.display_name.toLowerCase().includes('third down conversion percentage')))
+        return match?.priority ?? 999
+      }
+
+      const entry = preferredStats.find(p => {
+        const prefLabel = p.display_name.toLowerCase()
+        const prefAbbr = (p.abbreviation || '').toLowerCase()
+        return (
+          (prefLabel && labelLower.includes(prefLabel)) ||
+          (prefAbbr && abbrLower === prefAbbr)
+        )
+      })
+      return entry?.priority ?? 999
+    }
+    const filtered = nonExcluded.filter(stat => byPriority(stat) !== 999)
+    return filtered.sort((a, b) => byPriority(a) - byPriority(b))
+  }
+
+  // Default behavior: by stat_id/abbreviation (for other sports)
   const preferredStatIds = new Set(preferredStats.map(s => s.stat_id))
   const preferredAbbreviations = new Set(preferredStats.map(s => s.abbreviation))
-  const filteredStats = nonExcluded.filter(stat => 
-    preferredStatIds.has(stat.stat_id) || 
+  const filteredStats = nonExcluded.filter(stat =>
+    preferredStatIds.has(stat.stat_id) ||
     preferredAbbreviations.has(stat.stat?.abbreviation)
   )
   return filteredStats.sort((a, b) => {
-    const aPriority = preferredStats.find(p => 
+    const aPriority = preferredStats.find(p =>
       p.stat_id === a.stat_id || p.abbreviation === a.stat?.abbreviation
     )?.priority || 999
-    const bPriority = preferredStats.find(p => 
+    const bPriority = preferredStats.find(p =>
       p.stat_id === b.stat_id || p.abbreviation === b.stat?.abbreviation
     )?.priority || 999
     return aPriority - bPriority

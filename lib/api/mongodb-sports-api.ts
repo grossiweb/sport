@@ -158,11 +158,34 @@ export class MongoDBSportsAPI {
         const isHome = g.homeTeam.id === teamId
         const opponentId = isHome ? g.awayTeam.id : g.homeTeam.id
         const opponentName = teamsMap.get(opponentId)
+        
+        // Priority 1: Try g.homeScore/awayScore (from games collection)
+        let homeScore = g.homeScore
+        let awayScore = g.awayScore
+        
+        // Priority 2: If not available or zero, try summing from g.scoreByPeriod
+        if ((homeScore == null || homeScore === 0) && Array.isArray(g.scoreByPeriod?.home)) {
+          const summed = (g.scoreByPeriod!.home as number[]).reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0)
+          if (summed > 0) homeScore = summed
+        }
+        if ((awayScore == null || awayScore === 0) && Array.isArray(g.scoreByPeriod?.away)) {
+          const summed = (g.scoreByPeriod!.away as number[]).reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0)
+          if (summed > 0) awayScore = summed
+        }
+        
+        // Priority 3: Finally check betting_data if still missing/zero
         const betting = bettingByEvent.get(g.id) as MongoBettingData | undefined
-        const bdHome = sum(betting?.score?.score_home_by_period)
-        const bdAway = sum(betting?.score?.score_away_by_period)
-        const homeScore = (bdHome ?? g.homeScore ?? 0)
-        const awayScore = (bdAway ?? g.awayScore ?? 0)
+        if (betting?.score) {
+          const bdHome = sum(betting.score.score_home_by_period)
+          const bdAway = sum(betting.score.score_away_by_period)
+          if ((homeScore == null || homeScore === 0) && bdHome != null && bdHome > 0) homeScore = bdHome
+          if ((awayScore == null || awayScore === 0) && bdAway != null && bdAway > 0) awayScore = bdAway
+        }
+        
+        // Default to 0 if still null
+        homeScore = homeScore ?? 0
+        awayScore = awayScore ?? 0
+        
         const teamScore = isHome ? homeScore : awayScore
         const opponentScore = isHome ? awayScore : homeScore
         const result: 'win' | 'loss' | 'push' = teamScore > opponentScore ? 'win' : teamScore < opponentScore ? 'loss' : 'push'
