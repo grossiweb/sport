@@ -573,13 +573,12 @@ export function TeamDetailedStats({
                 STAT_CATEGORIES.TURNOVERS_PENALTIES
               ].filter(c => grouped[c]?.length)
             : sport === 'NFL'
-              ? (() => {
-                  const keys = Object.keys(grouped)
-                  const rest = keys.filter(k => k !== STAT_CATEGORIES.KEY_FACTORS)
-                  return grouped[STAT_CATEGORIES.KEY_FACTORS]
-                    ? [STAT_CATEGORIES.KEY_FACTORS, ...rest]
-                    : keys
-                })()
+              ? [
+                  STAT_CATEGORIES.KEY_FACTORS,
+                  STAT_CATEGORIES.OFFENSE,
+                  STAT_CATEGORIES.SPECIAL_TEAMS,
+                  STAT_CATEGORIES.TURNOVERS_PENALTIES
+                ].filter(c => grouped[c]?.length)
               : Object.keys(grouped)
         )
       : [selectedCategory]
@@ -638,7 +637,7 @@ export function TeamDetailedStats({
                     <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
                   </div>
                 )}
-                {(
+                {                (
                   cat === STAT_CATEGORIES.KEY_FACTORS
                     ? (() => {
                         const arr = [...grouped[cat]!].sort((a, b) => keyFactorPriority(a) - keyFactorPriority(b))
@@ -652,17 +651,7 @@ export function TeamDetailedStats({
                         }
                         return arr
                       })()
-                    : cat === STAT_CATEGORIES.SPECIAL_TEAMS
-                      ? [...grouped[cat]!].sort((a, b) => {
-                          const aLabel = (a?.stat?.display_name || a?.stat?.name || '').toLowerCase()
-                          const bLabel = (b?.stat?.display_name || b?.stat?.name || '').toLowerCase()
-                          const aIsFgPct = /field\s*goal\s*%|field\s*goal\s*percentage/i.test(a?.stat?.display_name || a?.stat?.name || '')
-                          const bIsFgPct = /field\s*goal\s*%|field\s*goal\s*percentage/i.test(b?.stat?.display_name || b?.stat?.name || '')
-                          if (aIsFgPct && !bIsFgPct) return -1
-                          if (!aIsFgPct && bIsFgPct) return 1
-                          return aLabel.localeCompare(bLabel)
-                        })
-                      : grouped[cat]!
+                    : [...grouped[cat]!].sort((a, b) => keyFactorPriority(a) - keyFactorPriority(b))
                 ).map((stat, index) => {
                 const baseLabel = (() => {
                   const raw = stat.stat?.display_name || stat.stat?.name || '—'
