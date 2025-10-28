@@ -67,9 +67,9 @@ export const NFL_PREFERRED_STATS: StatConfig[] = [
   { stat_id: 1106, abbreviation: 'PTS', display_name: 'Total Points', category: 'Key Factors', description: 'Total points scored', priority: 1 },
   { stat_id: 32, abbreviation: '3RDC%', display_name: 'Third Down Conversion Percentage', category: 'Key Factors', description: 'Third down conversion percentage', priority: 2, display_field: 'per_game_display_value' },
   { stat_id: -101, abbreviation: 'OPP 3RDC%', display_name: 'Opponent Third Down Conversion Percentage', category: 'Key Factors', description: 'Average third down conversion percentage of opponents faced', priority: 3 },
-  { stat_id: 1155, abbreviation: 'RZ%', display_name: 'Red Zone Scoring Percentage', category: 'Key Factors', description: 'Red zone scoring percentage', priority: 4, display_field: 'per_game_display_value' },
+  { stat_id: 1156, abbreviation: 'RZEFF%', display_name: 'Red Zone Efficiency Percentage', category: 'Key Factors', description: 'Red zone efficiency percentage', priority: 4, stat_key: 'redzoneEfficiencyPct', display_field: 'per_game_display_value' },
   { stat_id: -103, abbreviation: 'OPP RZ%', display_name: 'Opponent Red Zone Efficiency Percentage', category: 'Key Factors', description: 'Average red zone efficiency percentage of opponents faced', priority: 5 },
-  { stat_id: 34, abbreviation: 'TO', display_name: 'Turnover Ratio', category: 'Key Factors', description: 'Turnover ratio', priority: 9, display_field: 'per_game_display_value' },
+  { stat_id: 34, abbreviation: 'TO', display_name: 'Turnover Ratio', category: 'Key Factors', description: 'Turnover ratio', priority: 6, display_field: 'per_game_display_value' },
   // Third Down raw counts (excluded from H2H but available in config)
   { stat_id: 30, abbreviation: '3RDC', display_name: 'Third Down Conversions', category: 'Key Factors', description: '3rd down conversions', priority: 50 },
   { stat_id: 31, abbreviation: '3RDA', display_name: 'Third Down Attempts', category: 'Key Factors', description: '3rd down attempts', priority: 51 },
@@ -313,8 +313,8 @@ export function mapNflStatToCategory(stat: any): string {
   if ((label === 'third down conversions' || label === '3rd down conversions' || internalName === 'thirddownconvs') && !label.includes('percentage') && !label.includes('%')) return STAT_CATEGORIES.KEY_FACTORS
   // 5. Third Down Attempts
   if (label === 'third down attempts' || label === '3rd down attempts' || internalName === 'thirddownattempts') return STAT_CATEGORIES.KEY_FACTORS
-  // 6. Red Zone Scoring Percentage (not "efficiency")
-  if ((label.includes('red zone scoring percentage') || internalName === 'redzonescoringpct') && !label.includes('opponent')) return STAT_CATEGORIES.KEY_FACTORS
+  // 6. Red Zone Efficiency Percentage
+  if ((label.includes('red zone efficiency percentage') || internalName === 'redzoneefficiencypct') && !label.includes('opponent')) return STAT_CATEGORIES.KEY_FACTORS
   // 7. Opponent Red Zone Efficiency Percentage
   if (label.includes('opponent red zone') && (label.includes('efficiency') || label.includes('scoring')) && label.includes('percentage')) return STAT_CATEGORIES.KEY_FACTORS
   // 8. Turnover Ratio
