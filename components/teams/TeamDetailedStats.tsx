@@ -583,22 +583,39 @@ export function TeamDetailedStats({
         )
       : [selectedCategory]
 
-    // Ensure Key Factors are ordered by configured preference (PTS first, then 3rd down %, etc.)
+    // Ensure all stats are ordered by configured preference
     const preferredForSport = getPreferredStats(sport)
     const keyFactorPriority = (statLike: any): number => {
       const labelLower = (statLike?.stat?.display_name || statLike?.stat?.name || '').toLowerCase()
       const abbrLower = (statLike?.stat?.abbreviation || '').toLowerCase()
       const internalNameLower = (statLike?.stat?.name || '').toLowerCase()
-      const match = preferredForSport.find(p => {
-        const prefLabel = p.display_name.toLowerCase().replace('%', '')
-        const prefAbbr = (p.abbreviation || '').toLowerCase()
-        return (
-          (prefLabel && labelLower.includes(prefLabel)) ||
-          (prefAbbr && abbrLower === prefAbbr) ||
-          internalNameLower === 'thirddownconvpct'
-        )
+      
+      // Special case for third down conversion
+      if (internalNameLower === 'thirddownconvpct') {
+        const match = preferredForSport.find(p => p.display_name.toLowerCase().includes('third down conversion percentage'))
+        return match?.priority ?? 999
+      }
+      
+      // Try exact display name match first (most specific)
+      const exactMatch = preferredForSport.find(p => {
+        const prefLabel = p.display_name.toLowerCase()
+        return prefLabel === labelLower
       })
-      return match?.priority ?? 999
+      if (exactMatch) return exactMatch.priority
+      
+      // Then try abbreviation match
+      const abbrMatch = preferredForSport.find(p => {
+        const prefAbbr = (p.abbreviation || '').toLowerCase()
+        return prefAbbr && abbrLower === prefAbbr
+      })
+      if (abbrMatch) return abbrMatch.priority
+      
+      // Finally try partial match (least specific)
+      const partialMatch = preferredForSport.find(p => {
+        const prefLabel = p.display_name.toLowerCase().replace('%', '')
+        return prefLabel && labelLower.includes(prefLabel)
+      })
+      return partialMatch?.priority ?? 999
     }
 
     return (
