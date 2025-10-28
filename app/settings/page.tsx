@@ -5,6 +5,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { SubscriptionManager } from '@/components/subscription/SubscriptionManager'
 import { PackageManager } from '@/components/admin/PackageManager'
 import SubscriptionSyncButton from '@/components/SubscriptionSyncButton'
+import { toast } from 'react-hot-toast'
 import { 
   UserIcon, 
   CreditCardIcon, 
@@ -188,6 +189,87 @@ function NotificationSettings() {
 }
 
 function SecuritySettings() {
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters long'
+    }
+    if (!/[A-Z]/.test(password)) {
+      return 'Password must contain at least one uppercase letter'
+    }
+    if (!/[a-z]/.test(password)) {
+      return 'Password must contain at least one lowercase letter'
+    }
+    if (!/[0-9]/.test(password)) {
+      return 'Password must contain at least one number'
+    }
+    return null
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error('Please fill in all fields')
+      return
+    }
+
+    const passwordError = validatePassword(newPassword)
+    if (passwordError) {
+      toast.error(passwordError)
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error('New passwords do not match')
+      return
+    }
+
+    if (currentPassword === newPassword) {
+      toast.error('New password must be different from current password')
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
+
+      const response = await fetch('/api/auth/update-password', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ 
+          currentPassword, 
+          newPassword 
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success('Password updated successfully!')
+        // Clear form
+        setCurrentPassword('')
+        setNewPassword('')
+        setConfirmPassword('')
+      } else {
+        toast.error(data.error || 'Failed to update password')
+      }
+    } catch (error) {
+      console.error('Update password error:', error)
+      toast.error('An error occurred. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
@@ -199,14 +281,18 @@ function SecuritySettings() {
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Change Password
           </h3>
-          <form className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Current Password
               </label>
               <input
                 type="password"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                required
+                disabled={isLoading}
               />
             </div>
             <div>
@@ -215,8 +301,15 @@ function SecuritySettings() {
               </label>
               <input
                 type="password"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                required
+                disabled={isLoading}
               />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Must be at least 8 characters with uppercase, lowercase, and number
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -224,14 +317,19 @@ function SecuritySettings() {
               </label>
               <input
                 type="password"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                required
+                disabled={isLoading}
               />
             </div>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              disabled={isLoading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Update Password
+              {isLoading ? 'Updating...' : 'Update Password'}
             </button>
           </form>
         </div>
