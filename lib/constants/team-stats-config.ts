@@ -4,7 +4,34 @@
 // Stats to explicitly exclude by their internal name
 export const EXCLUDED_STAT_NAMES = [
   'redzoneFieldGoalPct',
-  'netPassingYardsPerGame'
+  'netPassingYardsPerGame',
+  // NFL exclusions to match CFB list
+  'touchdowns',
+  'sackYardsLost',
+  'puntYards',
+  'totalYards',
+  'passingYards',
+  'rushingYards',
+  'receivingYards',
+  'receivingYardsAfterCatch',
+  'yardsPerReception',
+  'sackYards',
+  'yardsPerKickReturn',
+  'yardsPerPuntReturn',
+  'interceptionYards',
+  'averageKickoffReturnYards',
+  'avgKickoffReturnYards',
+  'kickoffReturnYards',
+  'kickReturnYards',
+  'averagePuntYards',
+  'avgPuntYards',
+  'netAveragePuntYards',
+  'netAvgPuntYards',
+  'puntReturnYards',
+  'averagePuntReturnYards',
+  'avgPuntReturnYards',
+  'averageInterceptionYards',
+  'avgInterceptionYards'
 ]
 
 export interface StatConfig {
@@ -75,26 +102,43 @@ export const NFL_PREFERRED_STATS: StatConfig[] = [
   { stat_id: 31, abbreviation: '3RDA', display_name: 'Third Down Attempts', category: 'Key Factors', description: '3rd down attempts', priority: 51 },
   
   // Offense
-  { stat_id: 2, abbreviation: 'YDS', display_name: 'Total Yards', category: 'Offense', description: 'Total offensive yards', priority: 10 },
-  { stat_id: 3, abbreviation: 'PYDS', display_name: 'Passing Yards', category: 'Offense', description: 'Total passing yards', priority: 11 },
-  { stat_id: 4, abbreviation: 'RYDS', display_name: 'Rushing Yards', category: 'Offense', description: 'Total rushing yards', priority: 12 },
-  { stat_id: 5, abbreviation: 'TD', display_name: 'Touchdowns', category: 'Offense', description: 'Total touchdowns scored', priority: 13 },
-  
-  // Defense
-  { stat_id: 10, abbreviation: 'SACKS', display_name: 'Sacks', category: 'Defense', description: 'Total sacks', priority: 20 },
-  { stat_id: 11, abbreviation: 'INT', display_name: 'Interceptions', category: 'Defense', description: 'Total interceptions', priority: 21 },
-  { stat_id: 12, abbreviation: 'FUM', display_name: 'Fumbles Recovered', category: 'Defense', description: 'Total fumbles recovered', priority: 22 },
+  { stat_id: -1, abbreviation: 'PTS', display_name: 'Total Points', category: 'Offense', description: 'Total points scored', priority: 10 },
+  { stat_id: -1, abbreviation: 'KPTS', display_name: 'Kicking Points', category: 'Offense', description: 'Points from kicking', priority: 11 },
+  { stat_id: -1, abbreviation: 'TD', display_name: 'Total Touchdowns', category: 'Offense', description: 'Total touchdowns scored', priority: 12 },
+  { stat_id: -1, abbreviation: 'YDS', display_name: 'Yards', category: 'Offense', description: 'Total yards', priority: 13 },
+  { stat_id: -1, abbreviation: 'PYDS', display_name: 'Passing Yards', category: 'Offense', description: 'Total passing yards', priority: 14 },
+  { stat_id: -1, abbreviation: 'RYDS', display_name: 'Rushing Yards', category: 'Offense', description: 'Total rushing yards', priority: 15 },
+  { stat_id: -1, abbreviation: 'RECYDS', display_name: 'Receiving Yards', category: 'Offense', description: 'Total receiving yards', priority: 16 },
+  { stat_id: -1, abbreviation: 'CMP%', display_name: 'Completion Percentage', category: 'Offense', description: 'Pass completion percentage', priority: 17 },
+  { stat_id: -1, abbreviation: 'CMP', display_name: 'Completions', category: 'Offense', description: 'Pass completions', priority: 18 },
+  { stat_id: -1, abbreviation: 'YPA', display_name: 'Yards Per Pass Attempt', category: 'Offense', description: 'Yards per pass attempt', priority: 19 },
+  { stat_id: -1, abbreviation: 'YPRA', display_name: 'Yards Per Rushing Attempt', category: 'Offense', description: 'Yards per rushing attempt', priority: 20 },
+  { stat_id: -1, abbreviation: 'PEN', display_name: 'Total Penalties', category: 'Offense', description: 'Total penalties', priority: 21 },
   
   // Special Teams
-  { stat_id: 20, abbreviation: 'FGM', display_name: 'Field Goals Made', category: 'Special Teams', description: 'Field goals made', priority: 30 },
-  { stat_id: 21, abbreviation: 'FGA', display_name: 'Field Goals Attempted', category: 'Special Teams', description: 'Field goals attempted', priority: 31 },
-  { stat_id: 22, abbreviation: 'FG%', display_name: 'Field Goal %', category: 'Special Teams', description: 'Field goal percentage', priority: 32 },
+  { stat_id: -1, abbreviation: 'FG%', display_name: 'Field Goal Percentage', category: 'Special Teams', description: 'Field goal percentage', priority: 30 },
+  { stat_id: -1, abbreviation: 'FGA', display_name: 'Field Goal Attempts', category: 'Special Teams', description: 'Field goal attempts', priority: 31 },
+  { stat_id: -1, abbreviation: 'FGA1-19', display_name: 'Field Goal Attempts 1-19', category: 'Special Teams', description: 'Field goal attempts 1-19 yards', priority: 32 },
+  { stat_id: -1, abbreviation: 'FGA20-29', display_name: 'Field Goal Attempts 20-29', category: 'Special Teams', description: 'Field goal attempts 20-29 yards', priority: 33 },
+  { stat_id: -1, abbreviation: 'FGA30-39', display_name: 'Field Goal Attempts 30-39', category: 'Special Teams', description: 'Field goal attempts 30-39 yards', priority: 34 },
+  { stat_id: -1, abbreviation: 'FGA40-49', display_name: 'Field Goal Attempts 40-49', category: 'Special Teams', description: 'Field goal attempts 40-49 yards', priority: 35 },
+  { stat_id: -1, abbreviation: 'FGA50+', display_name: 'Field Goal Attempts 50+', category: 'Special Teams', description: 'Field goal attempts 50+ yards', priority: 36 },
+  { stat_id: -1, abbreviation: 'PRFL', display_name: 'Punt Return Fumbles Lost', category: 'Special Teams', description: 'Punt return fumbles lost', priority: 37 },
   
-  // Efficiency
-  { stat_id: 30, abbreviation: '3RDC', display_name: '3rd Down Conversions', category: 'Efficiency', description: '3rd down conversions', priority: 40 },
-  { stat_id: 31, abbreviation: '3RDA', display_name: '3rd Down Attempts', category: 'Efficiency', description: '3rd down attempts', priority: 41 },
-  { stat_id: 34, abbreviation: 'TO', display_name: 'Turnovers', category: 'Efficiency', description: 'Total turnovers', priority: 42 },
-  { stat_id: 35, abbreviation: 'DIFF', display_name: 'TO Margin', category: 'Efficiency', description: 'Turnover differential', priority: 43 },
+  // Turnovers & Penalties
+  { stat_id: -1, abbreviation: 'KRFL', display_name: 'Kick Return Fumbles Lost', category: 'Turnovers & Penalties', description: 'Kick return fumbles lost', priority: 40 },
+  { stat_id: -1, abbreviation: 'PFL', display_name: 'Passing Fumbles Lost', category: 'Turnovers & Penalties', description: 'Passing fumbles lost', priority: 41 },
+  { stat_id: -1, abbreviation: 'RUFL', display_name: 'Rushing Fumbles Lost', category: 'Turnovers & Penalties', description: 'Rushing fumbles lost', priority: 42 },
+  { stat_id: -1, abbreviation: 'REFL', display_name: 'Receiving Fumbles Lost', category: 'Turnovers & Penalties', description: 'Receiving fumbles lost', priority: 43 },
+  { stat_id: -1, abbreviation: 'FL', display_name: 'Fumbles Lost', category: 'Turnovers & Penalties', description: 'Total fumbles lost', priority: 44 },
+  { stat_id: -1, abbreviation: 'FUM', display_name: 'Fumbles', category: 'Turnovers & Penalties', description: 'Total fumbles', priority: 45 },
+  { stat_id: -1, abbreviation: 'FF', display_name: 'Forced Fumbles', category: 'Turnovers & Penalties', description: 'Forced fumbles', priority: 46 },
+  { stat_id: -1, abbreviation: 'FR', display_name: 'Fumbles Recovered', category: 'Turnovers & Penalties', description: 'Fumbles recovered', priority: 47 },
+  { stat_id: -1, abbreviation: 'FTD', display_name: 'Fumbles Touchdowns', category: 'Turnovers & Penalties', description: 'Fumbles returned for touchdowns', priority: 48 },
+  { stat_id: -1, abbreviation: 'RUFUM', display_name: 'Rushing Fumbles', category: 'Turnovers & Penalties', description: 'Rushing fumbles', priority: 49 },
+  { stat_id: -1, abbreviation: 'RECFUM', display_name: 'Receiving Fumbles', category: 'Turnovers & Penalties', description: 'Receiving fumbles', priority: 50 },
+  { stat_id: -1, abbreviation: 'INT', display_name: 'Interceptions', category: 'Turnovers & Penalties', description: 'Interceptions thrown', priority: 51 },
+  { stat_id: -1, abbreviation: 'PENYDS', display_name: 'Total Penalty Yards', category: 'Turnovers & Penalties', description: 'Total penalty yards', priority: 52 },
 ]
 
 // NBA Preferred Stats Configuration (from NBA_Stats_list.txt)
@@ -158,12 +202,33 @@ export function getPreferredStats(sport: 'CFB' | 'NFL' | 'NBA'): StatConfig[] {
   return CFB_PREFERRED_STATS
 }
 
+// Display names to explicitly exclude (for NFL to match CFB)
+export const EXCLUDED_DISPLAY_NAMES = [
+  'Touchdowns',  // Different from "Total Touchdowns"
+  'Sack Yards Lost',
+  'Total Yards',  // Different from "Yards"
+  'Receiving Yards After Catch',
+  'Yards Per Reception',
+  'Sack Yards',
+  'Yards Per Kick Return',
+  'Yards Per Punt Return',
+  'Average Kickoff Return Yards',
+  'Kickoff Return Yards',
+  'Average Punt Yards',
+  'Net Average Punt Yards',
+  'Punt Return Yards',
+  'Average Punt Return Yards',
+  'Average Interception Yards'
+]
+
 // Helper function to filter and sort stats based on preferred configuration
 export function filterAndSortStats(stats: any[], sport: 'CFB' | 'NFL' | 'NBA'): any[] {
-  // First, filter out explicitly excluded stats
+  // First, filter out explicitly excluded stats (by internal name and display name)
   const nonExcluded = stats.filter(stat => {
     const statName = stat?.stat?.name
-    return !statName || !EXCLUDED_STAT_NAMES.includes(statName)
+    const displayName = stat?.stat?.display_name
+    return (!statName || !EXCLUDED_STAT_NAMES.includes(statName)) &&
+           (!displayName || !EXCLUDED_DISPLAY_NAMES.includes(displayName))
   })
   
   const preferredStats = getPreferredStats(sport)
@@ -222,15 +287,26 @@ export function filterAndSortStats(stats: any[], sport: 'CFB' | 'NFL' | 'NBA'): 
         return match?.priority ?? 999
       }
 
-      const entry = preferredStats.find(p => {
+      // Try exact display name match first (most specific)
+      const exactMatch = preferredStats.find(p => {
         const prefLabel = p.display_name.toLowerCase()
-        const prefAbbr = (p.abbreviation || '').toLowerCase()
-        return (
-          (prefLabel && labelLower.includes(prefLabel)) ||
-          (prefAbbr && abbrLower === prefAbbr)
-        )
+        return prefLabel === labelLower
       })
-      return entry?.priority ?? 999
+      if (exactMatch) return exactMatch.priority
+
+      // Then try abbreviation match
+      const abbrMatch = preferredStats.find(p => {
+        const prefAbbr = (p.abbreviation || '').toLowerCase()
+        return prefAbbr && abbrLower === prefAbbr
+      })
+      if (abbrMatch) return abbrMatch.priority
+
+      // Finally try partial match (least specific)
+      const partialMatch = preferredStats.find(p => {
+        const prefLabel = p.display_name.toLowerCase()
+        return prefLabel && labelLower.includes(prefLabel)
+      })
+      return partialMatch?.priority ?? 999
     }
     const filtered = nonExcluded.filter(stat => byPriority(stat) !== 999)
     return filtered.sort((a, b) => byPriority(a) - byPriority(b))
@@ -320,27 +396,42 @@ export function mapNflStatToCategory(stat: any): string {
   // 8. Turnover Ratio
   if (label.includes('turnover ratio') || internalName === 'turnoverdifferential') return STAT_CATEGORIES.KEY_FACTORS
 
-  // Remap other miscellaneous stats to appropriate categories
+  // Special Teams stats
+  if (label.includes('field goal') || label.includes('punt return fumbles')) return STAT_CATEGORIES.SPECIAL_TEAMS
+  
+  // Turnovers & Penalties stats
+  if (label.includes('fumble') || label.includes('interception') || label.includes('penalty') || label.includes('penalties')) {
+    return STAT_CATEGORIES.TURNOVERS_PENALTIES
+  }
+  
+  // Offense stats (includes points, touchdowns, yards, completions, etc.)
+  if (label.includes('points') || label.includes('touchdown') || label.includes('yards') || 
+      label.includes('completion') || label.includes('passing') || label.includes('rushing') || 
+      label.includes('receiving') || label.includes('kick') || label.includes('attempt')) {
+    // Exception: fumbles and penalties go to Turnovers & Penalties
+    if (label.includes('fumble') || label.includes('penalty')) return STAT_CATEGORIES.TURNOVERS_PENALTIES
+    // Exception: field goal attempts go to Special Teams
+    if (label.includes('field goal')) return STAT_CATEGORIES.SPECIAL_TEAMS
+    return STAT_CATEGORIES.OFFENSE
+  }
+  
+  // Remap miscellaneous stats to appropriate categories
   if (originalCategory === 'miscellaneous') {
     // First downs → Offense
     if (label.includes('first down') || label.includes('1st down')) return STAT_CATEGORIES.OFFENSE
     // Fourth down stats → Offense
     if (label.includes('fourth down') || label.includes('4th down')) return STAT_CATEGORIES.OFFENSE
-    // Penalties → Turnovers & Penalties
-    if (label.includes('penalty') || label.includes('penalties')) return STAT_CATEGORIES.TURNOVERS_PENALTIES
     // Possession time → Offense
     if (label.includes('possession')) return STAT_CATEGORIES.OFFENSE
     // Red zone stats (non-Key Factors) → Offense
     if (label.includes('red zone')) return STAT_CATEGORIES.OFFENSE
-    // Turnovers (non-Key Factors) → Turnovers & Penalties
-    if (label.includes('takeaway') || label.includes('giveaway') || label.includes('fumbles lost')) return STAT_CATEGORIES.TURNOVERS_PENALTIES
     
     // Default: remap to Offense instead of miscellaneous
     return STAT_CATEGORIES.OFFENSE
   }
 
-  // Use original category for non-miscellaneous stats
-  return originalCategory
+  // Default to Offense for other categories
+  return STAT_CATEGORIES.OFFENSE
 }
 
 // Map an NBA stat to categories using the configured list

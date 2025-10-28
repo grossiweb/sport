@@ -299,14 +299,15 @@ export function TeamDetailedStats({
       return order.filter((c, idx) => idx === 0 || computedCategories.includes(c as any))
     }
     if (sport === 'NFL') {
-      // For NFL, surface all unique mapped categories (e.g., Kicking, Punting, Receiving) plus Key Factors
-      const unique = Array.from(new Set(computedCategories.filter(Boolean))) as string[]
-      // Ensure Key Factors appears first if present
-      const withoutKey = unique.filter(c => c !== STAT_CATEGORIES.KEY_FACTORS)
-      const ordered = [STAT_CATEGORIES.KEY_FACTORS, ...withoutKey]
-      // Remove Defensive/Defense category button per request
-      const cleaned = ordered.filter(c => !/^defen(sive|se)$/i.test(String(c)))
-      return ['all', ...cleaned]
+      // For NFL, use predefined category order
+      const order = [
+        'all',
+        STAT_CATEGORIES.KEY_FACTORS,
+        STAT_CATEGORIES.OFFENSE,
+        STAT_CATEGORIES.SPECIAL_TEAMS,
+        STAT_CATEGORIES.TURNOVERS_PENALTIES
+      ]
+      return order.filter((c, idx) => idx === 0 || computedCategories.includes(c as any))
     }
     // Fallback (e.g., NBA): use raw categories detected from data
     const raw = Array.from(new Set(comparisonData.map(stat => stat.stat?.category).filter(Boolean))) as string[]
