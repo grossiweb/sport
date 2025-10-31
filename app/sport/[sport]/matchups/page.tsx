@@ -8,7 +8,7 @@ import { isValidSportType } from '@/lib/constants/sports'
 import { useSport } from '@/contexts/SportContext'
 import { ModernMatchupCard } from '@/components/matchups/ModernMatchupCard'
 import { MatchupFilters } from '@/components/matchups/MatchupFilters'
-import { WeekInfo, getCurrentWeek, getWeekDateRange, getSeasonWeekOptions } from '@/lib/utils/week-utils'
+import { WeekInfo, getCurrentWeek, getWeekDateRange, getSeasonWeekOptions, getNFLSeasonWeekOptions } from '@/lib/utils/week-utils'
 import { formatToEasternWeekday } from '@/lib/utils/time'
 import { useQuery } from 'react-query'
 import { CoversStyleMatchupCard } from '@/components/matchups/CoversStyleMatchupCard'
@@ -60,7 +60,10 @@ export default function SportMatchupsPage() {
         if (!season?.start_date) return
         const start = new Date(season.start_date)
         const endDate = season.end_date ? new Date(season.end_date) : undefined
-        const weeks = getSeasonWeekOptions({ startDate: start, endDate })
+        // NFL: use exact league-defined week ranges when seasonYear == current year and sport is NFL
+        const weeks = (s === 'NFL')
+          ? getNFLSeasonWeekOptions(year, { startDate: start, endDate })
+          : getSeasonWeekOptions({ startDate: start, endDate })
         const now = new Date()
         const current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
         if (current) setSelectedWeek(current.weekInfo)

@@ -2,7 +2,7 @@
 
 import { SportType } from '@/types'
 import { WeekSelector } from './WeekSelector'
-import { WeekInfo, getCurrentWeek } from '@/lib/utils/week-utils'
+import { WeekInfo, getCurrentSeasonWeekForSport } from '@/lib/utils/week-utils'
 
 interface MatchupFiltersProps {
   sport: SportType
@@ -70,10 +70,10 @@ export function MatchupFilters({
 
       <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          Showing {sport} matchups for {selectedWeek.label} ({selectedWeek.dateRange})
+          Showing {sport} matchups for {selectedWeek.dateRange}
         </div>
         <button
-          onClick={() => onWeekChange(getCurrentWeek())}
+          onClick={() => onWeekChange(getCurrentSeasonWeekForSport(sport))}
           className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
         >
           Current Week

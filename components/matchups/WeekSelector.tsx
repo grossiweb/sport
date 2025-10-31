@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from '@heroicons/react/24/outline'
-import { WeekInfo, getPreviousWeek, getNextWeek, getAvailableYears, getAvailableMonths, getWeeksForMonth, parseWeekString, weekInfoToString, getSeasonWeekOptions } from '@/lib/utils/week-utils'
+import { WeekInfo, getPreviousWeek, getNextWeek, getAvailableYears, getAvailableMonths, getWeeksForMonth, parseWeekString, weekInfoToString, getSeasonWeekOptions, getNFLSeasonWeekOptions } from '@/lib/utils/week-utils'
 import { useSport } from '@/contexts/SportContext'
 import { useEffect } from 'react'
 import { SportType } from '@/types'
@@ -56,8 +56,14 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
           endDate = nextSeason?.start_date ? new Date(nextSeason.start_date) : undefined
         }
         setSeasonStart(start)
-        const weeks = getSeasonWeekOptions({ startDate: start, endDate })
-        setSeasonWeeks(weeks)
+        // NFL: use exact league-defined week ranges when seasonYear == 2025
+        if (currentSport === 'NFL') {
+          const nflWeeks = getNFLSeasonWeekOptions(selectedYear, { startDate: start, endDate })
+          setSeasonWeeks(nflWeeks)
+        } else {
+          const weeks = getSeasonWeekOptions({ startDate: start, endDate })
+          setSeasonWeeks(weeks)
+        }
       } catch (e) {
         setSeasonStart(null)
         setSeasonWeeks([])

@@ -1,4 +1,5 @@
-import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, getWeek, getYear, startOfYear, isAfter } from 'date-fns'
+import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, getWeek, getYear, startOfYear, isAfter, parseISO } from 'date-fns'
+import type { SportType } from '@/types'
 
 export interface WeekInfo {
   weekNumber: number
@@ -35,7 +36,7 @@ export function getWeekInfo(date: Date): WeekInfo {
     startDate,
     endDate,
     label: `Week ${weekNumber}`,
-    dateRange: `${format(startDate, 'MMM d')} - ${format(endDate, 'd')}`
+    dateRange: formatDateRange(startDate, endDate)
   }
 }
 
@@ -132,6 +133,108 @@ export function getSeasonWeekOptions({ startDate, endDate }: SeasonWeeksOptions)
     cursor = nextCursor
   }
   return weeks
+}
+
+/**
+ * Format a concise date range. If months differ, include month on both sides.
+ * If the year differs across the range, include the year on the end only.
+ */
+export function formatDateRange(startDate: Date, endDate: Date): string {
+  const sameMonth = startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear()
+  const sameYear = startDate.getFullYear() === endDate.getFullYear()
+  if (sameMonth) {
+    return `${format(startDate, 'MMM d')} - ${format(endDate, 'd')}`
+  }
+  if (sameYear) {
+    return `${format(startDate, 'MMM d')} - ${format(endDate, 'MMM d')}`
+  }
+  return `${format(startDate, 'MMM d')} - ${format(endDate, 'MMM d, yyyy')}`
+}
+
+/**
+ * NFL 2025 regular season week definitions (per NFL Football Operations).
+ * Uses exact Thursday–Wednesday ranges except Week 18 (Jan 3–Jan 4, 2026).
+ */
+const NFL_2025_WEEKS: Array<{ weekNumber: number, startISO: string, endISO: string }> = [
+  { weekNumber: 1, startISO: '2025-09-04', endISO: '2025-09-10' },
+  { weekNumber: 2, startISO: '2025-09-11', endISO: '2025-09-17' },
+  { weekNumber: 3, startISO: '2025-09-18', endISO: '2025-09-24' },
+  { weekNumber: 4, startISO: '2025-09-25', endISO: '2025-10-01' },
+  { weekNumber: 5, startISO: '2025-10-02', endISO: '2025-10-08' },
+  { weekNumber: 6, startISO: '2025-10-09', endISO: '2025-10-15' },
+  { weekNumber: 7, startISO: '2025-10-16', endISO: '2025-10-22' },
+  { weekNumber: 8, startISO: '2025-10-23', endISO: '2025-10-29' },
+  { weekNumber: 9, startISO: '2025-10-30', endISO: '2025-11-03' },
+  { weekNumber: 10, startISO: '2025-11-06', endISO: '2025-11-10' },
+  { weekNumber: 11, startISO: '2025-11-13', endISO: '2025-11-17' },
+  { weekNumber: 12, startISO: '2025-11-20', endISO: '2025-11-24' },
+  { weekNumber: 13, startISO: '2025-11-27', endISO: '2025-12-01' },
+  { weekNumber: 14, startISO: '2025-12-04', endISO: '2025-12-08' },
+  { weekNumber: 15, startISO: '2025-12-11', endISO: '2025-12-15' },
+  { weekNumber: 16, startISO: '2025-12-18', endISO: '2025-12-22' },
+  { weekNumber: 17, startISO: '2025-12-25', endISO: '2025-12-29' },
+  { weekNumber: 18, startISO: '2026-01-03', endISO: '2026-01-04' },
+]
+
+/**
+ * Build WeekOption[] for NFL 2025 season.
+ */
+export function getNFL2025WeekOptions(): WeekOption[] {
+  return NFL_2025_WEEKS.map(({ weekNumber, startISO, endISO }) => {
+    const startDate = parseISO(startISO)
+    const endDate = parseISO(endISO)
+    const weekInfo: WeekInfo = {
+      weekNumber,
+      year: startDate.getFullYear(),
+      startDate,
+      endDate,
+      label: `Week ${weekNumber}`,
+      dateRange: formatDateRange(startDate, endDate)
+    }
+    return {
+      value: `${startDate.getFullYear()}-W${weekNumber.toString().padStart(2, '0')}`,
+      label: `${weekInfo.label} (${weekInfo.dateRange})`,
+      weekInfo
+    }
+  })
+}
+
+/**
+ * Helper to get NFL season week options by season year.
+ * Currently supports 2025 regular season mapping; falls back to generic weeks otherwise.
+ */
+export function getNFLSeasonWeekOptions(seasonYear: number, fallback: SeasonWeeksOptions): WeekOption[] {
+  if (seasonYear === 2025) {
+    return getNFL2025WeekOptions()
+  }
+  return getSeasonWeekOptions(fallback)
+}
+
+/**
+ * Get the correct "current week" for a sport based on season-specific mappings when available.
+ * - NFL: If today falls within the 2025 season window (2025-09-04 to 2026-01-04), use NFL_2025 weeks.
+ * - NBA: Uses the 2025-26 season window defined in UI.
+ * - Others: fallback to ISO Monday–Sunday week.
+ */
+export function getCurrentSeasonWeekForSport(sport: SportType): WeekInfo {
+  const now = new Date()
+  if (sport === 'NFL') {
+    const seasonStart = parseISO('2025-09-04')
+    const seasonEnd = parseISO('2026-01-04')
+    if (now >= seasonStart && now <= seasonEnd) {
+      const weeks = getNFL2025WeekOptions()
+      const m = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+      if (m) return m.weekInfo
+    }
+  }
+  if (sport === 'NBA') {
+    const start = new Date('2025-10-09')
+    const endDate = new Date('2026-04-12')
+    const weeks = getSeasonWeekOptions({ startDate: start, endDate })
+    const m = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+    if (m) return m.weekInfo
+  }
+  return getCurrentWeek()
 }
 
 /**

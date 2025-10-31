@@ -942,10 +942,13 @@ export class MongoDBSportsAPI {
       // Add date filter if provided
       if (date) {
         if (endDate) {
-          // Date range query for week-based filtering
+          // Inclusive start, exclusive end (next day) to ensure all times on endDate are included
+          const start = new Date(date)
+          const endExclusive = new Date(endDate)
+          endExclusive.setDate(endExclusive.getDate() + 1)
           query.date_event = {
-            $gte: date,
-            $lte: endDate
+            $gte: start.toISOString().split('T')[0],
+            $lt: endExclusive.toISOString().split('T')[0]
           }
         } else {
           // Single date query (legacy support)
