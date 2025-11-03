@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { DetailedTeamStat, SportType } from '@/types'
 import { ChartBarIcon, TrophyIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline'
-import { filterAndSortStats, STAT_CATEGORIES, mapCfbStatToCategory, mapNflStatToCategory, getPreferredStats } from '@/lib/constants/team-stats-config'
+import { filterAndSortStats, STAT_CATEGORIES, mapCfbStatToCategory, mapNflStatToCategory, getPreferredStats, mapNbaStatToCategory } from '@/lib/constants/team-stats-config'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 
 interface TeamDetailedStatsProps {
@@ -215,8 +215,8 @@ export function TeamDetailedStats({
       }
     })
     
-    // Inject calculated opponent stats for Key Factors (always add rows; values may be null if unavailable)
-    {
+    // Inject calculated opponent stats for Key Factors (football only)
+    if (sport === 'CFB' || sport === 'NFL') {
       // Opponent Third Down Conversion Percentage
       comparisonMap.set('Opponent Third Down Conversion Percentage', {
           stat: {
@@ -283,6 +283,7 @@ export function TeamDetailedStats({
   const computedCategories = comparisonData.map(stat => {
     if (sport === 'CFB') return mapCfbStatToCategory(stat)
     if (sport === 'NFL') return mapNflStatToCategory(stat)
+    if (sport === 'NBA') return mapNbaStatToCategory(stat)
     return stat.stat?.category || STAT_CATEGORIES.OFFENSE
   })
   
@@ -309,7 +310,20 @@ export function TeamDetailedStats({
       ]
       return order.filter((c, idx) => idx === 0 || computedCategories.includes(c as any))
     }
-    // Fallback (e.g., NBA): use raw categories detected from data
+    if (sport === 'NBA') {
+      const order = [
+        'all',
+        'Key Factors',
+        'Offensive',
+        'Defense'
+      ]
+      // include only those that appear in mapped categories
+      const present = new Set(
+        comparisonData.map(s => mapNbaStatToCategory(s))
+      )
+      return order.filter((c, idx) => idx === 0 || present.has(c))
+    }
+    // Fallback
     const raw = Array.from(new Set(comparisonData.map(stat => stat.stat?.category).filter(Boolean))) as string[]
     return ['all', ...raw]
   })()
@@ -320,6 +334,7 @@ export function TeamDetailedStats({
     : comparisonData.filter(stat => {
         if (sport === 'CFB') return mapCfbStatToCategory(stat) === selectedCategory
         if (sport === 'NFL') return mapNflStatToCategory(stat) === selectedCategory
+        if (sport === 'NBA') return mapNbaStatToCategory(stat) === selectedCategory
         return stat.stat?.category === selectedCategory
       })
 
@@ -537,6 +552,7 @@ export function TeamDetailedStats({
     const getCategory = (stat: any) => {
       if (sport === 'CFB') return mapCfbStatToCategory(stat)
       if (sport === 'NFL') return mapNflStatToCategory(stat)
+      if (sport === 'NBA') return mapNbaStatToCategory(stat)
       return stat.stat?.category || 'Other'
     }
     // Exclude certain stats in H2H view (e.g., Sacks, and removed defensive 3rd down label if present)
@@ -572,14 +588,20 @@ export function TeamDetailedStats({
                 STAT_CATEGORIES.SPECIAL_TEAMS,
                 STAT_CATEGORIES.TURNOVERS_PENALTIES
               ].filter(c => grouped[c]?.length)
-            : sport === 'NFL'
+              : sport === 'NFL'
               ? [
                   STAT_CATEGORIES.KEY_FACTORS,
                   STAT_CATEGORIES.OFFENSE,
                   STAT_CATEGORIES.SPECIAL_TEAMS,
                   STAT_CATEGORIES.TURNOVERS_PENALTIES
                 ].filter(c => grouped[c]?.length)
-              : Object.keys(grouped)
+              : sport === 'NBA'
+                ? [
+                    'Key Factors',
+                    'Offensive',
+                    'Defense'
+                  ].filter(c => grouped[c]?.length)
+                : Object.keys(grouped)
         )
       : [selectedCategory]
 
