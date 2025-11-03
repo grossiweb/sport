@@ -18,6 +18,18 @@ export class MongoDBSportsAPI {
   private teamSeasonGamesCache = new Map<string, { seasonYear: number; games: Game[]; createdAt: number }>()
   private coversSummaryCache = new Map<string, { seasonYear: number; summary: MatchupCoversSummary; createdAt: number }>()
   
+  // Determine appropriate season year per sport (handles NBA cross-year seasons)
+  private getSeasonYearForSport(sport: SportType, referenceDate: Date = new Date()): number {
+    const year = referenceDate.getFullYear()
+    if (sport === 'NBA') {
+      // NBA season starts around October and runs into the next calendar year
+      const month = referenceDate.getMonth() // 0-11
+      // If before October (month < 9), we are still in the season that started last calendar year
+      return month >= 9 ? year : year - 1
+    }
+    return year
+  }
+
   private mapSportTypeToSportId(sport: SportType): number {
     switch (sport) {
       case 'CFB':
@@ -132,6 +144,99 @@ export class MongoDBSportsAPI {
     limit: number = 10
   ): Promise<Array<{ date: string; opponentId: string; opponentName?: string; isHome: boolean; teamScore: number; opponentScore: number; result: 'win' | 'loss' | 'push' }>> {
     try {
+      // For NBA, pull last 10 final games regardless of season-year boundaries
+      if (sport === 'NBA') {
+        const [gamesCollection, teamsCollection] = await Promise.all([
+          getGamesCollection(),
+          getTeamsCollection()
+        ])
+        const sportId = this.mapSportTypeToSportId(sport)
+        const numericTeamId = parseInt(teamId, 10)
+
+        // Pull most recent games for the team, then filter to finals and take last 10
+        const mongoGames = await gamesCollection
+          .find({
+            sport_id: sportId,
+            $or: [
+              { home_team_id: numericTeamId },
+              { away_team_id: numericTeamId }
+            ]
+          })
+          .sort({ date_event: -1 })
+          .limit(50)
+          .toArray()
+
+        const allTeams = await teamsCollection.find({ sport_id: sportId }).toArray()
+        const mongoTeamsById = new Map(allTeams.map(t => [t.team_id, t]))
+        const teamsMap = new Map(allTeams.map(t => [t.team_id.toString(), t.name]))
+
+        const mappedGames = mongoGames.map(g => this.mapMongoGameToGame(
+          g,
+          null,
+          mongoTeamsById.get(g.home_team_id),
+          mongoTeamsById.get(g.away_team_id)
+        ))
+
+        const recentFinal = mappedGames
+          .filter(g => g.status === 'final')
+          .slice(0, limit)
+
+        // Prefer betting_data summed scores if available
+        const bettingCollection = await getBettingDataCollection()
+        const eventIds = recentFinal.map(g => g.id)
+        const bettingDocs = eventIds.length > 0
+          ? await bettingCollection.find({ event_id: { $in: eventIds } }).toArray()
+          : []
+        const bettingByEvent = new Map(bettingDocs.map(doc => [doc.event_id, doc]))
+        const sum = (arr?: number[] | null) => Array.isArray(arr) ? arr.reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0) : undefined
+
+        return recentFinal.map(g => {
+          const isHome = g.homeTeam.id === teamId
+          const opponentId = isHome ? g.awayTeam.id : g.homeTeam.id
+          const opponentName = teamsMap.get(opponentId)
+
+          // Priority 1: Use g.homeScore/awayScore
+          let homeScore = g.homeScore
+          let awayScore = g.awayScore
+
+          // Priority 2: Sum scoreByPeriod if needed
+          if ((homeScore == null || homeScore === 0) && Array.isArray(g.scoreByPeriod?.home)) {
+            const summed = (g.scoreByPeriod!.home as number[]).reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0)
+            if (summed > 0) homeScore = summed
+          }
+          if ((awayScore == null || awayScore === 0) && Array.isArray(g.scoreByPeriod?.away)) {
+            const summed = (g.scoreByPeriod!.away as number[]).reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0)
+            if (summed > 0) awayScore = summed
+          }
+
+          // Priority 3: Check betting_data if still missing/zero
+          const betting = bettingByEvent.get(g.id) as MongoBettingData | undefined
+          if (betting?.score) {
+            const bdHome = sum(betting.score.score_home_by_period)
+            const bdAway = sum(betting.score.score_away_by_period)
+            if ((homeScore == null || homeScore === 0) && bdHome != null && bdHome > 0) homeScore = bdHome
+            if ((awayScore == null || awayScore === 0) && bdAway != null && bdAway > 0) awayScore = bdAway
+          }
+
+          homeScore = homeScore ?? 0
+          awayScore = awayScore ?? 0
+
+          const teamScore = isHome ? homeScore : awayScore
+          const opponentScore = isHome ? awayScore : homeScore
+          const result: 'win' | 'loss' | 'push' = teamScore > opponentScore ? 'win' : teamScore < opponentScore ? 'loss' : 'push'
+          return {
+            date: g.gameDate.toISOString(),
+            opponentId,
+            opponentName,
+            isHome,
+            teamScore,
+            opponentScore,
+            result
+          }
+        })
+      }
+
+      // Default behavior (CFB/NFL): use current season-year games
       const currentYear = new Date().getFullYear()
       const games = await this.getTeamSeasonGames(sport, teamId, currentYear)
       const recentFinal = games
@@ -584,7 +689,7 @@ export class MongoDBSportsAPI {
 
     const collection = await getGamesCollection()
     const teamsCollection = await getTeamsCollection()
-    const sportId = sport === 'NFL' ? 2 : 1
+    const sportId = this.mapSportTypeToSportId(sport)
     const numericTeamId = parseInt(teamId, 10)
 
     const mongoGames = await collection
@@ -621,7 +726,8 @@ export class MongoDBSportsAPI {
     awayTeamName?: string
   ): Promise<MatchupCoversSummary | null> {
     try {
-      const currentYear = new Date().getFullYear()
+      // Use sport-aware season year (NBA spans calendar years)
+      const currentYear = this.getSeasonYearForSport(sport)
 
       // Cache key (sport + season + team pair)
       const cacheKey = `${sport}:${currentYear}:${homeTeamId}:${awayTeamId}`
@@ -630,10 +736,20 @@ export class MongoDBSportsAPI {
         return cached.summary
       }
 
-      // Fetch both teams' season games in a single query using bulk helper
-      const bulkGames = await this.getTeamsSeasonGamesBulk(sport, [homeTeamId, awayTeamId], currentYear)
-      const homeGames = bulkGames.get(homeTeamId) || []
-      const awayGames = bulkGames.get(awayTeamId) || []
+      // For NBA, fetch all games without season_year filter (cross-season spanning)
+      let homeGames: Game[]
+      let awayGames: Game[]
+      
+      if (sport === 'NBA') {
+        const bulkGames = await this.getTeamsAllGamesBulk(sport, [homeTeamId, awayTeamId])
+        homeGames = bulkGames.get(homeTeamId) || []
+        awayGames = bulkGames.get(awayTeamId) || []
+      } else {
+        // For CFB/NFL, use season-year filtering
+        const bulkGames = await this.getTeamsSeasonGamesBulk(sport, [homeTeamId, awayTeamId], currentYear)
+        homeGames = bulkGames.get(homeTeamId) || []
+        awayGames = bulkGames.get(awayTeamId) || []
+      }
 
       const homeSummary = this.computeTeamCoversSummary(homeTeamId, homeTeamName, homeGames)
       const awaySummary = this.computeTeamCoversSummary(awayTeamId, awayTeamName, awayGames)
@@ -695,6 +811,53 @@ export class MongoDBSportsAPI {
       pAway = pAway / sum
     }
     return { winProbHome: pHome, winProbAway: pAway }
+  }
+
+  // Bulk fetch all games for multiple teams (NBA-specific, no season_year filter)
+  public async getTeamsAllGamesBulk(
+    sport: SportType,
+    teamIds: string[]
+  ): Promise<Map<string, Game[]>> {
+    const result = new Map<string, Game[]>()
+    if (teamIds.length === 0) return result
+    const sportId = this.mapSportTypeToSportId(sport)
+    const numericTeamIds = teamIds.map(id => parseInt(id, 10))
+
+    const [gamesCollection, teamsCollection] = await Promise.all([
+      getGamesCollection(),
+      getTeamsCollection()
+    ])
+
+    // Query all games for all those teams (no season_year filter)
+    const mongoGames = await gamesCollection
+      .find({
+        sport_id: sportId,
+        $or: [
+          { home_team_id: { $in: numericTeamIds } },
+          { away_team_id: { $in: numericTeamIds } }
+        ]
+      })
+      .sort({ date_event: -1 })
+      .toArray()
+
+    const allMongoTeams = await teamsCollection.find({ sport_id: sportId }).toArray()
+    const mongoTeamsMap = new Map(allMongoTeams.map(team => [team.team_id, team]))
+
+    // Group games per requested team id
+    for (const teamId of teamIds) {
+      const list: Game[] = []
+      const numericTeamId = parseInt(teamId, 10)
+      for (const g of mongoGames) {
+        if (g.home_team_id === numericTeamId || g.away_team_id === numericTeamId) {
+          const homeTeam = mongoTeamsMap.get(g.home_team_id)
+          const awayTeam = mongoTeamsMap.get(g.away_team_id)
+          list.push(this.mapMongoGameToGame(g, null, homeTeam, awayTeam))
+        }
+      }
+      result.set(teamId, list)
+    }
+
+    return result
   }
 
   // Bulk fetch season games for multiple teams to reduce DB roundtrips
