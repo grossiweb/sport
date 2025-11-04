@@ -74,14 +74,18 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
           // Set opponent stats individually if available
           if (homeOppResponse.ok) {
             const homeOppData = await homeOppResponse.json()
+            console.log(`[ModernMatchupDetail] Home opponent stats (${sport}):`, homeOppData.data)
             setHomeOpponentStats(homeOppData.data || null)
           } else {
+            console.log(`[ModernMatchupDetail] Home opponent stats request failed:`, homeOppResponse.status)
             setHomeOpponentStats(null)
           }
           if (awayOppResponse.ok) {
             const awayOppData = await awayOppResponse.json()
+            console.log(`[ModernMatchupDetail] Away opponent stats (${sport}):`, awayOppData.data)
             setAwayOpponentStats(awayOppData.data || null)
           } else {
+            console.log(`[ModernMatchupDetail] Away opponent stats request failed:`, awayOppResponse.status)
             setAwayOpponentStats(null)
           }
         } catch (error) {

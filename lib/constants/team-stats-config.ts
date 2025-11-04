@@ -472,6 +472,18 @@ export function mapNflStatToCategory(stat: any): string {
 export function mapNbaStatToCategory(stat: any): string {
   const label = (stat?.stat?.display_name || stat?.stat?.name || '').trim().toLowerCase()
   if (!label) return 'Offensive'
+  
+  // Handle opponent stats - they inherit the category from the corresponding regular stat
+  if (label.startsWith('opponent ')) {
+    const baseLabel = label.replace('opponent ', '')
+    const basePref = NBA_PREFERRED_STATS.find(p => p.display_name.toLowerCase() === baseLabel)
+    if (basePref) return basePref.category
+    // Fallback heuristics for opponent stats
+    if (/efficiency|assist|turnover|points|fg%|3|three|free throw|rebound|foul/i.test(baseLabel)) return 'Key Factors'
+    if (/defensive|steal|block/i.test(baseLabel)) return 'Defense'
+    return 'Offensive'
+  }
+  
   const pref = NBA_PREFERRED_STATS.find(p => p.display_name.toLowerCase() === label)
   if (pref) return pref.category
   // Heuristics fallback to requested three buckets

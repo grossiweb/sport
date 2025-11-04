@@ -273,11 +273,117 @@ export function TeamDetailedStats({
           updated_at: new Date().toISOString()
         })
     }
+
+    // Inject calculated opponent stats for NBA
+    if (sport === 'NBA' && (homeOpponentStats || awayOpponentStats)) {
+      console.log('[TeamDetailedStats] NBA Opponent Stats:', { homeOpponentStats, awayOpponentStats })
+      const nbaOpponentStats = [
+        // Key Factors
+        { statId: '1244', name: 'Opponent Fouls Per Game', abbr: 'OPP PF', category: 'Key Factors', description: 'Average fouls per game by opponents', decimals: 1 },
+        { statId: '1242', name: 'Opponent Rebounds Per Game', abbr: 'OPP REB', category: 'Key Factors', description: 'Average rebounds per game by opponents', decimals: 1 },
+        { statId: '1249', name: 'Opponent Rebounds', abbr: 'OPP REB', category: 'Key Factors', description: 'Total rebounds by opponents', decimals: 1 },
+        { statId: '1250', name: 'Opponent Rebounds', abbr: 'OPP REB', category: 'Key Factors', description: 'Total rebounds by opponents', decimals: 1 },
+        { statId: '1251', name: 'Opponent Free Throw %', abbr: 'OPP FT%', category: 'Key Factors', description: 'Opponent free throw percentage', decimals: 1 },
+        { statId: '1252', name: 'Opponent 3-Point Field Goal Percentage', abbr: 'OPP 3P%', category: 'Key Factors', description: 'Opponent 3-point percentage', decimals: 1 },
+        { statId: '1259', name: 'Opponent Points Per Game', abbr: 'OPP PTS', category: 'Key Factors', description: 'Average points per game by opponents', decimals: 1 },
+        { statId: '1260', name: 'Opponent Offensive Rebounds Per Game', abbr: 'OPP OR', category: 'Key Factors', description: 'Average offensive rebounds per game by opponents', decimals: 1 },
+        { statId: '1262', name: 'Opponent Turnovers Per Game', abbr: 'OPP TO', category: 'Key Factors', description: 'Average turnovers per game by opponents', decimals: 1 },
+        { statId: '1263', name: 'Opponent 2-Point Field Goal Percentage', abbr: 'OPP 2P%', category: 'Key Factors', description: 'Opponent 2-point percentage', decimals: 1 },
+        { statId: '1264', name: 'Opponent Scoring Efficiency', abbr: 'OPP SE', category: 'Key Factors', description: 'Opponent points per field goal attempt', decimals: 2 },
+        { statId: '1265', name: 'Opponent Shooting Efficiency', abbr: 'OPP eFG%', category: 'Key Factors', description: 'Opponent effective field goal percentage', decimals: 1 },
+        { statId: '1266', name: 'Opponent Field Goal %', abbr: 'OPP FG%', category: 'Key Factors', description: 'Opponent field goal percentage', decimals: 1 },
+        { statId: '1272', name: 'Opponent Turnovers', abbr: 'OPP TO', category: 'Key Factors', description: 'Total turnovers by opponents', decimals: 1 },
+        { statId: '1279', name: 'Opponent Three Point %', abbr: 'OPP 3P%', category: 'Key Factors', description: 'Opponent three point percentage', decimals: 1 },
+        { statId: '1282', name: 'Opponent Defensive Rebounds Per Game', abbr: 'OPP DR', category: 'Key Factors', description: 'Average defensive rebounds per game by opponents', decimals: 1 },
+        { statId: '1261', name: 'Opponent Assists Per Game', abbr: 'OPP AST', category: 'Key Factors', description: 'Average assists per game by opponents', decimals: 1 },
+        // Offensive
+        { statId: '1269', name: 'Opponent Points', abbr: 'OPP PTS', category: 'Offensive', description: 'Total points by opponents', decimals: 1 },
+        { statId: '1270', name: 'Opponent Offensive Rebounds', abbr: 'OPP OR', category: 'Offensive', description: 'Total offensive rebounds by opponents', decimals: 1 },
+        { statId: '1271', name: 'Opponent Assists', abbr: 'OPP AST', category: 'Offensive', description: 'Total assists by opponents', decimals: 1 },
+      ]
+
+      let addedCount = 0
+      nbaOpponentStats.forEach((oppStat, idx) => {
+        const homeValue = homeOpponentStats?.[oppStat.statId]
+        const awayValue = awayOpponentStats?.[oppStat.statId]
+        
+        // Only add if at least one team has data
+        if (homeValue !== undefined || awayValue !== undefined) {
+          // Find the original stat in comparisonMap to position opponent stat right after it
+          const originalStatName = oppStat.name.replace('Opponent ', '')
+          
+          comparisonMap.set(oppStat.name, {
+            stat: {
+              id: -1000 - idx,
+              name: `opponent${oppStat.statId}`,
+              category: oppStat.category,
+              display_name: oppStat.name,
+              abbreviation: oppStat.abbr,
+              description: oppStat.description,
+              sport_id: 4
+            },
+            homeValue: homeValue !== undefined ? (typeof homeValue === 'number' ? homeValue.toFixed(oppStat.decimals) : homeValue) : null,
+            homePerGame: null,
+            homeRank: undefined,
+            awayValue: awayValue !== undefined ? (typeof awayValue === 'number' ? awayValue.toFixed(oppStat.decimals) : awayValue) : null,
+            awayPerGame: null,
+            awayRank: undefined,
+            team_id: 0,
+            stat_id: -1000 - idx,
+            season_year: new Date().getFullYear(),
+            season_type: 2,
+            season_type_name: 'Regular Season',
+            value: 0,
+            display_value: '',
+            updated_at: new Date().toISOString()
+          })
+          addedCount++
+        }
+      })
+      console.log(`[TeamDetailedStats] Added ${addedCount} NBA opponent stats to comparisonMap`)
+    }
     
     return Array.from(comparisonMap.values())
   }
 
-  const comparisonData = createComparisonData()
+  const comparisonDataRaw = createComparisonData()
+
+  // Post-process to insert opponent stats right after their corresponding stats
+  const insertOpponentStatsAfterCorresponding = (data: any[]) => {
+    if (sport !== 'NBA') return data
+
+    const result: any[] = []
+    const opponentStats = data.filter(s => s.stat?.display_name?.startsWith('Opponent '))
+    const regularStats = data.filter(s => !s.stat?.display_name?.startsWith('Opponent '))
+
+    regularStats.forEach(stat => {
+      result.push(stat)
+      
+      // Find matching opponent stat(s)
+      const statName = stat.stat?.display_name || stat.stat?.name || ''
+      const matchingOppStats = opponentStats.filter(oppStat => {
+        const oppName = (oppStat.stat?.display_name || '').replace('Opponent ', '')
+        // Match by name similarity
+        return oppName === statName || 
+               oppName.toLowerCase() === statName.toLowerCase() ||
+               oppName.replace(/\s+/g, '') === statName.replace(/\s+/g, '')
+      })
+      
+      matchingOppStats.forEach(oppStat => result.push(oppStat))
+    })
+
+    // Add any unmatched opponent stats at the end
+    const addedOppStats = new Set(result.filter(s => s.stat?.display_name?.startsWith('Opponent ')).map(s => s.stat?.display_name))
+    opponentStats.forEach(oppStat => {
+      if (!addedOppStats.has(oppStat.stat?.display_name)) {
+        result.push(oppStat)
+      }
+    })
+
+    return result
+  }
+
+  const comparisonData = insertOpponentStatsAfterCorresponding(comparisonDataRaw)
 
   // Get unique categories (use sport-specific mapping)
   const computedCategories = comparisonData.map(stat => {

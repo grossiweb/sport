@@ -1333,21 +1333,31 @@ export class MongoDBSportsAPI {
     opponentRedZoneEfficiencyPct: number | null
   }> {
     try {
-      const currentYear = seasonYear || new Date().getFullYear()
+      const currentYear = seasonYear || this.getSeasonYearForSport(sport)
       const sportId = this.mapSportTypeToSportId(sport)
       const numericTeamId = parseInt(teamId, 10)
 
-      // Get all completed games for this team
-      const gamesCollection = await getGamesCollection()
-      const completedGames = await gamesCollection.find({
-        sport_id: sportId,
-        season_year: currentYear,
-        event_status: 'STATUS_FINAL',
-        $or: [
-          { home_team_id: numericTeamId },
-          { away_team_id: numericTeamId }
-        ]
-      }).toArray()
+      // Get completed games for this team
+      let completedGames: Game[] = []
+      if (sport === 'NBA') {
+        // Use ALL NBA games in the system (no season_year filter)
+        const bulk = await this.getTeamsAllGamesBulk(sport, [teamId])
+        const allGames = bulk.get(teamId) || []
+        completedGames = allGames.filter(g => g.status === 'final')
+      } else {
+        // Non-NBA fallback (season-scoped)
+        const gamesCollection = await getGamesCollection()
+        const raw = await gamesCollection.find({
+          sport_id: sportId,
+          season_year: currentYear,
+          event_status: 'STATUS_FINAL',
+          $or: [
+            { home_team_id: numericTeamId },
+            { away_team_id: numericTeamId }
+          ]
+        }).toArray()
+        completedGames = raw.map(g => this.mapMongoGameToGame(g as any, null as any))
+      }
 
       if (completedGames.length === 0) {
         return {
@@ -1358,7 +1368,8 @@ export class MongoDBSportsAPI {
 
       // Extract opponent team IDs
       const opponentIds = completedGames.map(game => {
-        return game.home_team_id === numericTeamId ? game.away_team_id : game.home_team_id
+        const isHome = game.homeTeam.id === teamId
+        return parseInt(isHome ? game.awayTeam.id : game.homeTeam.id, 10)
       })
 
       if (opponentIds.length === 0) {
@@ -1560,6 +1571,270 @@ export class MongoDBSportsAPI {
     } catch (error) {
       console.error('Error calculating defensive stats:', error)
       return { defensiveThirdDownConvPct: null }
+    }
+  }
+
+  /**
+   * Calculate NBA opponent stats for a team
+   * Returns stats that opponents scored against this team
+   */
+  async calculateNBAOpponentStats(sport: SportType, teamId: string, seasonYear?: number): Promise<any> {
+    try {
+      const sportId = this.mapSportTypeToSportId(sport)
+      const numericTeamId = parseInt(teamId, 10)
+
+      console.log(`[NBA Opponent Stats] Calculating for team ${teamId} (${numericTeamId})`)
+
+      // Get ALL completed games for this NBA team (no season filter)
+      const gamesCollection = await getGamesCollection()
+      const completedGames = await gamesCollection.find({
+        sport_id: sportId,
+        event_status: 'STATUS_FINAL',
+        $or: [
+          { home_team_id: numericTeamId },
+          { away_team_id: numericTeamId }
+        ]
+      }).toArray()
+
+      console.log(`[NBA Opponent Stats] Found ${completedGames.length} completed games`)
+
+      if (completedGames.length === 0) {
+        console.log(`[NBA Opponent Stats] No games found, returning empty`)
+        return {}
+      }
+
+      // Extract opponent team IDs
+      const opponentIds = completedGames.map(game => {
+        return game.home_team_id === numericTeamId ? game.away_team_id : game.home_team_id
+      })
+
+      if (opponentIds.length === 0) {
+        console.log(`[NBA Opponent Stats] No opponent IDs found`)
+        return {}
+      }
+
+      const numberOfGames = completedGames.length
+      console.log(`[NBA Opponent Stats] Processing ${opponentIds.length} unique opponents`)
+
+      // Get stats for all opponents (no season filter for NBA)
+      const teamStatsCollection = await getTeamStatsCollection()
+      const opponentStats = await teamStatsCollection.find({
+        team_id: { $in: opponentIds }
+      }).toArray()
+
+      console.log(`[NBA Opponent Stats] Found ${opponentStats.length} opponent stat records`)
+
+      // Helper: find a stat object by stat_id OR by name/display_name keywords
+      const findStatByIdOrName = (statsArr: any[] | undefined | null, opts: { ids?: number[]; nameIncludes?: string[]; displayIncludes?: string[] }) => {
+        if (!Array.isArray(statsArr)) return undefined
+        const ids = new Set((opts.ids || []).map(n => Number(n)))
+        const nameNeedles = (opts.nameIncludes || []).map(s => s.toLowerCase())
+        const displayNeedles = (opts.displayIncludes || []).map(s => s.toLowerCase())
+        let found = statsArr.find((s: any) => typeof s?.stat_id === 'number' && ids.has(Number(s.stat_id)))
+        if (found) return found
+        found = statsArr.find((s: any) => {
+          const nm = (s?.name || '').toString().toLowerCase()
+          return nameNeedles.some(n => n && nm.includes(n))
+        })
+        if (found) return found
+        found = statsArr.find((s: any) => {
+          const dn = (s?.display_name || '').toString().toLowerCase()
+          return displayNeedles.some(n => n && dn.includes(n))
+        })
+        return found
+      }
+
+      // Initialize accumulators
+      let totalFouls = 0, countFouls = 0
+      let totalRebounds = 0, countRebounds = 0
+      let totalPoints = 0, countPoints = 0
+      let totalOffensiveRebounds = 0, countOffensiveRebounds = 0
+      let totalTurnovers = 0, countTurnovers = 0
+      let totalDefensiveRebounds = 0, countDefensiveRebounds = 0
+      let totalAssists = 0, countAssists = 0
+      let totalFTM = 0, totalFTA = 0
+      let total3PM = 0, total3PA = 0
+      let total2PM = 0, total2PA = 0
+      let totalFGM = 0, totalFGA = 0
+
+      // Iterate through opponent stats
+      for (const opponentStat of opponentStats) {
+        // 1244 - Fouls Per Game (avgFouls)
+        const foulsStat = findStatByIdOrName(opponentStat.stats, {
+          ids: [1244],
+          nameIncludes: ['avgfouls', 'fouls per game'],
+          displayIncludes: ['fouls per game']
+        })
+        if (foulsStat?.value) {
+          totalFouls += foulsStat.value
+          countFouls++
+        }
+
+        // 1242 - Rebounds Per Game (avgRebounds)
+        const reboundsStat = findStatByIdOrName(opponentStat.stats, {
+          ids: [1242, 1249, 1250],
+          nameIncludes: ['avgrebound', 'rebounds per game', 'totalrebounds', 'rebounds'],
+          displayIncludes: ['rebounds per game', 'rebounds']
+        })
+        if (reboundsStat?.value) {
+          totalRebounds += reboundsStat.value
+          countRebounds++
+        }
+
+        // 1259 - Points Per Game (avgPoints) or 1269 - Points
+        const pointsStat = findStatByIdOrName(opponentStat.stats, {
+          ids: [1259, 1269],
+          nameIncludes: ['avgpoints', 'points per game', 'points'],
+          displayIncludes: ['points per game', 'points']
+        })
+        if (pointsStat?.value) {
+          totalPoints += pointsStat.value
+          countPoints++
+        }
+
+        // 1260 - Offensive Rebounds Per Game (avgOffensiveRebounds) or 1270 - Offensive Rebounds
+        const offRebStat = findStatByIdOrName(opponentStat.stats, {
+          ids: [1260, 1270],
+          nameIncludes: ['avgoffensiverebounds', 'offensive rebounds per game', 'offensiverebounds'],
+          displayIncludes: ['offensive rebounds per game', 'offensive rebounds']
+        })
+        if (offRebStat?.value) {
+          totalOffensiveRebounds += offRebStat.value
+          countOffensiveRebounds++
+        }
+
+        // 1262 - Turnovers Per Game (avgTurnovers) or 1272 - Turnovers
+        const turnoversStat = findStatByIdOrName(opponentStat.stats, {
+          ids: [1262, 1272],
+          nameIncludes: ['avgturnovers', 'turnovers per game', 'turnovers'],
+          displayIncludes: ['turnovers per game', 'turnovers']
+        })
+        if (turnoversStat?.value) {
+          totalTurnovers += turnoversStat.value
+          countTurnovers++
+        }
+
+        // 1282 - Defensive Rebounds Per Game (avgDefensiveRebounds)
+        const defRebStat = findStatByIdOrName(opponentStat.stats, {
+          ids: [1282],
+          nameIncludes: ['avgdefensiverebounds', 'defensive rebounds per game', 'defensiverebounds'],
+          displayIncludes: ['defensive rebounds per game', 'defensive rebounds']
+        })
+        if (defRebStat?.value) {
+          totalDefensiveRebounds += defRebStat.value
+          countDefensiveRebounds++
+        }
+
+        // 1261 - Assists Per Game (avgAssists) or 1271 - Assists
+        const assistsStat = findStatByIdOrName(opponentStat.stats, {
+          ids: [1261, 1271],
+          nameIncludes: ['avgassists', 'assists per game', 'assists'],
+          displayIncludes: ['assists per game', 'assists']
+        })
+        if (assistsStat?.value) {
+          totalAssists += assistsStat.value
+          countAssists++
+        }
+
+        // Free Throw stats for calculating FT%
+        const ftmStat = findStatByIdOrName(opponentStat.stats, {
+          nameIncludes: ['free throws made', 'freethrowsmade', 'average free throws made'],
+          displayIncludes: ['free throws made', 'average free throws made']
+        })
+        const ftaStat = findStatByIdOrName(opponentStat.stats, {
+          nameIncludes: ['free throws attempted', 'freethrowsattempted', 'average free throws attempted'],
+          displayIncludes: ['free throws attempted', 'average free throws attempted']
+        })
+        if (ftmStat?.value) totalFTM += ftmStat.value
+        if (ftaStat?.value) totalFTA += ftaStat.value
+
+        // 3-Point stats for calculating 3P%
+        const threePMStat = findStatByIdOrName(opponentStat.stats, {
+          nameIncludes: ['3-point field goals made', 'threepointfieldgoalsmade', 'average 3-point field goals made'],
+          displayIncludes: ['3-point field goals made', 'average 3-point field goals made']
+        })
+        const threePAStat = findStatByIdOrName(opponentStat.stats, {
+          nameIncludes: ['3-point field goals attempted', 'threepointfieldgoalsattempted', 'average 3-point field goals attempted'],
+          displayIncludes: ['3-point field goals attempted', 'average 3-point field goals attempted']
+        })
+        if (threePMStat?.value) total3PM += threePMStat.value
+        if (threePAStat?.value) total3PA += threePAStat.value
+
+        // 2-Point stats for calculating 2P%
+        const twoPMStat = findStatByIdOrName(opponentStat.stats, {
+          nameIncludes: ['2-point field goals made', 'twopointfieldgoalsmade'],
+          displayIncludes: ['2-point field goals made', '2-point field goals made per game']
+        })
+        const twoPAStat = findStatByIdOrName(opponentStat.stats, {
+          nameIncludes: ['2-point field goals attempted', 'twopointfieldgoalsattempted'],
+          displayIncludes: ['2-point field goals attempted', '2-point field goals attempted per game']
+        })
+        if (twoPMStat?.value) total2PM += twoPMStat.value
+        if (twoPAStat?.value) total2PA += twoPAStat.value
+
+        // Field Goal stats for calculating FG%
+        const fgmStat = findStatByIdOrName(opponentStat.stats, {
+          nameIncludes: ['field goals made', 'fieldgoalsmade', 'average field goals made'],
+          displayIncludes: ['field goals made', 'average field goals made']
+        })
+        const fgaStat = findStatByIdOrName(opponentStat.stats, {
+          nameIncludes: ['field goals attempted', 'fieldgoalsattempted', 'average field goals attempted'],
+          displayIncludes: ['field goals attempted', 'average field goals attempted']
+        })
+        if (fgmStat?.value) totalFGM += fgmStat.value
+        if (fgaStat?.value) totalFGA += fgaStat.value
+      }
+
+      // Calculate opponent stats
+      const opponentStatsResult: any = {}
+
+      // Per-game stats (averages)
+      if (numberOfGames > 0) {
+        opponentStatsResult['1244'] = totalFouls / numberOfGames
+        opponentStatsResult['1242'] = totalRebounds / numberOfGames
+        opponentStatsResult['1249'] = totalRebounds
+        opponentStatsResult['1250'] = totalRebounds / numberOfGames
+        opponentStatsResult['1259'] = totalPoints / numberOfGames
+        opponentStatsResult['1269'] = totalPoints / numberOfGames
+        opponentStatsResult['1260'] = totalOffensiveRebounds / numberOfGames
+        opponentStatsResult['1270'] = totalOffensiveRebounds / numberOfGames
+        opponentStatsResult['1262'] = totalTurnovers / numberOfGames
+        opponentStatsResult['1272'] = totalTurnovers
+        opponentStatsResult['1282'] = totalDefensiveRebounds / numberOfGames
+        opponentStatsResult['1261'] = totalAssists / numberOfGames
+        opponentStatsResult['1271'] = totalAssists / numberOfGames
+      }
+
+      // Percentage stats
+      if (totalFTA > 0) {
+        opponentStatsResult['1251'] = (totalFTM / totalFTA) * 100
+      }
+      if (total3PA > 0) {
+        opponentStatsResult['1252'] = (total3PM / total3PA) * 100
+        opponentStatsResult['1279'] = (total3PM / total3PA) * 100
+      }
+      if (total2PA > 0) {
+        opponentStatsResult['1263'] = (total2PM / total2PA) * 100
+      }
+      if (totalFGA > 0) {
+        opponentStatsResult['1266'] = (totalFGM / totalFGA) * 100
+      }
+
+      // Efficiency stats
+      // 1264 Scoring Efficiency: Points per Field Goal Attempt (not a percentage)
+      if (totalFGA > 0) {
+        opponentStatsResult['1264'] = totalPoints / totalFGA
+      }
+      // 1265 Shooting Efficiency: Effective FG% = (FGM + 0.5 * 3PM) / FGA
+      if (totalFGA > 0) {
+        opponentStatsResult['1265'] = ((totalFGM + 0.5 * total3PM) / totalFGA) * 100
+      }
+
+      console.log(`[NBA Opponent Stats] Returning ${Object.keys(opponentStatsResult).length} stats:`, opponentStatsResult)
+      return opponentStatsResult
+    } catch (error) {
+      console.error('Error calculating NBA opponent stats:', error)
+      return {}
     }
   }
 }
