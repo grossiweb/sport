@@ -99,6 +99,17 @@ export function TeamDetailedStats({
     const internalName = (stat.stat?.name || '').trim().toLowerCase()
     const displayName = (stat.stat?.display_name || '').trim().toLowerCase()
 
+    // NBA: For FG%, 3P% and FT%, prefer top-level display_value exactly as provided
+    if (sport === 'NBA') {
+      const isNbaPercent = displayName === 'field goal %'
+        || displayName === '3-point field goal percentage'
+        || displayName === 'free throw %'
+      if (isNbaPercent) {
+        const dv = (stat as any).display_value
+        if (dv !== undefined && dv !== null && dv !== '') return dv
+      }
+    }
+
     // Special-case: Turnover Ratio (turnOverDifferential) should always use display_value
     if (internalName === 'turnoverdifferential' || displayName.includes('turnover ratio')) {
       const dv = (stat as any).display_value
@@ -296,6 +307,9 @@ export function TeamDetailedStats({
         { statId: '1279', name: 'Opponent Three Point %', abbr: 'OPP 3P%', category: 'Key Factors', description: 'Opponent three point percentage', decimals: 1 },
         { statId: '1282', name: 'Opponent Defensive Rebounds Per Game', abbr: 'OPP DR', category: 'Key Factors', description: 'Average defensive rebounds per game by opponents', decimals: 1 },
         { statId: '1261', name: 'Opponent Assists Per Game', abbr: 'OPP AST', category: 'Key Factors', description: 'Average assists per game by opponents', decimals: 1 },
+        { statKey: 'opp_blocks_per_game', name: 'Opponent Blocks Per Game', abbr: 'OPP BLK', category: 'Key Factors', description: 'Average blocks per game by opponents', decimals: 1 },
+        { statKey: 'opp_steals_per_game', name: 'Opponent Steals Per Game', abbr: 'OPP STL', category: 'Key Factors', description: 'Average steals per game by opponents', decimals: 1 },
+        { statId: '1243', name: 'Opponent Assist To Turnover Ratio', abbr: 'OPP AST/TO', category: 'Key Factors', description: 'Opponent assists per turnover', decimals: 2 },
         // Offensive
         { statId: '1269', name: 'Opponent Points', abbr: 'OPP PTS', category: 'Offensive', description: 'Total points by opponents', decimals: 1 },
         { statId: '1270', name: 'Opponent Offensive Rebounds', abbr: 'OPP OR', category: 'Offensive', description: 'Total offensive rebounds by opponents', decimals: 1 },
@@ -304,8 +318,9 @@ export function TeamDetailedStats({
 
       let addedCount = 0
       nbaOpponentStats.forEach((oppStat, idx) => {
-        const homeValue = homeOpponentStats?.[oppStat.statId]
-        const awayValue = awayOpponentStats?.[oppStat.statId]
+        const key = (oppStat as any).statId ?? (oppStat as any).statKey
+        const homeValue = key ? (homeOpponentStats?.[key]) : undefined
+        const awayValue = key ? (awayOpponentStats?.[key]) : undefined
         
         // Only add if at least one team has data
         if (homeValue !== undefined || awayValue !== undefined) {
@@ -315,7 +330,7 @@ export function TeamDetailedStats({
           comparisonMap.set(oppStat.name, {
             stat: {
               id: -1000 - idx,
-              name: `opponent${oppStat.statId}`,
+              name: `opponent${(oppStat as any).statId || (oppStat as any).statKey}`,
               category: oppStat.category,
               display_name: oppStat.name,
               abbreviation: oppStat.abbr,
@@ -417,16 +432,10 @@ export function TeamDetailedStats({
       return order.filter((c, idx) => idx === 0 || computedCategories.includes(c as any))
     }
     if (sport === 'NBA') {
-      const order = [
-        'all',
-        'Key Factors',
-        'Offensive',
-        'Defense'
-      ]
-      // include only those that appear in mapped categories
-      const present = new Set(
-        comparisonData.map(s => mapNbaStatToCategory(s))
-      )
+      // In NBA H2H, we show a single combined ordered list; only keep 'all'
+      if (h2hStyle) return ['all']
+      const order = ['all', 'Key Factors', 'Offensive', 'Defense']
+      const present = new Set(comparisonData.map(s => mapNbaStatToCategory(s)))
       return order.filter((c, idx) => idx === 0 || present.has(c))
     }
     // Fallback
@@ -675,14 +684,40 @@ export function TeamDetailedStats({
       return true
     })
 
-    const grouped = selectedCategory === 'all'
-      ? h2hFiltered.reduce((acc: Record<string, any[]>, s) => {
-          const c = getCategory(s)
-          if (!acc[c]) acc[c] = []
-          acc[c].push(s)
-          return acc
-        }, {})
-      : { [selectedCategory]: h2hFiltered }
+    // For NBA H2H, enforce a strict order and filter
+    let grouped: Record<string, any[]>
+    if (sport === 'NBA') {
+      const desiredOrder = [
+        'Points Per Game', 'Opponent Points Per Game',
+        'Turnovers Per Game', 'Opponent Turnovers Per Game',
+        'Offensive Rebounds Per Game', 'Defensive Rebounds Per Game',
+        'Field Goal %', '3-Point Field Goal Percentage', 'Free Throw %',
+        'Scoring Efficiency', 'Shooting Efficiency',
+        'Assist To Turnover Ratio', 'Opponent Assist To Turnover Ratio',
+        'Assists Per Game', 'Opponent Assists Per Game',
+        'Blocks Per Game', 'Opponent Blocks Per Game',
+        'Fouls Per Game', 'Opponent Fouls Per Game',
+        'Steals Per Game', 'Opponent Steals Per Game',
+        'Opponent Field Goal %', 'Opponent 3-Point Field Goal Percentage', 'Opponent Free Throw %'
+      ]
+      const byLabel = new Map<string, any>()
+      for (const s of h2hFiltered) {
+        const lbl = (s?.stat?.display_name || s?.stat?.name || '').trim()
+        if (!lbl) continue
+        if (!byLabel.has(lbl)) byLabel.set(lbl, s)
+      }
+      const ordered = desiredOrder.map(lbl => byLabel.get(lbl)).filter(Boolean) as any[]
+      grouped = { All: ordered }
+    } else {
+      grouped = selectedCategory === 'all'
+        ? h2hFiltered.reduce((acc: Record<string, any[]>, s) => {
+            const c = getCategory(s)
+            if (!acc[c]) acc[c] = []
+            acc[c].push(s)
+            return acc
+          }, {})
+        : { [selectedCategory]: h2hFiltered }
+    }
 
     const orderedCategories = selectedCategory === 'all'
       ? (
@@ -702,11 +737,7 @@ export function TeamDetailedStats({
                   STAT_CATEGORIES.TURNOVERS_PENALTIES
                 ].filter(c => grouped[c]?.length)
               : sport === 'NBA'
-                ? [
-                    'Key Factors',
-                    'Offensive',
-                    'Defense'
-                  ].filter(c => grouped[c]?.length)
+                ? ['All']
                 : Object.keys(grouped)
         )
       : [selectedCategory]
@@ -783,20 +814,24 @@ export function TeamDetailedStats({
                   </div>
                 )}
                 {                (
-                  cat === STAT_CATEGORIES.KEY_FACTORS
-                    ? (() => {
-                        const arr = [...grouped[cat]!].sort((a, b) => keyFactorPriority(a) - keyFactorPriority(b))
-                        // Ensure Opponent RZ % appears immediately after Red Zone Efficiency %
-                        const labelOf = (s: any) => (s?.stat?.display_name || s?.stat?.name || '').toLowerCase()
-                        const idxRZ = arr.findIndex(s => /red\s*zone\s*efficiency\s*percentage/i.test(s?.stat?.display_name || s?.stat?.name || ''))
-                        const idxOppRZ = arr.findIndex(s => /opponent\s+red\s*zone\s*efficiency\s*percentage/i.test(s?.stat?.display_name || s?.stat?.name || ''))
-                        if (idxRZ !== -1 && idxOppRZ !== -1 && idxOppRZ !== idxRZ + 1) {
-                          const [oppItem] = arr.splice(idxOppRZ, 1)
-                          arr.splice(idxRZ + 1, 0, oppItem)
-                        }
-                        return arr
-                      })()
-                    : [...grouped[cat]!].sort((a, b) => keyFactorPriority(a) - keyFactorPriority(b))
+                  sport === 'NBA' && h2hStyle
+                    ? [...grouped[cat]!]
+                    : (
+                        cat === STAT_CATEGORIES.KEY_FACTORS
+                          ? (() => {
+                              const arr = [...grouped[cat]!].sort((a, b) => keyFactorPriority(a) - keyFactorPriority(b))
+                              // Ensure Opponent RZ % appears immediately after Red Zone Efficiency %
+                              const labelOf = (s: any) => (s?.stat?.display_name || s?.stat?.name || '').toLowerCase()
+                              const idxRZ = arr.findIndex(s => /red\s*zone\s*efficiency\s*percentage/i.test(s?.stat?.display_name || s?.stat?.name || ''))
+                              const idxOppRZ = arr.findIndex(s => /opponent\s+red\s*zone\s*efficiency\s*percentage/i.test(s?.stat?.display_name || s?.stat?.name || ''))
+                              if (idxRZ !== -1 && idxOppRZ !== -1 && idxOppRZ !== idxRZ + 1) {
+                                const [oppItem] = arr.splice(idxOppRZ, 1)
+                                arr.splice(idxRZ + 1, 0, oppItem)
+                              }
+                              return arr
+                            })()
+                          : [...grouped[cat]!].sort((a, b) => keyFactorPriority(a) - keyFactorPriority(b))
+                      )
                 ).map((stat, index) => {
                 const baseLabel = (() => {
                   const raw = stat.stat?.display_name || stat.stat?.name || '—'

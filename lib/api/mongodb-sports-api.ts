@@ -1652,6 +1652,8 @@ export class MongoDBSportsAPI {
       let totalTurnovers = 0, countTurnovers = 0
       let totalDefensiveRebounds = 0, countDefensiveRebounds = 0
       let totalAssists = 0, countAssists = 0
+      let totalBlocks = 0
+      let totalSteals = 0
       let totalFTM = 0, totalFTA = 0
       let total3PM = 0, total3PA = 0
       let total2PM = 0, total2PA = 0
@@ -1736,6 +1738,24 @@ export class MongoDBSportsAPI {
           countAssists++
         }
 
+        // Blocks (prefer per-game if present)
+        const blocksStat = findStatByIdOrName(opponentStat.stats, {
+          nameIncludes: ['blocks per game', 'blocks'],
+          displayIncludes: ['blocks per game', 'blocks']
+        })
+        if (blocksStat?.value) {
+          totalBlocks += blocksStat.value
+        }
+
+        // Steals (prefer per-game if present)
+        const stealsStat = findStatByIdOrName(opponentStat.stats, {
+          nameIncludes: ['steals per game', 'steals'],
+          displayIncludes: ['steals per game', 'steals']
+        })
+        if (stealsStat?.value) {
+          totalSteals += stealsStat.value
+        }
+
         // Free Throw stats for calculating FT%
         const ftmStat = findStatByIdOrName(opponentStat.stats, {
           nameIncludes: ['free throws made', 'freethrowsmade', 'average free throws made'],
@@ -1803,6 +1823,8 @@ export class MongoDBSportsAPI {
         opponentStatsResult['1282'] = totalDefensiveRebounds / numberOfGames
         opponentStatsResult['1261'] = totalAssists / numberOfGames
         opponentStatsResult['1271'] = totalAssists / numberOfGames
+        opponentStatsResult['opp_blocks_per_game'] = totalBlocks / numberOfGames
+        opponentStatsResult['opp_steals_per_game'] = totalSteals / numberOfGames
       }
 
       // Percentage stats
@@ -1828,6 +1850,11 @@ export class MongoDBSportsAPI {
       // 1265 Shooting Efficiency: Effective FG% = (FGM + 0.5 * 3PM) / FGA
       if (totalFGA > 0) {
         opponentStatsResult['1265'] = ((totalFGM + 0.5 * total3PM) / totalFGA) * 100
+      }
+
+      // Opponent Assist/Turnover Ratio (1243)
+      if (totalTurnovers > 0) {
+        opponentStatsResult['1243'] = totalAssists / totalTurnovers
       }
 
       console.log(`[NBA Opponent Stats] Returning ${Object.keys(opponentStatsResult).length} stats:`, opponentStatsResult)
