@@ -10,7 +10,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { SportType, Game } from '@/types'
 import { formatToEasternTime } from '@/lib/utils/time'
-import { formatSpread as formatSpreadUtil, formatOdds as formatOddsUtil } from '@/lib/utils/betting-format'
+import { formatSpread as formatSpreadUtil, formatOdds as formatOddsUtil, formatTotal as formatTotalUtil } from '@/lib/utils/betting-format'
 
 interface BettingLine {
   affiliate: {
@@ -113,6 +113,8 @@ function BettingLinesPopup({
   const formatOdds = (odds: number | null | undefined) => formatOddsUtil(odds)
 
   const formatSpread = (spread: number | null | undefined) => formatSpreadUtil(spread)
+
+  const formatTotal = (total: number | null | undefined) => formatTotalUtil(total)
 
   const formatTime = (dateString: string) => formatToEasternTime(dateString)
 
@@ -291,7 +293,7 @@ function BettingLinesPopup({
                       <div className="text-center p-2 bg-white/60 dark:bg-gray-800/60 rounded">
                         <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Over</div>
                         <div className="text-base font-bold text-gray-900 dark:text-white">
-                          {isFinal ? (selectedLine as any).total?.total_over_delta ?? selectedLine.total.total_over : selectedLine.total.total_over}
+                          {formatTotal(isFinal ? (selectedLine as any).total?.total_over_delta ?? selectedLine.total.total_over : selectedLine.total.total_over)}
                         </div>
                         <div className="text-[11px] text-gray-500 dark:text-gray-400">
                           ({formatOdds(isFinal ? (selectedLine as any).total?.total_over_money_delta ?? selectedLine.total.total_over_money : selectedLine.total.total_over_money)})
@@ -300,7 +302,7 @@ function BettingLinesPopup({
                       <div className="text-center p-2 bg-white/60 dark:bg-gray-800/60 rounded">
                         <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Under</div>
                         <div className="text-base font-bold text-gray-900 dark:text-white">
-                          {isFinal ? (selectedLine as any).total?.total_under_delta ?? selectedLine.total.total_under : selectedLine.total.total_under}
+                          {formatTotal(isFinal ? (selectedLine as any).total?.total_under_delta ?? selectedLine.total.total_under : selectedLine.total.total_under)}
                         </div>
                         <div className="text-[11px] text-gray-500 dark:text-gray-400">
                           ({formatOdds(isFinal ? (selectedLine as any).total?.total_under_money_delta ?? selectedLine.total.total_under_money : selectedLine.total.total_under_money)})

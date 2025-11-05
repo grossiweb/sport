@@ -18,7 +18,7 @@ export function formatSpread(spread: number | null | undefined): string {
   if (spread == null || isNaN(spread)) return '-'
   
   const rounded = roundToNearestHalf(spread)
-  const formatted = rounded === Math.floor(rounded) ? rounded.toString() : rounded.toFixed(1)
+  const formatted = rounded.toFixed(1)
   
   return rounded > 0 ? `+${formatted}` : formatted
 }
@@ -30,7 +30,7 @@ export function formatTotal(total: number | null | undefined): string {
   if (total == null || isNaN(total)) return '-'
   
   const rounded = roundToNearestHalf(total)
-  return rounded === Math.floor(rounded) ? rounded.toString() : rounded.toFixed(1)
+  return rounded.toFixed(1)
 }
 
 /**
@@ -39,8 +39,11 @@ export function formatTotal(total: number | null | undefined): string {
  */
 export function formatOdds(odds: number | null | undefined): string {
   if (odds == null || isNaN(odds)) return '-'
-  
-  return odds > 0 ? `+${odds}` : `${odds}`
+  // Round to one decimal and normalize tiny values to 0.0
+  const rounded = Math.round(odds * 10) / 10
+  const normalized = Math.abs(rounded) < 0.05 ? 0 : rounded
+  const formatted = normalized.toFixed(1)
+  return normalized > 0 ? `+${formatted}` : formatted
 }
 
 /**
