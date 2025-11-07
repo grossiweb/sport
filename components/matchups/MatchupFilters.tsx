@@ -2,39 +2,55 @@
 
 import { SportType } from '@/types'
 import { WeekSelector } from './WeekSelector'
+import { NcaabDatePicker } from './NcaabDatePicker'
 import { WeekInfo, getCurrentSeasonWeekForSport } from '@/lib/utils/week-utils'
+import { format } from 'date-fns'
 
 interface MatchupFiltersProps {
   sport: SportType
-  selectedWeek: WeekInfo
+  selectedWeek?: WeekInfo
+  selectedDate?: Date
   filters: any
-  onWeekChange: (week: WeekInfo) => void
+  onWeekChange?: (week: WeekInfo) => void
+  onDateChange?: (date: Date) => void
   onFiltersChange: (filters: any) => void
 }
 
 export function MatchupFilters({
   sport,
   selectedWeek,
+  selectedDate,
   filters,
   onWeekChange,
+  onDateChange,
   onFiltersChange
 }: MatchupFiltersProps) {
+  const isNcaab = sport === 'NCAAB'
+  
   return (
     <div>
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">
-        Week Selection & Filters
+        {isNcaab ? 'Date Selection & Filters' : 'Week Selection & Filters'}
       </h3>
       
-		{/* Responsive: Row 1 = Week; Row 2 = Search (left) + Status (right) */}
+		{/* Responsive: Row 1 = Week/Date; Row 2 = Search (left) + Status (right) */}
 		<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-			{/* Row 1: Week Selector */}
+			{/* Row 1: Week Selector or Date Picker */}
 			<div className="relative z-10">
-				<WeekSelector
-					currentWeek={selectedWeek}
-					onWeekChange={onWeekChange}
-					className="w-full"
-				/>
+				{isNcaab && selectedDate && onDateChange ? (
+					<NcaabDatePicker
+						selectedDate={selectedDate}
+						onDateChange={onDateChange}
+						className="w-full"
+					/>
+				) : selectedWeek && onWeekChange ? (
+					<WeekSelector
+						currentWeek={selectedWeek}
+						onWeekChange={onWeekChange}
+						className="w-full"
+					/>
+				) : null}
 			</div>
 
 			{/* Row 2: Search + Status */}
@@ -70,14 +86,27 @@ export function MatchupFilters({
 
       <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          Showing {sport} matchups for {selectedWeek.dateRange}
+          {isNcaab && selectedDate ? (
+            <>Showing {sport} matchups for {format(selectedDate, 'MMMM d, yyyy')}</>
+          ) : selectedWeek ? (
+            <>Showing {sport} matchups for {selectedWeek.dateRange}</>
+          ) : null}
         </div>
-        <button
-          onClick={() => onWeekChange(getCurrentSeasonWeekForSport(sport))}
-          className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
-        >
-          Current Week
-        </button>
+        {isNcaab && onDateChange ? (
+          <button
+            onClick={() => onDateChange(new Date())}
+            className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+          >
+            Today
+          </button>
+        ) : onWeekChange ? (
+          <button
+            onClick={() => onWeekChange(getCurrentSeasonWeekForSport(sport))}
+            className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+          >
+            Current Week
+          </button>
+        ) : null}
       </div>
     </div>
   )

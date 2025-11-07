@@ -30,12 +30,22 @@ const fetchWeekMatchups = async (sport: SportType, weekInfo: WeekInfo): Promise<
   return result.data || []
 }
 
+// Fetch matchups for a single day (for NCAAB)
+const fetchDailyMatchups = async (sport: SportType, date: Date): Promise<Matchup[]> => {
+  const dateStr = format(date, 'yyyy-MM-dd')
+  const response = await fetch(`/api/matchups?sport=${sport}&date=${dateStr}`)
+  if (!response.ok) throw new Error('Failed to fetch matchups')
+  const result = await response.json()
+  return result.data || []
+}
+
 export default function SportMatchupsPage() {
   const params = useParams()
   const { currentSport, currentSportData, isLoading: contextLoading } = useSport()
   const [validSport, setValidSport] = useState<SportType | null>(null)
   const [selectedWeek, setSelectedWeek] = useState<WeekInfo>(getCurrentWeek())
-  // Align initial selectedWeek to current season-relative week if season data exists
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  // Align initial selectedWeek/date to current season-relative week if season data exists
   useEffect(() => {
     const alignToSeason = async () => {
       const s = (validSport || currentSport)
@@ -94,10 +104,16 @@ export default function SportMatchupsPage() {
   }, [params.sport])
 
   const sport = validSport || currentSport
+  const isNcaab = sport === 'NCAAB'
 
+  // Use daily matchups for NCAAB, weekly for others
   const { data: matchups, isLoading: matchupsLoading, error } = useQuery(
-    ['weekMatchups', sport, selectedWeek.weekNumber, selectedWeek.year],
-    () => fetchWeekMatchups(sport, selectedWeek),
+    isNcaab 
+      ? ['dailyMatchups', sport, format(selectedDate, 'yyyy-MM-dd')]
+      : ['weekMatchups', sport, selectedWeek.weekNumber, selectedWeek.year],
+    isNcaab
+      ? () => fetchDailyMatchups(sport, selectedDate)
+      : () => fetchWeekMatchups(sport, selectedWeek),
     { enabled: !!sport }
   )
 
@@ -175,13 +191,15 @@ export default function SportMatchupsPage() {
         </p>
       </div>
 
-      {/* Week and Filters */}
+      {/* Week/Date and Filters */}
       <div className="mb-6">
         <MatchupFilters
           sport={sport}
-          selectedWeek={selectedWeek}
+          selectedWeek={isNcaab ? undefined : selectedWeek}
+          selectedDate={isNcaab ? selectedDate : undefined}
           filters={filters}
-          onWeekChange={setSelectedWeek}
+          onWeekChange={isNcaab ? undefined : setSelectedWeek}
+          onDateChange={isNcaab ? setSelectedDate : undefined}
           onFiltersChange={setFilters}
         />
       </div>
@@ -259,7 +277,11 @@ export default function SportMatchupsPage() {
             No games scheduled
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            There are no {currentSportData.displayName} games scheduled for {selectedWeek.label} ({selectedWeek.dateRange}).
+            {isNcaab ? (
+              <>There are no {currentSportData.displayName} games scheduled for {format(selectedDate, 'MMMM d, yyyy')}.</>
+            ) : (
+              <>There are no {currentSportData.displayName} games scheduled for {selectedWeek.label} ({selectedWeek.dateRange}).</>
+            )}
           </p>
         </div>
       )}
