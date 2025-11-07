@@ -37,6 +37,16 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
       return
     }
 
+    // For NCAAB, use provided season dates
+    if (currentSport === 'NCAAB') {
+      const start = new Date('2025-11-03')
+      const endDate = new Date('2026-03-15')
+      setSeasonStart(start)
+      const weeks = getSeasonWeekOptions({ startDate: start, endDate })
+      setSeasonWeeks(weeks)
+      return
+    }
+
     const sportId = currentSport === 'CFB' ? 1 : currentSport === 'NFL' ? 2 : undefined
     if (!sportId) return
     const loadSeason = async () => {

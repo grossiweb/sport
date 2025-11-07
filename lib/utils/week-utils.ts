@@ -234,6 +234,13 @@ export function getCurrentSeasonWeekForSport(sport: SportType): WeekInfo {
     const m = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
     if (m) return m.weekInfo
   }
+  if (sport === 'NCAAB') {
+    const start = new Date('2025-11-03')
+    const endDate = new Date('2026-03-15')
+    const weeks = getSeasonWeekOptions({ startDate: start, endDate })
+    const m = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+    if (m) return m.weekInfo
+  }
   return getCurrentWeek()
 }
 

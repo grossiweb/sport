@@ -29,11 +29,11 @@ export async function GET(
     console.log(`${sport} opponent stats API called for team ${teamId}`)
     
     // Calculate opponent and defensive stats based on sport
-    if (sport === 'NBA') {
-      const nbaOpponentStats = await mongoSportsAPI.calculateNBAOpponentStats(sport as SportType, teamId)
+    if (sport === 'NBA' || sport === 'NCAAB') {
+      const basketballOpponentStats = await mongoSportsAPI.calculateNBAOpponentStats(sport as SportType, teamId)
       return NextResponse.json({
         success: true,
-        data: nbaOpponentStats
+        data: basketballOpponentStats
       })
     }
     

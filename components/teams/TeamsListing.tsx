@@ -16,9 +16,9 @@ export function TeamsListing({ teams, sport, isLoading }: TeamsListingProps) {
   const [selectedConference, setSelectedConference] = useState<string>('all')
 
 
-  // Build conference list for CFB
+  // Build conference list for CFB/NCAAB
   const conferences = useMemo(() => {
-    if (sport !== 'CFB') return [] as string[]
+    if (sport !== 'CFB' && sport !== 'NCAAB') return [] as string[]
     const set = new Set<string>()
     for (const t of teams) {
       const name = (t.conference?.name || 'Other').trim()
@@ -29,7 +29,7 @@ export function TeamsListing({ teams, sport, isLoading }: TeamsListingProps) {
 
   // Filter teams based on sport-specific filters
   const filteredTeams = useMemo(() => {
-    if (sport === 'CFB') {
+    if (sport === 'CFB' || sport === 'NCAAB') {
       let list = teams
       if (selectedConference !== 'all') {
         list = list.filter(t => (t.conference?.name || 'Other') === selectedConference)
@@ -113,14 +113,14 @@ export function TeamsListing({ teams, sport, isLoading }: TeamsListingProps) {
           </div>
           <input
             type="text"
-            placeholder={sport === 'CFB' ? 'Search team name...' : `Search ${sport} teams...`}
+            placeholder={(sport === 'CFB' || sport === 'NCAAB') ? 'Search team name...' : `Search ${sport} teams...`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
-        {sport === 'CFB' && (
+        {(sport === 'CFB' || sport === 'NCAAB') && (
           <div className="w-full sm:w-80">
             <select
               value={selectedConference}

@@ -50,6 +50,17 @@ export default function SportMatchupsPage() {
         return
       }
 
+      // For NCAAB, use provided season dates
+      if (s === 'NCAAB') {
+        const start = new Date('2025-11-03')
+        const endDate = new Date('2026-03-15')
+        const weeks = getSeasonWeekOptions({ startDate: start, endDate })
+        const now = new Date()
+        const current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+        if (current) setSelectedWeek(current.weekInfo)
+        return
+      }
+
       const sportId = s === 'CFB' ? 1 : s === 'NFL' ? 2 : undefined
       if (!sportId) return
       const year = new Date().getFullYear()

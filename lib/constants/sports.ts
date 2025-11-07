@@ -21,6 +21,13 @@ export const SPORTS: Record<SportType, Sport> = {
     displayName: 'NBA',
     shortName: 'NBA',
     apiId: 4
+  },
+  NCAAB: {
+    id: 'ncaab',
+    name: 'NCAAB',
+    displayName: 'NCAAB',
+    shortName: 'NCAAB',
+    apiId: 5
   }
 }
 
@@ -29,7 +36,8 @@ export const DEFAULT_SPORT: SportType = 'CFB'
 export const SPORT_ROUTES = {
   CFB: '/sport/cfb',
   NFL: '/sport/nfl',
-  NBA: '/sport/nba'
+  NBA: '/sport/nba',
+  NCAAB: '/sport/ncaab'
 }
 
 export function getSportByApiId(apiId: number): Sport | null {
@@ -41,5 +49,5 @@ export function getSportById(id: string): Sport | null {
 }
 
 export function isValidSportType(value: string): value is SportType {
-  return value === 'CFB' || value === 'NFL' || value === 'NBA'
+  return value === 'CFB' || value === 'NFL' || value === 'NBA' || value === 'NCAAB'
 }

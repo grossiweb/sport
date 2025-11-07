@@ -38,6 +38,8 @@ export class MongoDBSportsAPI {
         return 2
       case 'NBA':
         return 4
+      case 'NCAAB':
+        return 5
       default:
         return 1
     }
@@ -51,6 +53,8 @@ export class MongoDBSportsAPI {
         return 'NFL'
       case 4:
         return 'NBA'
+      case 5:
+        return 'NCAAB'
       default:
         return 'CFB'
     }
@@ -1080,14 +1084,39 @@ export class MongoDBSportsAPI {
       const collection = await getTeamStatsCollection()
       const currentYear = new Date().getFullYear()
       
-      const mongoStats = await collection.findOne({ 
+      // For NCAAB, try current year first, then fall back to previous year if no data
+      // (NCAAB season spans across calendar years, e.g., 2024-2025 season)
+      let mongoStats = await collection.findOne({ 
         team_id: parseInt(teamId),
         season_year: currentYear
       })
       
-      if (!mongoStats) return []
+      // If no stats found for NCAAB in current year, try previous year
+      if (!mongoStats && sport === 'NCAAB') {
+        console.log(`[${sport}] No stats found for team ${teamId} in year ${currentYear}, trying ${currentYear - 1}`)
+        mongoStats = await collection.findOne({ 
+          team_id: parseInt(teamId),
+          season_year: currentYear - 1
+        })
+      }
       
-      return this.mapMongoTeamStatsToDetailedStats(mongoStats)
+      if (!mongoStats) {
+        console.log(`[${sport}] No stats found for team ${teamId} in MongoDB`)
+        return []
+      }
+      
+      console.log(`[${sport}] Found ${mongoStats.stats.length} stats for team ${teamId}, season ${mongoStats.season_year}`)
+      
+      const detailedStats = this.mapMongoTeamStatsToDetailedStats(mongoStats)
+      
+      // Log stats with missing ranks for debugging
+      const statsWithoutRank = detailedStats.filter(s => !s.rank && !s.rank_display_value)
+      if (statsWithoutRank.length > 0) {
+        console.log(`[${sport}] Team ${teamId}: ${statsWithoutRank.length}/${detailedStats.length} stats missing rank data`)
+        console.log(`[${sport}] Sample stats without ranks:`, statsWithoutRank.slice(0, 3).map(s => s.stat?.display_name))
+      }
+      
+      return detailedStats
     } catch (error) {
       console.error(`Error fetching detailed team stats for team ${teamId}:`, error)
       return []

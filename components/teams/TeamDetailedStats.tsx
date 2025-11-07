@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { DetailedTeamStat, SportType } from '@/types'
 import { ChartBarIcon, TrophyIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline'
-import { filterAndSortStats, STAT_CATEGORIES, mapCfbStatToCategory, mapNflStatToCategory, getPreferredStats, mapNbaStatToCategory } from '@/lib/constants/team-stats-config'
+import { filterAndSortStats, STAT_CATEGORIES, mapCfbStatToCategory, mapNflStatToCategory, getPreferredStats, mapNbaStatToCategory, mapNcaabStatToCategory } from '@/lib/constants/team-stats-config'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 
 interface TeamDetailedStatsProps {
@@ -44,7 +44,7 @@ export function TeamDetailedStats({
   const formatRankDisplay = (rank: string | number | undefined | null): string | null => {
     if (rank === undefined || rank === null) return null
     const raw = String(rank).trim()
-    if (!raw) return null
+    if (!raw || raw === '0') return null // Treat 0 as no rank
     const noHash = raw.replace(/^#+\s*/, '')
     const noTied = noHash.replace(/tied[-\s]?/i, '')
     return noTied
@@ -99,12 +99,12 @@ export function TeamDetailedStats({
     const internalName = (stat.stat?.name || '').trim().toLowerCase()
     const displayName = (stat.stat?.display_name || '').trim().toLowerCase()
 
-    // NBA: For FG%, 3P% and FT%, prefer top-level display_value exactly as provided
-    if (sport === 'NBA') {
-      const isNbaPercent = displayName === 'field goal %'
+    // NBA/NCAAB: For FG%, 3P% and FT%, prefer top-level display_value exactly as provided
+    if (sport === 'NBA' || sport === 'NCAAB') {
+      const isBasketballPercent = displayName === 'field goal %'
         || displayName === '3-point field goal percentage'
         || displayName === 'free throw %'
-      if (isNbaPercent) {
+      if (isBasketballPercent) {
         const dv = (stat as any).display_value
         if (dv !== undefined && dv !== null && dv !== '') return dv
       }
@@ -285,9 +285,9 @@ export function TeamDetailedStats({
         })
     }
 
-    // Inject calculated opponent stats for NBA
-    if (sport === 'NBA' && (homeOpponentStats || awayOpponentStats)) {
-      console.log('[TeamDetailedStats] NBA Opponent Stats:', { homeOpponentStats, awayOpponentStats })
+    // Inject calculated opponent stats for NBA/NCAAB
+    if ((sport === 'NBA' || sport === 'NCAAB') && (homeOpponentStats || awayOpponentStats)) {
+      console.log(`[TeamDetailedStats] ${sport} Opponent Stats:`, { homeOpponentStats, awayOpponentStats })
       const nbaOpponentStats = [
         // Key Factors
         { statId: '1244', name: 'Opponent Fouls Per Game', abbr: 'OPP PF', category: 'Key Factors', description: 'Average fouls per game by opponents', decimals: 1 },
@@ -405,6 +405,7 @@ export function TeamDetailedStats({
     if (sport === 'CFB') return mapCfbStatToCategory(stat)
     if (sport === 'NFL') return mapNflStatToCategory(stat)
     if (sport === 'NBA') return mapNbaStatToCategory(stat)
+    if (sport === 'NCAAB') return mapNcaabStatToCategory(stat)
     return stat.stat?.category || STAT_CATEGORIES.OFFENSE
   })
   
@@ -431,11 +432,12 @@ export function TeamDetailedStats({
       ]
       return order.filter((c, idx) => idx === 0 || computedCategories.includes(c as any))
     }
-    if (sport === 'NBA') {
-      // In NBA H2H, we show a single combined ordered list; only keep 'all'
+    if (sport === 'NBA' || sport === 'NCAAB') {
+      // In NBA/NCAAB H2H, we show a single combined ordered list; only keep 'all'
       if (h2hStyle) return ['all']
       const order = ['all', 'Key Factors', 'Offensive', 'Defense']
-      const present = new Set(comparisonData.map(s => mapNbaStatToCategory(s)))
+      const mapFn = sport === 'NBA' ? mapNbaStatToCategory : mapNcaabStatToCategory
+      const present = new Set(comparisonData.map(s => mapFn(s)))
       return order.filter((c, idx) => idx === 0 || present.has(c))
     }
     // Fallback
@@ -450,6 +452,7 @@ export function TeamDetailedStats({
         if (sport === 'CFB') return mapCfbStatToCategory(stat) === selectedCategory
         if (sport === 'NFL') return mapNflStatToCategory(stat) === selectedCategory
         if (sport === 'NBA') return mapNbaStatToCategory(stat) === selectedCategory
+        if (sport === 'NCAAB') return mapNcaabStatToCategory(stat) === selectedCategory
         return stat.stat?.category === selectedCategory
       })
 
@@ -668,6 +671,7 @@ export function TeamDetailedStats({
       if (sport === 'CFB') return mapCfbStatToCategory(stat)
       if (sport === 'NFL') return mapNflStatToCategory(stat)
       if (sport === 'NBA') return mapNbaStatToCategory(stat)
+      if (sport === 'NCAAB') return mapNcaabStatToCategory(stat)
       return stat.stat?.category || 'Other'
     }
     // Exclude certain stats in H2H view (e.g., Sacks, and removed defensive 3rd down label if present)
@@ -684,9 +688,9 @@ export function TeamDetailedStats({
       return true
     })
 
-    // For NBA H2H, enforce a strict order and filter
+    // For NBA/NCAAB H2H, enforce a strict order and filter
     let grouped: Record<string, any[]>
-    if (sport === 'NBA') {
+    if (sport === 'NBA' || sport === 'NCAAB') {
       const desiredOrder = [
         'Points Per Game', 'Opponent Points Per Game',
         'Turnovers Per Game', 'Opponent Turnovers Per Game',
@@ -736,7 +740,7 @@ export function TeamDetailedStats({
                   STAT_CATEGORIES.SPECIAL_TEAMS,
                   STAT_CATEGORIES.TURNOVERS_PENALTIES
                 ].filter(c => grouped[c]?.length)
-              : sport === 'NBA'
+              : (sport === 'NBA' || sport === 'NCAAB')
                 ? ['All']
                 : Object.keys(grouped)
         )
@@ -814,7 +818,7 @@ export function TeamDetailedStats({
                   </div>
                 )}
                 {                (
-                  sport === 'NBA' && h2hStyle
+                  (sport === 'NBA' || sport === 'NCAAB') && h2hStyle
                     ? [...grouped[cat]!]
                     : (
                         cat === STAT_CATEGORIES.KEY_FACTORS
@@ -926,6 +930,7 @@ export function TeamDetailedStats({
       : filteredStats.filter(stat => {
           if (sport === 'CFB') return mapCfbStatToCategory(stat) === selectedCategory
           if (sport === 'NFL') return mapNflStatToCategory(stat) === selectedCategory
+          if (sport === 'NCAAB') return mapNcaabStatToCategory(stat) === selectedCategory
           return stat.stat?.category === selectedCategory
         })
     const categoryStats = deduplicateByDisplayName(categoryStatsRaw)

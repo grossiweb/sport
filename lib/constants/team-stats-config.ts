@@ -175,6 +175,47 @@ export const NBA_PREFERRED_STATS: StatConfig[] = [
   { stat_id: 1286, abbreviation: 'STL', display_name: 'Steals', category: 'Defense', description: 'Total steals.', priority: 62 },
 ]
 
+// NCAAB Preferred Stats Configuration - Exact order as specified by user
+export const NCAAB_PREFERRED_STATS: StatConfig[] = [
+  // Exact order from user requirements (priority matches display order)
+  { stat_id: -1, abbreviation: 'PF', display_name: 'Fouls Per Game', category: 'Key Factors', description: 'Average fouls per game.', priority: 1 },
+  { stat_id: -1, abbreviation: 'REB', display_name: 'Rebounds Per Game', category: 'Key Factors', description: 'Average rebounds per game.', priority: 2 },
+  { stat_id: -1, abbreviation: 'AST/TO', display_name: 'Assist To Turnover Ratio', category: 'Key Factors', description: 'Assist to turnover ratio.', priority: 3 },
+  { stat_id: -1, abbreviation: 'REB', display_name: 'Rebounds', category: 'Key Factors', description: 'Total rebounds.', priority: 4 },
+  { stat_id: -1, abbreviation: 'FT%', display_name: 'Free Throw %', category: 'Key Factors', description: 'Free throw percentage.', priority: 5 },
+  { stat_id: -1, abbreviation: '3P%', display_name: '3-Point Field Goal Percentage', category: 'Key Factors', description: '3-point field goal percentage.', priority: 6 },
+  { stat_id: -1, abbreviation: 'PTS', display_name: 'Points Per Game', category: 'Key Factors', description: 'Average points per game.', priority: 7 },
+  { stat_id: -1, abbreviation: 'OR', display_name: 'Offensive Rebounds Per Game', category: 'Key Factors', description: 'Average offensive rebounds per game.', priority: 8 },
+  { stat_id: -1, abbreviation: 'TO', display_name: 'Turnovers Per Game', category: 'Key Factors', description: 'Average turnovers per game.', priority: 9 },
+  { stat_id: -1, abbreviation: '2P%', display_name: '2-Point Field Goal Percentage', category: 'Key Factors', description: '2-point field goal percentage.', priority: 10 },
+  { stat_id: -1, abbreviation: 'SC-EFF', display_name: 'Scoring Efficiency', category: 'Key Factors', description: 'Scoring efficiency.', priority: 11 },
+  { stat_id: -1, abbreviation: 'SH-EFF', display_name: 'Shooting Efficiency', category: 'Key Factors', description: 'Shooting efficiency.', priority: 12 },
+  { stat_id: -1, abbreviation: 'FG%', display_name: 'Field Goal %', category: 'Key Factors', description: 'Field goal percentage.', priority: 13 },
+  { stat_id: -1, abbreviation: 'TO', display_name: 'Turnovers', category: 'Key Factors', description: 'Total turnovers.', priority: 14 },
+  { stat_id: -1, abbreviation: '3P%', display_name: 'Three Point %', category: 'Key Factors', description: 'Three point percentage.', priority: 15 },
+  { stat_id: -1, abbreviation: 'DR', display_name: 'Defensive Rebounds Per Game', category: 'Key Factors', description: 'Average defensive rebounds per game.', priority: 16 },
+  { stat_id: -1, abbreviation: 'AST', display_name: 'Assists Per Game', category: 'Key Factors', description: 'Average assists per game.', priority: 17 },
+  { stat_id: -1, abbreviation: 'PTS', display_name: 'Points', category: 'Offensive', description: 'Total points.', priority: 18 },
+  { stat_id: -1, abbreviation: 'OREB', display_name: 'Offensive Rebounds', category: 'Offensive', description: 'Total offensive rebounds.', priority: 19 },
+  { stat_id: -1, abbreviation: 'AST', display_name: 'Assists', category: 'Offensive', description: 'Total assists.', priority: 20 },
+  { stat_id: -1, abbreviation: 'BLK', display_name: 'Blocks', category: 'Offensive', description: 'Total blocks.', priority: 21 },
+  { stat_id: -1, abbreviation: 'BLK', display_name: 'Blocks Per Game', category: 'Defense', description: 'Average blocks per game.', priority: 22 },
+  { stat_id: -1, abbreviation: 'STL', display_name: 'Steals Per Game', category: 'Defense', description: 'Average steals per game.', priority: 23 },
+  { stat_id: -1, abbreviation: 'STL', display_name: 'Steals', category: 'Defense', description: 'Total steals.', priority: 24 },
+  
+  // Opponent stats (lower priority, will be filtered out if not present)
+  { stat_id: -1, abbreviation: 'OPP PTS', display_name: 'Opponent Points', category: 'Key Factors', description: 'Opponent points per game.', priority: 100 },
+  { stat_id: -1, abbreviation: 'OPP TO', display_name: 'Opponent Turnovers', category: 'Key Factors', description: 'Opponent turnovers per game.', priority: 101 },
+  { stat_id: -1, abbreviation: 'OPP AST/TO', display_name: 'Opponent Assist To Turnover Ratio', category: 'Key Factors', description: 'Opponent assist to turnover ratio.', priority: 102 },
+  { stat_id: -1, abbreviation: 'OPP AST', display_name: 'Opponent Assists', category: 'Key Factors', description: 'Opponent assists per game.', priority: 103 },
+  { stat_id: -1, abbreviation: 'OPP BLK', display_name: 'Opponent Blocks', category: 'Key Factors', description: 'Opponent blocks per game.', priority: 104 },
+  { stat_id: -1, abbreviation: 'OPP PF', display_name: 'Opponent Fouls', category: 'Key Factors', description: 'Opponent fouls per game.', priority: 105 },
+  { stat_id: -1, abbreviation: 'OPP STL', display_name: 'Opponent Steals', category: 'Key Factors', description: 'Opponent steals per game.', priority: 106 },
+  { stat_id: -1, abbreviation: 'OPP FG%', display_name: 'Opponent Field Goal %', category: 'Key Factors', description: 'Opponent field goal percentage.', priority: 107 },
+  { stat_id: -1, abbreviation: 'OPP 3P%', display_name: 'Opponent 3-Point Field Goal Percentage', category: 'Key Factors', description: 'Opponent 3-point field goal percentage.', priority: 108 },
+  { stat_id: -1, abbreviation: 'OPP FT%', display_name: 'Opponent Free Throw %', category: 'Key Factors', description: 'Opponent free throw percentage.', priority: 109 },
+]
+
 // Strict allowlist: only stats present in uploaded NBA stats list
 export const NBA_ALLOWED_DISPLAY_NAMES = new Set<string>([
   'Rebounds Per Game',
@@ -224,10 +265,73 @@ export const NBA_ALLOWED_DISPLAY_NAMES = new Set<string>([
   'Blocks'
 ])
 
+// NCAAB Allowlist - Exact stats in priority order plus additional stats
+export const NCAAB_ALLOWED_DISPLAY_NAMES = new Set<string>([
+  // Core stats from user requirements (exact order)
+  'Fouls Per Game',
+  'Rebounds Per Game',
+  'Assist To Turnover Ratio',
+  'Rebounds',
+  'Free Throw %',
+  '3-Point Field Goal Percentage',
+  'Points Per Game',
+  'Offensive Rebounds Per Game',
+  'Turnovers Per Game',
+  '2-Point Field Goal Percentage',
+  'Scoring Efficiency',
+  'Shooting Efficiency',
+  'Field Goal %',
+  'Turnovers',
+  'Three Point %',
+  'Defensive Rebounds Per Game',
+  'Assists Per Game',
+  'Points',
+  'Offensive Rebounds',
+  'Assists',
+  'Blocks',
+  'Blocks Per Game',
+  'Steals Per Game',
+  'Steals',
+  // Opponent stats
+  'Opponent Points',
+  'Opponent Turnovers',
+  'Opponent Assist To Turnover Ratio',
+  'Opponent Assists',
+  'Opponent Blocks',
+  'Opponent Fouls',
+  'Opponent Steals',
+  'Opponent Field Goal %',
+  'Opponent 3-Point Field Goal Percentage',
+  'Opponent Free Throw %',
+  // Additional stats that might be in database
+  'Games Played',
+  'Games Started',
+  'Minutes',
+  'Minutes Per Game',
+  'Defensive Rebounds',
+  'Average Field Goals Made',
+  'Average Field Goals Attempted',
+  'Average 3-Point Field Goals Made',
+  'Average 3-Point Field Goals Attempted',
+  'Average Free Throws Made',
+  'Average Free Throws Attempted',
+  '2-Point Field Goals Made',
+  '2-Point Field Goals Attempted',
+  'Field Goals Made',
+  'Field Goals Attempted',
+  'Free Throws Made',
+  'Free Throws Attempted',
+  '3-Point Field Goals Made',
+  '3-Point Field Goals Attempted',
+  '2-Point Field Goals Made per Game',
+  '2-Point Field Goals Attempted per Game',
+])
+
 // Helper function to get preferred stats by sport
-export function getPreferredStats(sport: 'CFB' | 'NFL' | 'NBA'): StatConfig[] {
+export function getPreferredStats(sport: 'CFB' | 'NFL' | 'NBA' | 'NCAAB'): StatConfig[] {
   if (sport === 'NFL') return NFL_PREFERRED_STATS
   if (sport === 'NBA') return NBA_PREFERRED_STATS
+  if (sport === 'NCAAB') return NCAAB_PREFERRED_STATS
   return CFB_PREFERRED_STATS
 }
 
@@ -251,7 +355,7 @@ export const EXCLUDED_DISPLAY_NAMES = [
 ]
 
 // Helper function to filter and sort stats based on preferred configuration
-export function filterAndSortStats(stats: any[], sport: 'CFB' | 'NFL' | 'NBA'): any[] {
+export function filterAndSortStats(stats: any[], sport: 'CFB' | 'NFL' | 'NBA' | 'NCAAB'): any[] {
   // First, filter out explicitly excluded stats (by internal name and display name)
   const nonExcluded = stats.filter(stat => {
     const statName = stat?.stat?.name
@@ -292,11 +396,12 @@ export function filterAndSortStats(stats: any[], sport: 'CFB' | 'NFL' | 'NBA'): 
     return filtered.sort((a, b) => byPriority(a) - byPriority(b))
   }
 
-  if (sport === 'NBA') {
-    // Strict allowlist by display name
+  if (sport === 'NBA' || sport === 'NCAAB') {
+    // Strict allowlist by display name - same logic for both basketball sports
+    const allowedNames = sport === 'NBA' ? NBA_ALLOWED_DISPLAY_NAMES : NCAAB_ALLOWED_DISPLAY_NAMES
     const allowed = nonExcluded.filter(stat => {
       const dn = (stat?.stat?.display_name || stat?.stat?.name || '').trim()
-      return dn && NBA_ALLOWED_DISPLAY_NAMES.has(dn)
+      return dn && allowedNames.has(dn)
     })
     const loweredToPriority = new Map<string, number>()
     preferredStats.forEach(p => loweredToPriority.set(p.display_name.toLowerCase(), p.priority))
@@ -306,7 +411,18 @@ export function filterAndSortStats(stats: any[], sport: 'CFB' | 'NFL' | 'NBA'): 
       return loweredToPriority.get(name) ?? 999
     }
     const filtered = allowed.filter(stat => byPriority(stat) !== 999)
-    return filtered.sort((a, b) => byPriority(a) - byPriority(b))
+    const sorted = filtered.sort((a, b) => byPriority(a) - byPriority(b))
+    
+    // Debug logging for NCAAB to verify order
+    if (sport === 'NCAAB' && sorted.length > 0) {
+      console.log(`[NCAAB Stats Order] Sorted ${sorted.length} stats by priority:`)
+      sorted.slice(0, 10).forEach((s, i) => {
+        const name = (s?.stat?.display_name || s?.stat?.name || '').trim()
+        console.log(`  ${i + 1}. ${name} (priority: ${byPriority(s)})`)
+      })
+    }
+    
+    return sorted
   }
 
   if (sport === 'NFL') {
@@ -488,6 +604,30 @@ export function mapNbaStatToCategory(stat: any): string {
   if (pref) return pref.category
   // Heuristics fallback to requested three buckets
   if (/efficiency|assist to turnover|ast\/to|points per game|fg%|3|three|free throw/i.test(label)) return 'Key Factors'
+  if (/defensive|steal|block/i.test(label)) return 'Defense'
+  return 'Offensive'
+}
+
+// Map an NCAAB stat to categories (same logic as NBA - both are basketball)
+export function mapNcaabStatToCategory(stat: any): string {
+  const label = (stat?.stat?.display_name || stat?.stat?.name || '').trim().toLowerCase()
+  if (!label) return 'Offensive'
+  
+  // Handle opponent stats - they inherit the category from the corresponding regular stat
+  if (label.startsWith('opponent ')) {
+    const baseLabel = label.replace('opponent ', '')
+    const basePref = NCAAB_PREFERRED_STATS.find(p => p.display_name.toLowerCase() === baseLabel)
+    if (basePref) return basePref.category
+    // Fallback heuristics for opponent stats
+    if (/efficiency|assist|turnover|points|fg%|3|three|free throw|rebound|foul/i.test(baseLabel)) return 'Key Factors'
+    if (/defensive|steal|block/i.test(baseLabel)) return 'Defense'
+    return 'Offensive'
+  }
+  
+  const pref = NCAAB_PREFERRED_STATS.find(p => p.display_name.toLowerCase() === label)
+  if (pref) return pref.category
+  // Heuristics fallback to requested three buckets
+  if (/efficiency|assist to turnover|ast\/to|points|fg%|3|three|free throw|rebound|foul/i.test(label)) return 'Key Factors'
   if (/defensive|steal|block/i.test(label)) return 'Defense'
   return 'Offensive'
 }
