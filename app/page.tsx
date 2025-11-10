@@ -11,6 +11,7 @@ import { DailyMatchups } from '@/components/dashboard/DailyMatchups'
 import { RecentMatchups } from '@/components/dashboard/RecentMatchups'
 import { UpcomingMatchups } from '@/components/dashboard/UpcomingMatchups'
 import { UpcomingScroller } from '@/components/dashboard/UpcomingScroller'
+import { MostBetMatchups } from '@/components/dashboard/MostBetMatchups'
 import { useSport } from '@/contexts/SportContext'
 import toast from 'react-hot-toast'
 
@@ -42,12 +43,28 @@ function HomePageContent() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* Hero Section */}
-      <DashboardHero />
+      {/*<DashboardHero />*/}
+
+      {/* Upcoming Scroller */}
+      <section>
+        <Suspense fallback={<LoadingSpinner />}>
+          <UpcomingScroller />
+        </Suspense>
+      </section>
 
       {/* Today's Daily Matchups */}
+      {/*
       <section>
         <Suspense fallback={<LoadingSpinner />}>
           <DailyMatchups />
+        </Suspense>
+      </section>
+      */}
+
+      {/* Most Bet Matchups */}
+      <section>
+        <Suspense fallback={<LoadingSpinner />}>
+          <MostBetMatchups />
         </Suspense>
       </section>
 
@@ -62,13 +79,6 @@ function HomePageContent() {
       <section>
         <Suspense fallback={<LoadingSpinner />}>
           <UpcomingMatchups />
-        </Suspense>
-      </section>
-
-      {/* Upcoming Scroller */}
-      <section>
-        <Suspense fallback={<LoadingSpinner />}>
-          <UpcomingScroller />
         </Suspense>
       </section>
 
