@@ -1133,40 +1133,24 @@ export class MongoDBSportsAPI {
 
       // Add date filter if provided
       if (date) {
-        // Build both string and Date-based comparisons to handle mixed schema types in Mongo
         if (endDate) {
           // Inclusive start, exclusive end (next day) to ensure all times on endDate are included
           const start = new Date(date)
           const endExclusive = new Date(endDate)
           endExclusive.setDate(endExclusive.getDate() + 1)
-
-          const startStr = start.toISOString().split('T')[0]
-          const endStrExclusive = endExclusive.toISOString().split('T')[0]
-
-          query = {
-            sport_id: sportId,
-            $or: [
-              // String-stored date_event: 'YYYY-MM-DD'
-              { date_event: { $gte: startStr, $lt: endStrExclusive } },
-              // Date-stored date_event
-              { date_event: { $gte: start, $lt: endExclusive } }
-            ]
+          query.date_event = {
+            $gte: start.toISOString().split('T')[0],
+            $lte: endExclusive.toISOString().split('T')[0]
           }
         } else {
-          // Single date query (legacy support) - same dual-type handling
+          // Single date query (legacy support)
           const targetDate = new Date(date)
           const nextDay = new Date(targetDate)
           nextDay.setDate(nextDay.getDate() + 1)
-
-          const startStr = targetDate.toISOString().split('T')[0]
-          const endStrExclusive = nextDay.toISOString().split('T')[0]
-
-          query = {
-            sport_id: sportId,
-            $or: [
-              { date_event: { $gte: startStr, $lt: endStrExclusive } },
-              { date_event: { $gte: targetDate, $lt: nextDay } }
-            ]
+          
+          query.date_event = {
+            $gte: targetDate.toISOString().split('T')[0],
+            $lte: nextDay.toISOString().split('T')[0]
           }
         }
       }
@@ -1176,8 +1160,9 @@ export class MongoDBSportsAPI {
       if (limit) {
         cursor = cursor.limit(limit)
       }
-      
+
       const mongoGames = await cursor.toArray()
+
       const bettingCollection = await getBettingDataCollection()
 
       const bettingDataByEventId = new Map<string, MongoBettingData>()
@@ -1247,6 +1232,59 @@ export class MongoDBSportsAPI {
       return this.mapMongoBettingDataToBettingData(mongoBetting)
     } catch (error) {
       console.error(`Error fetching betting data for event ${eventId}:`, error)
+      return null
+    }
+  }
+
+  // Fallback: fetch a single game by event_id regardless of sport filters
+  public async getGameByEventId(eventId: string): Promise<Game | null> {
+    try {
+      const gamesCollection = await getGamesCollection()
+      const mongoGame = await gamesCollection.findOne({ event_id: eventId }) as MongoGame | null
+      if (!mongoGame) return null
+
+      // Resolve sport type from sport_id field on the game document
+      const sportType = this.mapSportIdToSportType(mongoGame.sport_id)
+
+      // Load teams metadata for proper mapping
+      const teams = await this.getTeams(sportType)
+      const teamsMap = new Map(teams.map(team => [team.id, team]))
+
+      // Mongo team docs for abbreviations
+      const teamsCollection = await getTeamsCollection()
+      const allMongoTeams = await teamsCollection.find({ sport_id: mongoGame.sport_id }).toArray()
+      const mongoTeamsMap = new Map(allMongoTeams.map(team => [team.team_id.toString(), team]))
+
+      const game = this.mapMongoGameToGame(
+        mongoGame,
+        null,
+        mongoTeamsMap.get(mongoGame.home_team_id.toString()),
+        mongoTeamsMap.get(mongoGame.away_team_id.toString())
+      )
+
+      // Enrich with division/conference/mascot/record
+      const homeTeam = teamsMap.get(game.homeTeam.id)
+      const awayTeam = teamsMap.get(game.awayTeam.id)
+
+      return {
+        ...game,
+        homeTeam: {
+          ...game.homeTeam,
+          division: homeTeam?.division,
+          conference: homeTeam?.conference,
+          mascot: homeTeam?.mascot,
+          record: homeTeam?.record
+        },
+        awayTeam: {
+          ...game.awayTeam,
+          division: awayTeam?.division,
+          conference: awayTeam?.conference,
+          mascot: awayTeam?.mascot,
+          record: awayTeam?.record
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching game by event_id:', e)
       return null
     }
   }
