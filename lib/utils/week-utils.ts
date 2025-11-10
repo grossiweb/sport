@@ -156,24 +156,25 @@ export function formatDateRange(startDate: Date, endDate: Date): string {
  * Uses exact Thursday–Wednesday ranges except Week 18 (Jan 3–Jan 4, 2026).
  */
 const NFL_2025_WEEKS: Array<{ weekNumber: number, startISO: string, endISO: string }> = [
-  { weekNumber: 1, startISO: '2025-09-04', endISO: '2025-09-10' },
-  { weekNumber: 2, startISO: '2025-09-11', endISO: '2025-09-17' },
-  { weekNumber: 3, startISO: '2025-09-18', endISO: '2025-09-24' },
-  { weekNumber: 4, startISO: '2025-09-25', endISO: '2025-10-01' },
-  { weekNumber: 5, startISO: '2025-10-02', endISO: '2025-10-08' },
-  { weekNumber: 6, startISO: '2025-10-09', endISO: '2025-10-15' },
-  { weekNumber: 7, startISO: '2025-10-16', endISO: '2025-10-22' },
-  { weekNumber: 8, startISO: '2025-10-23', endISO: '2025-10-29' },
-  { weekNumber: 9, startISO: '2025-10-30', endISO: '2025-11-03' },
-  { weekNumber: 10, startISO: '2025-11-06', endISO: '2025-11-10' },
-  { weekNumber: 11, startISO: '2025-11-13', endISO: '2025-11-17' },
-  { weekNumber: 12, startISO: '2025-11-20', endISO: '2025-11-24' },
-  { weekNumber: 13, startISO: '2025-11-27', endISO: '2025-12-01' },
-  { weekNumber: 14, startISO: '2025-12-04', endISO: '2025-12-08' },
-  { weekNumber: 15, startISO: '2025-12-11', endISO: '2025-12-15' },
-  { weekNumber: 16, startISO: '2025-12-18', endISO: '2025-12-22' },
-  { weekNumber: 17, startISO: '2025-12-25', endISO: '2025-12-29' },
-  { weekNumber: 18, startISO: '2026-01-03', endISO: '2026-01-04' },
+  // Per request: fixed ranges (inclusive) for 2025 season
+  { weekNumber: 1,  startISO: '2025-09-04', endISO: '2025-09-09' }, // Sep 4 - 9
+  { weekNumber: 2,  startISO: '2025-09-10', endISO: '2025-09-16' }, // Sep 10 - 16
+  { weekNumber: 3,  startISO: '2025-09-17', endISO: '2025-09-23' }, // Sep 17 - 23
+  { weekNumber: 4,  startISO: '2025-09-24', endISO: '2025-09-30' }, // Sep 24 - 30
+  { weekNumber: 5,  startISO: '2025-10-01', endISO: '2025-10-07' }, // Oct 1 - 7
+  { weekNumber: 6,  startISO: '2025-10-08', endISO: '2025-10-14' }, // Oct 8 - 14
+  { weekNumber: 7,  startISO: '2025-10-15', endISO: '2025-10-21' }, // Oct 15 - 21
+  { weekNumber: 8,  startISO: '2025-10-22', endISO: '2025-10-28' }, // Oct 22 - 28
+  { weekNumber: 9,  startISO: '2025-10-29', endISO: '2025-11-04' }, // Oct 29 - Nov 4
+  { weekNumber: 10, startISO: '2025-11-05', endISO: '2025-11-11' }, // Nov 5 - 11
+  { weekNumber: 11, startISO: '2025-11-12', endISO: '2025-11-18' }, // Nov 12 - 18
+  { weekNumber: 12, startISO: '2025-11-19', endISO: '2025-11-25' }, // Nov 19 - 25
+  { weekNumber: 13, startISO: '2025-11-26', endISO: '2025-12-02' }, // Nov 26 - Dec 2
+  { weekNumber: 14, startISO: '2025-12-03', endISO: '2025-12-09' }, // Dec 3 - 9
+  { weekNumber: 15, startISO: '2025-12-10', endISO: '2025-12-16' }, // Dec 10 - 16
+  { weekNumber: 16, startISO: '2025-12-17', endISO: '2025-12-23' }, // Dec 17 - 23
+  { weekNumber: 17, startISO: '2025-12-24', endISO: '2025-12-30' }, // Dec 24 - 30
+  { weekNumber: 18, startISO: '2025-12-31', endISO: '2026-01-07' }, // Dec 31 - Jan 7
 ]
 
 /**

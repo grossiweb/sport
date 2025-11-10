@@ -1130,27 +1130,43 @@ export class MongoDBSportsAPI {
       const sportId = this.mapSportTypeToSportId(sport)
       
       let query: any = { sport_id: sportId }
-      
+
       // Add date filter if provided
       if (date) {
+        // Build both string and Date-based comparisons to handle mixed schema types in Mongo
         if (endDate) {
           // Inclusive start, exclusive end (next day) to ensure all times on endDate are included
           const start = new Date(date)
           const endExclusive = new Date(endDate)
           endExclusive.setDate(endExclusive.getDate() + 1)
-          query.date_event = {
-            $gte: start.toISOString().split('T')[0],
-            $lt: endExclusive.toISOString().split('T')[0]
+
+          const startStr = start.toISOString().split('T')[0]
+          const endStrExclusive = endExclusive.toISOString().split('T')[0]
+
+          query = {
+            sport_id: sportId,
+            $or: [
+              // String-stored date_event: 'YYYY-MM-DD'
+              { date_event: { $gte: startStr, $lt: endStrExclusive } },
+              // Date-stored date_event
+              { date_event: { $gte: start, $lt: endExclusive } }
+            ]
           }
         } else {
-          // Single date query (legacy support)
+          // Single date query (legacy support) - same dual-type handling
           const targetDate = new Date(date)
           const nextDay = new Date(targetDate)
           nextDay.setDate(nextDay.getDate() + 1)
-          
-          query.date_event = {
-            $gte: targetDate.toISOString().split('T')[0],
-            $lt: nextDay.toISOString().split('T')[0]
+
+          const startStr = targetDate.toISOString().split('T')[0]
+          const endStrExclusive = nextDay.toISOString().split('T')[0]
+
+          query = {
+            sport_id: sportId,
+            $or: [
+              { date_event: { $gte: startStr, $lt: endStrExclusive } },
+              { date_event: { $gte: targetDate, $lt: nextDay } }
+            ]
           }
         }
       }

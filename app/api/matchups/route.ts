@@ -101,6 +101,7 @@ export async function GET(request: NextRequest) {
     const limit = limitParam ? parseInt(limitParam, 10) : endDate ? undefined : 10
     const status = searchParams.get('status') // New status filter parameter
     const dateRange = searchParams.get('dateRange') // New date range parameter (past/future)
+
     
     if (!isValidSportType(sport)) {
       return NextResponse.json(
