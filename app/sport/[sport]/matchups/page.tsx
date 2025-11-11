@@ -8,7 +8,7 @@ import { isValidSportType } from '@/lib/constants/sports'
 import { useSport } from '@/contexts/SportContext'
 import { ModernMatchupCard } from '@/components/matchups/ModernMatchupCard'
 import { MatchupFilters } from '@/components/matchups/MatchupFilters'
-import { WeekInfo, getCurrentWeek, getWeekDateRange, getSeasonWeekOptions, getNFLSeasonWeekOptions } from '@/lib/utils/week-utils'
+import { WeekInfo, getCurrentWeek, getWeekDateRange, getSeasonWeekOptions, getNFLSeasonWeekOptions, getCurrentSeasonWeekForSport } from '@/lib/utils/week-utils'
 import { formatToEasternWeekday } from '@/lib/utils/time'
 import { useQuery } from 'react-query'
 import { CoversStyleMatchupCard } from '@/components/matchups/CoversStyleMatchupCard'
@@ -45,10 +45,19 @@ export default function SportMatchupsPage() {
   const [validSport, setValidSport] = useState<SportType | null>(null)
   const [selectedWeek, setSelectedWeek] = useState<WeekInfo>(getCurrentWeek())
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [weekReady, setWeekReady] = useState<boolean>(false)
   // Align initial selectedWeek/date to current season-relative week if season data exists
   useEffect(() => {
     const alignToSeason = async () => {
       const s = (validSport || currentSport)
+
+      // Immediately align the week selection synchronously based on sport-specific logic
+      // This prevents an initial fetch using generic ISO week ranges for NFL
+      if (s && s !== 'NCAAB') {
+        setWeekReady(false)
+        setSelectedWeek(getCurrentSeasonWeekForSport(s))
+        setWeekReady(true)
+      }
       // For NBA, always use provided season dates
       if (s === 'NBA') {
         const start = new Date('2025-10-09')
@@ -114,7 +123,7 @@ export default function SportMatchupsPage() {
     isNcaab
       ? () => fetchDailyMatchups(sport, selectedDate)
       : () => fetchWeekMatchups(sport, selectedWeek),
-    { enabled: !!sport }
+    { enabled: !!sport && (isNcaab ? !!selectedDate : weekReady) }
   )
 
   const isLoading = contextLoading || matchupsLoading

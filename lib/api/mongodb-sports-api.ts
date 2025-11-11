@@ -386,6 +386,8 @@ export class MongoDBSportsAPI {
         league: this.mapSportIdToSportType(mongoGame.sport_id)
       },
       league: this.mapSportIdToSportType(mongoGame.sport_id),
+      // Preserve exact DB date string for display consistency across time zones
+      gameDateString: mongoGame.date_event,
       gameDate: new Date(mongoGame.date_event),
       status: this.mapEventStatus(mongoGame.event_status),
       statusDetail: mongoGame.event_status_detail || '',

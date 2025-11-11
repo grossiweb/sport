@@ -12,7 +12,8 @@ import Link from 'next/link'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 import { BettingLinesPopup } from './BettingLinesPopup'
 import { ScoreByPeriodPopup } from './ScoreByPeriodPopup'
-import { formatToEasternTime, formatToEasternDate, formatToEasternWeekday } from '@/lib/utils/time'
+import { formatToEasternTime } from '@/lib/utils/time'
+import { parse, parseISO, format as formatDateFns, isValid as isValidDate } from 'date-fns'
 import { useScoreByPeriod } from '@/hooks/useScoreByPeriod'
 import { computeConsensus, computeAtsFromConsensus } from '@/lib/utils/consensus'
 import { formatSpread as formatSpreadUtil, formatTotal as formatTotalUtil, formatPercentage } from '@/lib/utils/betting-format'
@@ -35,9 +36,22 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
     winProbHome: number | null
   } | null>(null)
 
-  const gameTime = formatToEasternTime(game.gameDate)
-  const gameDateShort = formatToEasternDate(game.gameDate, { month: 'short', day: 'numeric' })
-  const gameDayOfWeek = formatToEasternWeekday(game.gameDate)
+  // Safely derive a Date for display without throwing on invalid values
+  const deriveSafeDate = (): Date | null => {
+    if (game.gameDateString) {
+      // Try strict yyyy-MM-dd first, then ISO fallback
+      const byPattern = parse(game.gameDateString, 'yyyy-MM-dd', new Date())
+      if (isValidDate(byPattern)) return byPattern
+      const byIso = parseISO(game.gameDateString)
+      if (isValidDate(byIso)) return byIso
+    }
+    const asDate = new Date(game.gameDate as any)
+    return isValidDate(asDate) ? asDate : null
+  }
+  const safeDate = deriveSafeDate()
+  const gameTime = safeDate ? formatToEasternTime(safeDate) : '-'
+  const gameDateShort = safeDate ? formatDateFns(safeDate, 'MMM d') : ''
+  const gameDayOfWeek = safeDate ? formatDateFns(safeDate, 'EEE') : ''
   const isScheduled = game.status === 'scheduled'
   const showPredictions = false
 

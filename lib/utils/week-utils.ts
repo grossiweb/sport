@@ -221,7 +221,7 @@ export function getCurrentSeasonWeekForSport(sport: SportType): WeekInfo {
   const now = new Date()
   if (sport === 'NFL') {
     const seasonStart = parseISO('2025-09-04')
-    const seasonEnd = parseISO('2026-01-04')
+    const seasonEnd = parseISO('2026-01-07') // Updated to match Week 18 end date
     if (now >= seasonStart && now <= seasonEnd) {
       const weeks = getNFL2025WeekOptions()
       const m = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)

@@ -249,7 +249,7 @@ export async function GET(request: NextRequest) {
     if (typeof limit === 'number') {
       filteredMatchups = filteredMatchups.slice(0, limit)
     }
-
+    console.log(`fetch date: ${fetchDate}`)
     const response = {
       success: true,
       data: filteredMatchups,

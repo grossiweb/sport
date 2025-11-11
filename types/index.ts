@@ -219,6 +219,8 @@ export interface Game {
   homeTeam: Team
   awayTeam: Team
   league: SportType
+  // Raw date string from MongoDB (yyyy-MM-dd) to preserve exact DB date
+  gameDateString?: string
   gameDate: Date
   status: 'scheduled' | 'live' | 'final' | 'postponed' | 'cancelled'
   statusDetail?: string

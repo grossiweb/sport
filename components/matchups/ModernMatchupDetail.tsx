@@ -166,7 +166,14 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
             {/* Center Info */}
             <div className="w-1/3 text-center px-2">
               <div className="text-sm font-semibold">{gameTime}</div>
-              <div className="text-xs text-gray-300">{format(new Date(game.gameDate), 'MMM dd, yyyy')}</div>
+              <div className="text-xs text-gray-300">
+                {(() => {
+                  const d = (matchup.game as any).gameDateString
+                    ? parse((matchup.game as any).gameDateString, 'yyyy-MM-dd', new Date())
+                    : new Date(game.gameDate)
+                  return format(d, 'MMM dd, yyyy')
+                })()}
+              </div>
               {game.venue && (
                 <div className="mt-1 flex items-center justify-center text-xs text-gray-300 gap-1">
                   <MapPinIcon className="h-4 w-4" />
