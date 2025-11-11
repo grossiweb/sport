@@ -51,11 +51,17 @@ export default function SportMatchupsPage() {
     const alignToSeason = async () => {
       const s = (validSport || currentSport)
 
-      // Immediately align the week selection synchronously based on sport-specific logic
-      // This prevents an initial fetch using generic ISO week ranges for NFL
-      if (s && s !== 'NCAAB') {
-        setSelectedWeek(getCurrentSeasonWeekForSport(s))
+      // For NFL, use provided season dates (same logic as NBA/NCAAB)
+      if (s === 'NFL') {
+        const start = new Date('2025-09-04')
+        const endDate = new Date('2026-01-07')
+        const weeks = getNFLSeasonWeekOptions(2025, { startDate: start, endDate })
+        const now = new Date()
+        const current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+        if (current) setSelectedWeek(current.weekInfo)
+        return
       }
+
       // For NBA, always use provided season dates
       if (s === 'NBA') {
         const start = new Date('2025-10-09')
@@ -78,7 +84,8 @@ export default function SportMatchupsPage() {
         return
       }
 
-      const sportId = s === 'CFB' ? 1 : s === 'NFL' ? 2 : undefined
+      // For CFB, fetch from API
+      const sportId = s === 'CFB' ? 1 : undefined
       if (!sportId) return
       const year = new Date().getFullYear()
       try {
@@ -88,10 +95,7 @@ export default function SportMatchupsPage() {
         if (!season?.start_date) return
         const start = new Date(season.start_date)
         const endDate = season.end_date ? new Date(season.end_date) : undefined
-        // NFL: use exact league-defined week ranges when seasonYear == current year and sport is NFL
-        const weeks = (s === 'NFL')
-          ? getNFLSeasonWeekOptions(year, { startDate: start, endDate })
-          : getSeasonWeekOptions({ startDate: start, endDate })
+        const weeks = getSeasonWeekOptions({ startDate: start, endDate })
         const now = new Date()
         const current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
         if (current) setSelectedWeek(current.weekInfo)

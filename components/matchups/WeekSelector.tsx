@@ -27,6 +27,16 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
 
   // Load season start date from API based on sport and year, then compute weeks dynamically
   useEffect(() => {
+    // For NFL, use provided season dates (same logic as NBA/NCAAB)
+    if (currentSport === 'NFL') {
+      const start = new Date('2025-09-04')
+      const endDate = new Date('2026-01-07')
+      setSeasonStart(start)
+      const weeks = getNFLSeasonWeekOptions(selectedYear, { startDate: start, endDate })
+      setSeasonWeeks(weeks)
+      return
+    }
+
     // For NBA, always use provided season dates
     if (currentSport === 'NBA') {
       const start = new Date('2025-10-09')
@@ -47,7 +57,8 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
       return
     }
 
-    const sportId = currentSport === 'CFB' ? 1 : currentSport === 'NFL' ? 2 : undefined
+    // For CFB, fetch from API
+    const sportId = currentSport === 'CFB' ? 1 : undefined
     if (!sportId) return
     const loadSeason = async () => {
       try {
@@ -66,14 +77,8 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
           endDate = nextSeason?.start_date ? new Date(nextSeason.start_date) : undefined
         }
         setSeasonStart(start)
-        // NFL: use exact league-defined week ranges when seasonYear == 2025
-        if (currentSport === 'NFL') {
-          const nflWeeks = getNFLSeasonWeekOptions(selectedYear, { startDate: start, endDate })
-          setSeasonWeeks(nflWeeks)
-        } else {
-          const weeks = getSeasonWeekOptions({ startDate: start, endDate })
-          setSeasonWeeks(weeks)
-        }
+        const weeks = getSeasonWeekOptions({ startDate: start, endDate })
+        setSeasonWeeks(weeks)
       } catch (e) {
         setSeasonStart(null)
         setSeasonWeeks([])
