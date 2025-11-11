@@ -1,4 +1,4 @@
-import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, getWeek, getYear, startOfYear, isAfter, parseISO } from 'date-fns'
+import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, getWeek, getYear, startOfYear, isAfter, parseISO, addDays, getDay } from 'date-fns'
 import type { SportType } from '@/types'
 
 export interface WeekInfo {
@@ -152,11 +152,10 @@ export function formatDateRange(startDate: Date, endDate: Date): string {
 }
 
 /**
- * NFL 2025 regular season week definitions (per NFL Football Operations).
- * Uses exact Thursday–Wednesday ranges except Week 18 (Jan 3–Jan 4, 2026).
+ * NFL 2025 regular season week definitions with exact dates.
+ * Each week's date range as specified.
  */
 const NFL_2025_WEEKS: Array<{ weekNumber: number, startISO: string, endISO: string }> = [
-  // Per request: fixed ranges (inclusive) for 2025 season
   { weekNumber: 1,  startISO: '2025-09-04', endISO: '2025-09-09' }, // Sep 4 - 9
   { weekNumber: 2,  startISO: '2025-09-10', endISO: '2025-09-16' }, // Sep 10 - 16
   { weekNumber: 3,  startISO: '2025-09-17', endISO: '2025-09-23' }, // Sep 17 - 23
@@ -178,7 +177,7 @@ const NFL_2025_WEEKS: Array<{ weekNumber: number, startISO: string, endISO: stri
 ]
 
 /**
- * Build WeekOption[] for NFL 2025 season.
+ * Build WeekOption[] for NFL 2025 season using exact date ranges.
  */
 export function getNFL2025WeekOptions(): WeekOption[] {
   return NFL_2025_WEEKS.map(({ weekNumber, startISO, endISO }) => {
@@ -202,7 +201,7 @@ export function getNFL2025WeekOptions(): WeekOption[] {
 
 /**
  * Helper to get NFL season week options by season year.
- * Currently supports 2025 regular season mapping; falls back to generic weeks otherwise.
+ * For 2025, uses exact hardcoded weeks; otherwise falls back to generic weeks.
  */
 export function getNFLSeasonWeekOptions(seasonYear: number, fallback: SeasonWeeksOptions): WeekOption[] {
   if (seasonYear === 2025) {
@@ -221,7 +220,7 @@ export function getCurrentSeasonWeekForSport(sport: SportType): WeekInfo {
   const now = new Date()
   if (sport === 'NFL') {
     const seasonStart = parseISO('2025-09-04')
-    const seasonEnd = parseISO('2026-01-07') // Updated to match Week 18 end date
+    const seasonEnd = parseISO('2026-01-07')
     if (now >= seasonStart && now <= seasonEnd) {
       const weeks = getNFL2025WeekOptions()
       const m = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
