@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Matchup, SportType, DetailedTeamStat } from '@/types'
-import { format } from 'date-fns'
+import { format, parse, parseISO, isValid as isValidDate } from 'date-fns'
 import { 
   ClockIcon, 
   MapPinIcon, 
@@ -168,10 +168,14 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
               <div className="text-sm font-semibold">{gameTime}</div>
               <div className="text-xs text-gray-300">
                 {(() => {
-                  const d = (matchup.game as any).gameDateString
-                    ? parse((matchup.game as any).gameDateString, 'yyyy-MM-dd', new Date())
-                    : new Date(game.gameDate)
-                  return format(d, 'MMM dd, yyyy')
+                  const raw = (matchup.game as any)?.gameDateString as string | undefined
+                  const parsedByPattern = raw ? parse(raw, 'yyyy-MM-dd', new Date()) : null
+                  const parsedByIso = raw ? parseISO(raw) : null
+                  const chosen =
+                    (parsedByPattern && isValidDate(parsedByPattern) && parsedByPattern) ||
+                    (parsedByIso && isValidDate(parsedByIso) && parsedByIso) ||
+                    (game.gameDate instanceof Date ? game.gameDate : new Date(game.gameDate as any))
+                  return isValidDate(chosen) ? format(chosen, 'MMM dd, yyyy') : ''
                 })()}
               </div>
               {game.venue && (

@@ -56,7 +56,6 @@ export default function SportMatchupsPage() {
       if (s && s !== 'NCAAB') {
         setWeekReady(false)
         setSelectedWeek(getCurrentSeasonWeekForSport(s))
-        setWeekReady(true)
       }
       // For NBA, always use provided season dates
       if (s === 'NBA') {
@@ -101,6 +100,23 @@ export default function SportMatchupsPage() {
     }
     alignToSeason()
   }, [validSport, currentSport])
+
+  // Mark week ready only after selectedWeek aligns with sport-specific current week
+  useEffect(() => {
+    const s = (validSport || currentSport)
+    if (!s || s === 'NCAAB') return
+    const expected = getCurrentSeasonWeekForSport(s)
+    if (
+      expected &&
+      selectedWeek &&
+      selectedWeek.startDate.getTime() === expected.startDate.getTime() &&
+      selectedWeek.endDate.getTime() === expected.endDate.getTime()
+    ) {
+      setWeekReady(true)
+    } else {
+      setWeekReady(false)
+    }
+  }, [validSport, currentSport, selectedWeek])
   const [filters, setFilters] = useState<MatchupFiltersState>({})
 
   useEffect(() => {
