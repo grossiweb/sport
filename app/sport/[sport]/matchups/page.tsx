@@ -45,7 +45,7 @@ export default function SportMatchupsPage() {
   const [validSport, setValidSport] = useState<SportType | null>(null)
   const [selectedWeek, setSelectedWeek] = useState<WeekInfo>(getCurrentWeek())
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
-  const [weekReady, setWeekReady] = useState<boolean>(false)
+  
   // Align initial selectedWeek/date to current season-relative week if season data exists
   useEffect(() => {
     const alignToSeason = async () => {
@@ -54,7 +54,6 @@ export default function SportMatchupsPage() {
       // Immediately align the week selection synchronously based on sport-specific logic
       // This prevents an initial fetch using generic ISO week ranges for NFL
       if (s && s !== 'NCAAB') {
-        setWeekReady(false)
         setSelectedWeek(getCurrentSeasonWeekForSport(s))
       }
       // For NBA, always use provided season dates
@@ -100,23 +99,7 @@ export default function SportMatchupsPage() {
     }
     alignToSeason()
   }, [validSport, currentSport])
-
-  // Mark week ready only after selectedWeek aligns with sport-specific current week
-  useEffect(() => {
-    const s = (validSport || currentSport)
-    if (!s || s === 'NCAAB') return
-    const expected = getCurrentSeasonWeekForSport(s)
-    if (
-      expected &&
-      selectedWeek &&
-      selectedWeek.startDate.getTime() === expected.startDate.getTime() &&
-      selectedWeek.endDate.getTime() === expected.endDate.getTime()
-    ) {
-      setWeekReady(true)
-    } else {
-      setWeekReady(false)
-    }
-  }, [validSport, currentSport, selectedWeek])
+  
   const [filters, setFilters] = useState<MatchupFiltersState>({})
 
   useEffect(() => {
@@ -135,11 +118,11 @@ export default function SportMatchupsPage() {
   const { data: matchups, isLoading: matchupsLoading, error } = useQuery(
     isNcaab 
       ? ['dailyMatchups', sport, format(selectedDate, 'yyyy-MM-dd')]
-      : ['weekMatchups', sport, selectedWeek.weekNumber, selectedWeek.year],
+      : ['weekMatchups', sport, selectedWeek.weekNumber, selectedWeek.year, format(selectedWeek.startDate, 'yyyy-MM-dd'), format(selectedWeek.endDate, 'yyyy-MM-dd')],
     isNcaab
       ? () => fetchDailyMatchups(sport, selectedDate)
       : () => fetchWeekMatchups(sport, selectedWeek),
-    { enabled: !!sport && (isNcaab ? !!selectedDate : weekReady) }
+    { enabled: !!sport && (isNcaab ? !!selectedDate : true) }
   )
 
   const isLoading = contextLoading || matchupsLoading
