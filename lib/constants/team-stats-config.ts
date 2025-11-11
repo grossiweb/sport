@@ -31,7 +31,17 @@ export const EXCLUDED_STAT_NAMES = [
   'averagePuntReturnYards',
   'avgPuntReturnYards',
   'averageInterceptionYards',
-  'avgInterceptionYards'
+  'avgInterceptionYards',
+  'passingFumblesLost',
+  'rushingFumblesLost',
+  'receivingFumblesLost',
+  'fumblesLost',
+  'fumblesRecovered',
+  'fumblesTouchdowns',
+  'rushingFumbles',
+  'receivingFumbles',
+  'kickReturnFumblesLost',
+  'puntReturnFumblesLost'
 ]
 
 export interface StatConfig {
@@ -74,12 +84,8 @@ export const CFB_PREFERRED_STATS: StatConfig[] = [
   // Defensive (best-effort mapping based on available fields)
   { stat_id: -1, abbreviation: '', display_name: 'Sacks', category: 'Defensive', description: 'Sacks per game', priority: 30 },
 
-  // Special Teams
-  { stat_id: -1, abbreviation: '', display_name: 'Field Goal Attempts', category: 'Special Teams', description: 'FG Attempts per game', priority: 40 },
-  { stat_id: -1, abbreviation: '', display_name: 'Field Goal Percentage', category: 'Special Teams', description: 'FG Conversion %', priority: 41 },
-
-  // Turnovers & Penalties
-  { stat_id: -1, abbreviation: '', display_name: 'Fumbles Lost', category: 'Turnovers & Penalties', description: 'Fumbles lost per game', priority: 50 },
+  // Turnovers & Penalties (Other)
+  { stat_id: -1, abbreviation: '', display_name: 'Field Goal Percentage', category: 'Turnovers & Penalties', description: 'FG Conversion %', priority: 41 },
   { stat_id: -1, abbreviation: '', display_name: 'Fumbles', category: 'Turnovers & Penalties', description: 'Total fumbles per game', priority: 51 },
   { stat_id: -1, abbreviation: '', display_name: 'Interceptions', category: 'Turnovers & Penalties', description: 'Thrown interceptions per game', priority: 52 },
   { stat_id: -1, abbreviation: '', display_name: 'TO Margin', category: 'Turnovers & Penalties', description: 'Turnover margin', priority: 53 },
@@ -115,28 +121,11 @@ export const NFL_PREFERRED_STATS: StatConfig[] = [
   { stat_id: -1, abbreviation: 'YPRA', display_name: 'Yards Per Rushing Attempt', category: 'Offense', description: 'Yards per rushing attempt', priority: 20 },
   { stat_id: -1, abbreviation: 'PEN', display_name: 'Total Penalties', category: 'Offense', description: 'Total penalties', priority: 21 },
   
-  // Special Teams
-  { stat_id: -1, abbreviation: 'FG%', display_name: 'Field Goal Percentage', category: 'Special Teams', description: 'Field goal percentage', priority: 30 },
-  { stat_id: -1, abbreviation: 'FGA', display_name: 'Field Goal Attempts', category: 'Special Teams', description: 'Field goal attempts', priority: 31 },
-  { stat_id: -1, abbreviation: 'FGA1-19', display_name: 'Field Goal Attempts 1-19', category: 'Special Teams', description: 'Field goal attempts 1-19 yards', priority: 32 },
-  { stat_id: -1, abbreviation: 'FGA20-29', display_name: 'Field Goal Attempts 20-29', category: 'Special Teams', description: 'Field goal attempts 20-29 yards', priority: 33 },
-  { stat_id: -1, abbreviation: 'FGA30-39', display_name: 'Field Goal Attempts 30-39', category: 'Special Teams', description: 'Field goal attempts 30-39 yards', priority: 34 },
-  { stat_id: -1, abbreviation: 'FGA40-49', display_name: 'Field Goal Attempts 40-49', category: 'Special Teams', description: 'Field goal attempts 40-49 yards', priority: 35 },
-  { stat_id: -1, abbreviation: 'FGA50+', display_name: 'Field Goal Attempts 50+', category: 'Special Teams', description: 'Field goal attempts 50+ yards', priority: 36 },
-  { stat_id: -1, abbreviation: 'PRFL', display_name: 'Punt Return Fumbles Lost', category: 'Special Teams', description: 'Punt return fumbles lost', priority: 37 },
-  
-  // Turnovers & Penalties
-  { stat_id: -1, abbreviation: 'KRFL', display_name: 'Kick Return Fumbles Lost', category: 'Turnovers & Penalties', description: 'Kick return fumbles lost', priority: 40 },
-  { stat_id: -1, abbreviation: 'PFL', display_name: 'Passing Fumbles Lost', category: 'Turnovers & Penalties', description: 'Passing fumbles lost', priority: 41 },
-  { stat_id: -1, abbreviation: 'RUFL', display_name: 'Rushing Fumbles Lost', category: 'Turnovers & Penalties', description: 'Rushing fumbles lost', priority: 42 },
-  { stat_id: -1, abbreviation: 'REFL', display_name: 'Receiving Fumbles Lost', category: 'Turnovers & Penalties', description: 'Receiving fumbles lost', priority: 43 },
-  { stat_id: -1, abbreviation: 'FL', display_name: 'Fumbles Lost', category: 'Turnovers & Penalties', description: 'Total fumbles lost', priority: 44 },
+  // Turnovers & Penalties (Other)
+  { stat_id: -1, abbreviation: 'FG%', display_name: 'Field Goal Percentage', category: 'Turnovers & Penalties', description: 'Field goal percentage', priority: 30 },
   { stat_id: -1, abbreviation: 'FUM', display_name: 'Fumbles', category: 'Turnovers & Penalties', description: 'Total fumbles', priority: 45 },
   { stat_id: -1, abbreviation: 'FF', display_name: 'Forced Fumbles', category: 'Turnovers & Penalties', description: 'Forced fumbles', priority: 46 },
-  { stat_id: -1, abbreviation: 'FR', display_name: 'Fumbles Recovered', category: 'Turnovers & Penalties', description: 'Fumbles recovered', priority: 47 },
-  { stat_id: -1, abbreviation: 'FTD', display_name: 'Fumbles Touchdowns', category: 'Turnovers & Penalties', description: 'Fumbles returned for touchdowns', priority: 48 },
-  { stat_id: -1, abbreviation: 'RUFUM', display_name: 'Rushing Fumbles', category: 'Turnovers & Penalties', description: 'Rushing fumbles', priority: 49 },
-  { stat_id: -1, abbreviation: 'RECFUM', display_name: 'Receiving Fumbles', category: 'Turnovers & Penalties', description: 'Receiving fumbles', priority: 50 },
+  // Removed KRFL, PFL, RUFL, REFL, FL, FR, FTD, RUFUM, RECFUM per requirements
   { stat_id: -1, abbreviation: 'INT', display_name: 'Interceptions', category: 'Turnovers & Penalties', description: 'Interceptions thrown', priority: 51 },
   { stat_id: -1, abbreviation: 'PENYDS', display_name: 'Total Penalty Yards', category: 'Turnovers & Penalties', description: 'Total penalty yards', priority: 52 },
 ]
@@ -496,6 +485,15 @@ export const STAT_CATEGORIES = {
   CONTROL: 'Control'
 } as const
 
+// Helper function to get display name for categories based on sport
+// For CFB and NFL, rename 'Turnovers & Penalties' to 'Other'
+export function getCategoryDisplayName(category: string, sport: 'CFB' | 'NFL' | 'NBA' | 'NCAAB'): string {
+  if ((sport === 'CFB' || sport === 'NFL') && category === STAT_CATEGORIES.TURNOVERS_PENALTIES) {
+    return 'Other'
+  }
+  return category
+}
+
 // Map a CFB stat to one of the requested categories using display_name heuristics
 export function mapCfbStatToCategory(stat: any): string {
   const label = (stat?.stat?.display_name || stat?.stat?.name || '').toLowerCase()
@@ -507,11 +505,14 @@ export function mapCfbStatToCategory(stat: any): string {
   if (label.includes('red zone efficiency') || (label.includes('red zone') && label.includes('percentage'))) return STAT_CATEGORIES.KEY_FACTORS
   if (label.includes('turnover ratio')) return STAT_CATEGORIES.KEY_FACTORS
 
-  // Special Teams
-  if (label.includes('field goal') || label.includes('punting') || label.includes('punt')) return STAT_CATEGORIES.SPECIAL_TEAMS
+  // Special Teams (excluding Field Goal Percentage which goes to Other)
+  if ((label.includes('field goal') && !label.includes('percentage') && !label.includes('%')) || label.includes('punting') || label.includes('punt')) return STAT_CATEGORIES.SPECIAL_TEAMS
 
-  // Turnovers & Penalties
-  if (label.includes('fumble') || label.includes('interception') || label.includes('penalty')) return STAT_CATEGORIES.TURNOVERS_PENALTIES
+  // Turnovers & Penalties (Other) - includes Field Goal Percentage
+  if (label.includes('fumble') || label.includes('interception') || label.includes('penalty') || 
+      (label.includes('field goal') && (label.includes('percentage') || label.includes('%')))) {
+    return STAT_CATEGORIES.TURNOVERS_PENALTIES
+  }
 
   // Defensive (best-effort)
   if (label.includes('sacks') || label.includes('tackles') || label.includes('tfl')) return STAT_CATEGORIES.DEFENSIVE
@@ -546,11 +547,12 @@ export function mapNflStatToCategory(stat: any): string {
   // 8. Turnover Ratio
   if (label.includes('turnover ratio') || internalName === 'turnoverdifferential') return STAT_CATEGORIES.KEY_FACTORS
 
-  // Special Teams stats
-  if (label.includes('field goal') || label.includes('punt return fumbles')) return STAT_CATEGORIES.SPECIAL_TEAMS
+  // Special Teams stats (excluding Field Goal Percentage which goes to Other)
+  if ((label.includes('field goal') && !label.includes('percentage') && !label.includes('%')) || label.includes('punt return fumbles')) return STAT_CATEGORIES.SPECIAL_TEAMS
   
-  // Turnovers & Penalties stats
-  if (label.includes('fumble') || label.includes('interception') || label.includes('penalty') || label.includes('penalties')) {
+  // Turnovers & Penalties stats (Other) - includes Field Goal Percentage
+  if (label.includes('fumble') || label.includes('interception') || label.includes('penalty') || label.includes('penalties') ||
+      (label.includes('field goal') && (label.includes('percentage') || label.includes('%')))) {
     return STAT_CATEGORIES.TURNOVERS_PENALTIES
   }
   
@@ -558,10 +560,14 @@ export function mapNflStatToCategory(stat: any): string {
   if (label.includes('points') || label.includes('touchdown') || label.includes('yards') || 
       label.includes('completion') || label.includes('passing') || label.includes('rushing') || 
       label.includes('receiving') || label.includes('kick') || label.includes('attempt')) {
-    // Exception: fumbles and penalties go to Turnovers & Penalties
+    // Exception: fumbles and penalties go to Turnovers & Penalties (Other)
     if (label.includes('fumble') || label.includes('penalty')) return STAT_CATEGORIES.TURNOVERS_PENALTIES
-    // Exception: field goal attempts go to Special Teams
-    if (label.includes('field goal')) return STAT_CATEGORIES.SPECIAL_TEAMS
+    // Exception: field goal stats go to appropriate categories (handled above)
+    if (label.includes('field goal')) {
+      // Percentage goes to Other, attempts/made would go to Special Teams (but we removed attempts)
+      if (label.includes('percentage') || label.includes('%')) return STAT_CATEGORIES.TURNOVERS_PENALTIES
+      return STAT_CATEGORIES.SPECIAL_TEAMS
+    }
     return STAT_CATEGORIES.OFFENSE
   }
   

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { DetailedTeamStat, SportType } from '@/types'
 import { ChartBarIcon, TrophyIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline'
-import { filterAndSortStats, STAT_CATEGORIES, mapCfbStatToCategory, mapNflStatToCategory, getPreferredStats, mapNbaStatToCategory, mapNcaabStatToCategory } from '@/lib/constants/team-stats-config'
+import { filterAndSortStats, STAT_CATEGORIES, mapCfbStatToCategory, mapNflStatToCategory, getPreferredStats, mapNbaStatToCategory, mapNcaabStatToCategory, getCategoryDisplayName } from '@/lib/constants/team-stats-config'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 
 interface TeamDetailedStatsProps {
@@ -589,7 +589,7 @@ export function TeamDetailedStats({
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
             }`}
           >
-            {category === 'all' ? 'All Stats' : capitalizeLabel(String(category))}
+            {category === 'all' ? 'All Stats' : capitalizeLabel(getCategoryDisplayName(String(category), sport))}
           </button>
         ))}
       </div>
@@ -797,7 +797,7 @@ export function TeamDetailedStats({
               </div>
               <div className="flex items-center justify-center truncate">
                 <span className="uppercase tracking-wide">
-                  {selectedCategory === 'all' ? 'All Stats' : selectedCategory}
+                  {selectedCategory === 'all' ? 'All Stats' : getCategoryDisplayName(selectedCategory, sport)}
                 </span>
               </div>
               <div className="flex items-center justify-end truncate">
@@ -812,7 +812,7 @@ export function TeamDetailedStats({
                   <div className="flex items-center my-3">
                     <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
                     <span className="mx-3 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-xs md:text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
-                      {cat}
+                      {getCategoryDisplayName(cat, sport)}
                     </span>
                     <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
                   </div>
