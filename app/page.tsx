@@ -67,18 +67,16 @@ function HomePageContent() {
           <MostBetMatchups />
         </Suspense>
       </section>
-
-      {/* Recent Matchups */}
-      <section>
-        <Suspense fallback={<LoadingSpinner />}>
-          <RecentMatchups />
-        </Suspense>
-      </section>
-
       {/* Upcoming Matchups */}
       <section>
         <Suspense fallback={<LoadingSpinner />}>
           <UpcomingMatchups />
+        </Suspense>
+      </section>
+      {/* Recent Matchups */}
+      <section>
+        <Suspense fallback={<LoadingSpinner />}>
+          <RecentMatchups />
         </Suspense>
       </section>
 
