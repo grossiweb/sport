@@ -8,20 +8,28 @@ import { format, isToday, isTomorrow } from 'date-fns'
 import { formatToEasternTime } from '@/lib/utils/time'
 import { CalendarIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline'
 import { Game } from '@/types'
+import { getCurrentSeasonWeekForSport } from '@/lib/utils/week-utils'
+import { formatPercentage } from '@/lib/utils/betting-format'
 
 export function MostBetMatchups() {
   const { currentSport, currentSportData } = useSport()
   const { data: items, isLoading, isFetching, error } = useMostBetMatchups(currentSport, 3, 7)
+
+  const weekInfo = getCurrentSeasonWeekForSport(currentSport)
+  const showWeek = currentSport === 'NFL' || currentSport === 'CFB'
+  const heading = showWeek
+    ? `Vegas Biggest Liabilities — ${currentSportData.displayName} Week ${weekInfo.weekNumber}`
+    : `Vegas Biggest Liabilities — ${currentSportData.displayName}`
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Most Bet {currentSportData.displayName} Matchups
+            {heading}
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Ranked by largest consensus spread across books for upcoming games
+            Ranked by largest public betting edge for this window
           </p>
         </div>
         <Link
@@ -62,7 +70,7 @@ function MostBetGameCard({
   consensusSpread
 }: {
   game: Game
-  consensusSpread: { home: number | null; away: number | null; absMax: number | null }
+  consensusSpread: { home: number | null; away: number | null; absMax: number | null; winProbHome?: number | null; winProbAway?: number | null }
 }) {
   const gameDate = new Date(game.gameDate)
   const isUpcomingToday = isToday(gameDate)
@@ -80,7 +88,13 @@ function MostBetGameCard({
     return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
   }
 
-  const fmt = (n: number) => (n > 0 ? `+${n.toFixed(1)}` : n.toFixed(1))
+  const formatPct = (p: number | null | undefined) => formatPercentage(p)
+  const pctBadgeClass = (p: number | null | undefined) => {
+    if (p == null) return 'bg-gray-100 text-gray-600 dark:bg-gray-700/40 dark:text-gray-300'
+    return p >= 0.5
+      ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300'
+      : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'
+  }
 
   return (
     <Link href={`/sport/${game.league.toLowerCase()}/matchups/${game.id}`} className="group">
@@ -95,11 +109,6 @@ function MostBetGameCard({
               <ClockIcon className="w-3 h-3 mr-1" />
               {formatToEasternTime(gameDate)}
             </div>
-            {typeof consensusSpread.absMax === 'number' && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-semibold">
-                Spread {fmt(consensusSpread.absMax)}
-              </span>
-            )}
           </div>
         </div>
 
@@ -119,9 +128,9 @@ function MostBetGameCard({
               </div>
             </div>
             <div className="text-right">
-              {typeof consensusSpread.away === 'number' ? (
-                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                  {fmt(consensusSpread.away)}
+              {typeof consensusSpread.winProbAway === 'number' ? (
+                <span className={`px-2 py-0.5 rounded text-xs font-semibold ${pctBadgeClass(consensusSpread.winProbAway)}`}>
+                  Away {formatPct(consensusSpread.winProbAway)}
                 </span>
               ) : (
                 <span className="text-xs text-gray-400">—</span>
@@ -151,9 +160,9 @@ function MostBetGameCard({
               </div>
             </div>
             <div className="text-right">
-              {typeof consensusSpread.home === 'number' ? (
-                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                  {fmt(consensusSpread.home)}
+              {typeof consensusSpread.winProbHome === 'number' ? (
+                <span className={`px-2 py-0.5 rounded text-xs font-semibold ${pctBadgeClass(consensusSpread.winProbHome)}`}>
+                  Home {formatPct(consensusSpread.winProbHome)}
                 </span>
               ) : (
                 <span className="text-xs text-gray-400">—</span>

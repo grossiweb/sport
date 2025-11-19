@@ -63,6 +63,8 @@ export async function GET(request: NextRequest) {
       absMaxSpread: number | null
       spreadHome: number | null
       spreadAway: number | null
+      winProbHome: number | null
+      winProbAway: number | null
     }
 
     const ranked: RankedItem[] = []
@@ -76,6 +78,8 @@ export async function GET(request: NextRequest) {
       const lines = Object.values(doc.lines) as any[]
       const homeVals: number[] = []
       const awayVals: number[] = []
+      const moneyHomeVals: number[] = []
+      const moneyAwayVals: number[] = []
 
       for (const l of lines) {
         const h = typeof l?.spread?.point_spread_home === 'number' && isFinite(l.spread.point_spread_home)
@@ -86,6 +90,15 @@ export async function GET(request: NextRequest) {
           : (typeof l?.spread?.point_spread_away_delta === 'number' ? Number(l.spread.point_spread_away_delta) : null)
         if (typeof h === 'number' && isFinite(h)) homeVals.push(h)
         if (typeof a === 'number' && isFinite(a)) awayVals.push(a)
+
+        const mh = typeof l?.moneyline?.moneyline_home === 'number' && isFinite(l.moneyline.moneyline_home)
+          ? Number(l.moneyline.moneyline_home)
+          : (typeof l?.moneyline?.moneyline_home_delta === 'number' ? Number(l.moneyline.moneyline_home_delta) : null)
+        const ma = typeof l?.moneyline?.moneyline_away === 'number' && isFinite(l.moneyline.moneyline_away)
+          ? Number(l.moneyline.moneyline_away)
+          : (typeof l?.moneyline?.moneyline_away_delta === 'number' ? Number(l.moneyline.moneyline_away_delta) : null)
+        if (typeof mh === 'number' && isFinite(mh)) moneyHomeVals.push(mh)
+        if (typeof ma === 'number' && isFinite(ma)) moneyAwayVals.push(ma)
       }
 
       const avgHome = avg(homeVals)
@@ -94,11 +107,17 @@ export async function GET(request: NextRequest) {
         ? null
         : Math.max(Math.abs(avgHome ?? 0), Math.abs(avgAway ?? 0))
 
+      const avgMoneyHome = avg(moneyHomeVals)
+      const avgMoneyAway = avg(moneyAwayVals)
+      const probs = mongoSportsAPI.computeWinProbFromMoneylines(avgMoneyHome, avgMoneyAway)
+
       ranked.push({
         gameId: game.id,
         absMaxSpread: absMax,
         spreadHome: avgHome,
-        spreadAway: avgAway
+        spreadAway: avgAway,
+        winProbHome: probs.winProbHome,
+        winProbAway: probs.winProbAway
       })
     }
 
@@ -118,7 +137,7 @@ export async function GET(request: NextRequest) {
 
     const selected: Array<{
       game: (typeof futureGames)[number]
-      consensusSpread: { home: number | null; away: number | null; absMax: number | null }
+      consensusSpread: { home: number | null; away: number | null; absMax: number | null; winProbHome: number | null; winProbAway: number | null }
     }> = []
 
     for (const r of ranked) {
@@ -126,7 +145,13 @@ export async function GET(request: NextRequest) {
       if (idx == null) continue
       selected.push({
         game: futureGames[idx],
-        consensusSpread: { home: r.spreadHome, away: r.spreadAway, absMax: r.absMaxSpread }
+        consensusSpread: {
+          home: r.spreadHome,
+          away: r.spreadAway,
+          absMax: r.absMaxSpread,
+          winProbHome: r.winProbHome,
+          winProbAway: r.winProbAway
+        }
       })
       if (selected.length >= limit) break
     }
