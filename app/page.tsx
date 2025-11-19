@@ -74,12 +74,12 @@ function HomePageContent() {
         </Suspense>
       </section>
       {/* Recent Matchups */}
-      <section>
+      {/* <section>
         <Suspense fallback={<LoadingSpinner />}>
           <RecentMatchups />
         </Suspense>
       </section>
-
+       */}
       {/* Quick Access Links */}
       <section>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
