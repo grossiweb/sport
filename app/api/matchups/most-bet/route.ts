@@ -72,7 +72,14 @@ export async function GET(request: NextRequest) {
     for (const game of games) {
       const doc: any = bettingByEvent.get(game.id)
       if (!doc || !doc.lines) {
-        ranked.push({ gameId: game.id, absMaxSpread: null, spreadHome: null, spreadAway: null })
+        ranked.push({
+          gameId: game.id,
+          absMaxSpread: null,
+          spreadHome: null,
+          spreadAway: null,
+          winProbHome: null,
+          winProbAway: null
+        })
         continue
       }
       const lines = Object.values(doc.lines) as any[]
