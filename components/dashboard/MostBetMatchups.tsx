@@ -29,7 +29,7 @@ export function MostBetMatchups() {
             {heading}
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Ranked by largest public betting edge for this window
+          Highlighted teams represent the most heavily bet sides (%) and Vegas largest liabilities
           </p>
         </div>
         <Link
