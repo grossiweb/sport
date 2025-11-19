@@ -136,10 +136,33 @@ export function getSeasonWeekOptions({ startDate, endDate }: SeasonWeeksOptions)
 }
 
 /**
+ * Given a list of season week options and a date, return the "current" week:
+ * - If the date is inside a week range, return that week
+ * - Otherwise, return the next future week (first week whose startDate is after the date)
+ * - If there is no future week, return the last week in the list
+ */
+function resolveCurrentOrNextWeek(weeks: WeekOption[], now: Date): WeekInfo | null {
+  if (!weeks.length) return null
+
+  const inRange = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+  if (inRange) return inRange.weekInfo
+
+  const future = weeks.find(w => now < w.weekInfo.startDate)
+  if (future) return future.weekInfo
+
+  // If we're past the last defined week, treat the last week as "current"
+  return weeks[weeks.length - 1].weekInfo
+}
+
+/**
  * Format a concise date range. If months differ, include month on both sides.
  * If the year differs across the range, include the year on the end only.
  */
 export function formatDateRange(startDate: Date, endDate: Date): string {
+  const sameDay = startDate.getTime() === endDate.getTime()
+  if (sameDay) {
+    return format(startDate, 'MMM d')
+  }
   const sameMonth = startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear()
   const sameYear = startDate.getFullYear() === endDate.getFullYear()
   if (sameMonth) {
@@ -151,20 +174,116 @@ export function formatDateRange(startDate: Date, endDate: Date): string {
   return `${format(startDate, 'MMM d')} - ${format(endDate, 'MMM d, yyyy')}`
 }
 
+const NFL_2025_WEEKS: Array<{ weekNumber: number; start: string; end: string }> = [
+  { weekNumber: 1, start: '2025-09-04', end: '2025-09-08' },
+  { weekNumber: 2, start: '2025-09-11', end: '2025-09-15' },
+  { weekNumber: 3, start: '2025-09-18', end: '2025-09-22' },
+  { weekNumber: 4, start: '2025-09-25', end: '2025-09-29' },
+  { weekNumber: 5, start: '2025-10-02', end: '2025-10-06' },
+  { weekNumber: 6, start: '2025-10-09', end: '2025-10-13' },
+  { weekNumber: 7, start: '2025-10-16', end: '2025-10-20' },
+  { weekNumber: 8, start: '2025-10-23', end: '2025-10-27' },
+  { weekNumber: 9, start: '2025-10-30', end: '2025-11-03' },
+  { weekNumber: 10, start: '2025-11-06', end: '2025-11-10' },
+  { weekNumber: 11, start: '2025-11-13', end: '2025-11-17' },
+  { weekNumber: 12, start: '2025-11-20', end: '2025-11-24' },
+  { weekNumber: 13, start: '2025-11-27', end: '2025-12-01' },
+  { weekNumber: 14, start: '2025-12-04', end: '2025-12-08' },
+  { weekNumber: 15, start: '2025-12-11', end: '2025-12-15' },
+  { weekNumber: 16, start: '2025-12-18', end: '2025-12-22' },
+  { weekNumber: 17, start: '2025-12-25', end: '2025-12-29' },
+  { weekNumber: 18, start: '2026-01-04', end: '2026-01-04' }
+]
+
 function getNFLSeasonRange(): SeasonWeeksOptions {
   return {
-    startDate: parseISO('2025-09-04'),
-    endDate: parseISO('2026-01-07')
+    startDate: parseISO(NFL_2025_WEEKS[0].start),
+    endDate: parseISO(NFL_2025_WEEKS[NFL_2025_WEEKS.length - 1].end)
   }
 }
 
 /**
  * Helper to get NFL season week options by season year.
- * Uses the same week-building logic as other sports but with the NFL season window.
+ * Uses explicit Covers.com week windows for 2025; falls back to generic weeks otherwise.
  */
 export function getNFLSeasonWeekOptions(seasonYear: number, _fallback: SeasonWeeksOptions): WeekOption[] {
-  const range = getNFLSeasonRange()
-  return getSeasonWeekOptions(range)
+  if (seasonYear === 2025) {
+    return NFL_2025_WEEKS.map(({ weekNumber, start, end }) => {
+      const startDate = parseISO(start)
+      const endDate = parseISO(end)
+      const weekInfo: WeekInfo = {
+        weekNumber,
+        year: startDate.getFullYear(),
+        startDate,
+        endDate,
+        label: `Week ${weekNumber}`,
+        dateRange: formatDateRange(startDate, endDate)
+      }
+      return {
+        value: `${seasonYear}-W${weekNumber.toString().padStart(2, '0')}`,
+        label: `${weekInfo.label} (${weekInfo.dateRange})`,
+        weekInfo
+      }
+    })
+  }
+
+  // Fallback: build generic Monday–Sunday weeks using provided season window
+  return getSeasonWeekOptions(_fallback)
+}
+
+const CFB_2025_WEEKS: Array<{ weekNumber: number; start: string; end: string }> = [
+  { weekNumber: 1, start: '2025-08-23', end: '2025-09-01' },
+  { weekNumber: 2, start: '2025-09-05', end: '2025-09-07' },
+  { weekNumber: 3, start: '2025-09-11', end: '2025-09-14' },
+  { weekNumber: 4, start: '2025-09-18', end: '2025-09-21' },
+  { weekNumber: 5, start: '2025-09-25', end: '2025-09-27' },
+  { weekNumber: 6, start: '2025-10-02', end: '2025-10-04' },
+  { weekNumber: 7, start: '2025-10-08', end: '2025-10-12' },
+  { weekNumber: 8, start: '2025-10-14', end: '2025-10-18' },
+  { weekNumber: 9, start: '2025-10-21', end: '2025-10-25' },
+  { weekNumber: 10, start: '2025-10-28', end: '2025-11-01' },
+  { weekNumber: 11, start: '2025-11-04', end: '2025-11-08' },
+  { weekNumber: 12, start: '2025-11-11', end: '2025-11-15' },
+  { weekNumber: 13, start: '2025-11-18', end: '2025-11-22' },
+  { weekNumber: 14, start: '2025-11-25', end: '2025-11-29' },
+  // Note: schedule provided skips "Week 15" and goes to Week 16 on Dec 13
+  { weekNumber: 16, start: '2025-12-13', end: '2025-12-13' }
+]
+
+function getCFBSeasonRange(): SeasonWeeksOptions {
+  return {
+    startDate: parseISO(CFB_2025_WEEKS[0].start),
+    endDate: parseISO(CFB_2025_WEEKS[CFB_2025_WEEKS.length - 1].end)
+  }
+}
+
+/**
+ * Helper to get CFB season week options by season year.
+ * Uses explicit Covers-style week windows for 2025; falls back to generic weeks otherwise.
+ */
+export function getCFBSeasonWeekOptions(seasonYear: number, _fallback: SeasonWeeksOptions): WeekOption[] {
+  if (seasonYear === 2025) {
+    return CFB_2025_WEEKS.map(({ weekNumber, start, end }) => {
+      const startDate = parseISO(start)
+      const endDate = parseISO(end)
+      const weekInfo: WeekInfo = {
+        weekNumber,
+        year: startDate.getFullYear(),
+        startDate,
+        endDate,
+        label: `Week ${weekNumber}`,
+        dateRange: formatDateRange(startDate, endDate)
+      }
+      return {
+        value: `${seasonYear}-W${weekNumber.toString().padStart(2, '0')}`,
+        label: `${weekInfo.label} (${weekInfo.dateRange})`,
+        weekInfo
+      }
+    })
+  }
+
+  // Fallback: build generic Monday–Sunday weeks using provided season window
+  return getSeasonWeekOptions(_fallback)
 }
 
 /**
@@ -178,24 +297,32 @@ export function getCurrentSeasonWeekForSport(sport: SportType): WeekInfo {
   if (sport === 'NFL') {
     const { startDate, endDate } = getNFLSeasonRange()
     if (now >= startDate && now <= (endDate ?? now)) {
-      const weeks = getSeasonWeekOptions({ startDate, endDate })
-      const m = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
-      if (m) return m.weekInfo
+      const weeks = getNFLSeasonWeekOptions(startDate.getFullYear(), { startDate, endDate })
+      const wk = resolveCurrentOrNextWeek(weeks, now)
+      if (wk) return wk
+    }
+  }
+  if (sport === 'CFB') {
+    const { startDate, endDate } = getCFBSeasonRange()
+    if (now >= startDate && now <= (endDate ?? now)) {
+      const weeks = getCFBSeasonWeekOptions(startDate.getFullYear(), { startDate, endDate })
+      const wk = resolveCurrentOrNextWeek(weeks, now)
+      if (wk) return wk
     }
   }
   if (sport === 'NBA') {
     const start = new Date('2025-10-09')
     const endDate = new Date('2026-04-12')
     const weeks = getSeasonWeekOptions({ startDate: start, endDate })
-    const m = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
-    if (m) return m.weekInfo
+    const wk = resolveCurrentOrNextWeek(weeks, now)
+    if (wk) return wk
   }
   if (sport === 'NCAAB') {
     const start = new Date('2025-11-03')
     const endDate = new Date('2026-03-15')
     const weeks = getSeasonWeekOptions({ startDate: start, endDate })
-    const m = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
-    if (m) return m.weekInfo
+    const wk = resolveCurrentOrNextWeek(weeks, now)
+    if (wk) return wk
   }
   return getCurrentWeek()
 }

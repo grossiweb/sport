@@ -8,7 +8,7 @@ import { isValidSportType } from '@/lib/constants/sports'
 import { useSport } from '@/contexts/SportContext'
 import { ModernMatchupCard } from '@/components/matchups/ModernMatchupCard'
 import { MatchupFilters } from '@/components/matchups/MatchupFilters'
-import { WeekInfo, getCurrentWeek, getWeekDateRange, getSeasonWeekOptions, getNFLSeasonWeekOptions, getCurrentSeasonWeekForSport } from '@/lib/utils/week-utils'
+import { WeekInfo, getCurrentWeek, getWeekDateRange, getSeasonWeekOptions, getNFLSeasonWeekOptions, getCurrentSeasonWeekForSport, getCFBSeasonWeekOptions } from '@/lib/utils/week-utils'
 import { formatToEasternWeekday } from '@/lib/utils/time'
 import { useQuery } from 'react-query'
 import { CoversStyleMatchupCard } from '@/components/matchups/CoversStyleMatchupCard'
@@ -46,10 +46,13 @@ export default function SportMatchupsPage() {
   const [selectedWeek, setSelectedWeek] = useState<WeekInfo>(getCurrentWeek())
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   
-  // Align initial selectedWeek/date to current season-relative week if season data exists
+  // Align initial selectedWeek/date to current season-relative week based on the route sport only.
+  // We intentionally use `validSport` (from the URL) instead of `currentSport` from context
+  // so that a previous/global sport (e.g. CFB) cannot override the NFL week selection after load.
   useEffect(() => {
     const alignToSeason = async () => {
-      const s = (validSport || currentSport)
+      if (!validSport) return
+      const s = validSport
 
       // For NFL, use provided season dates (same logic as NBA/NCAAB)
       if (s === 'NFL') {
@@ -57,7 +60,12 @@ export default function SportMatchupsPage() {
         const endDate = new Date('2026-01-07')
         const weeks = getNFLSeasonWeekOptions(2025, { startDate: start, endDate })
         const now = new Date()
-        const current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+        let current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+        if (!current) {
+          // If today is not inside any NFL week window (e.g., Nov 18–19),
+          // treat the next future week as the "current" default; otherwise use the last week.
+          current = weeks.find(w => now < w.weekInfo.startDate) || weeks[weeks.length - 1]
+        }
         if (current) setSelectedWeek(current.weekInfo)
         return
       }
@@ -68,7 +76,10 @@ export default function SportMatchupsPage() {
         const endDate = new Date('2026-04-12')
         const weeks = getSeasonWeekOptions({ startDate: start, endDate })
         const now = new Date()
-        const current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+        let current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+        if (!current) {
+          current = weeks.find(w => now < w.weekInfo.startDate) || weeks[weeks.length - 1]
+        }
         if (current) setSelectedWeek(current.weekInfo)
         return
       }
@@ -79,30 +90,32 @@ export default function SportMatchupsPage() {
         const endDate = new Date('2026-03-15')
         const weeks = getSeasonWeekOptions({ startDate: start, endDate })
         const now = new Date()
-        const current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+        let current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+        if (!current) {
+          current = weeks.find(w => now < w.weekInfo.startDate) || weeks[weeks.length - 1]
+        }
         if (current) setSelectedWeek(current.weekInfo)
         return
       }
 
-      // For CFB, fetch from API
-      const sportId = s === 'CFB' ? 1 : undefined
-      if (!sportId) return
-      const year = new Date().getFullYear()
-      try {
-        const res = await fetch(`/api/seasons?sport_id=${sportId}&season=${year}`)
-        const json = await res.json()
-        const season = Array.isArray(json.data) ? json.data[0] : null
-        if (!season?.start_date) return
-        const start = new Date(season.start_date)
-        const endDate = season.end_date ? new Date(season.end_date) : undefined
-        const weeks = getSeasonWeekOptions({ startDate: start, endDate })
+      // For CFB (NCAAF), use explicit season week windows (Covers-style)
+      if (s === 'CFB') {
+        const start = new Date('2025-08-23')
+        const endDate = new Date('2025-12-13')
+        const weeks = getCFBSeasonWeekOptions(2025, { startDate: start, endDate })
         const now = new Date()
-        const current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+        let current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
+        if (!current) {
+          // If today is not inside any CFB week window,
+          // treat the next future week as the "current" default; otherwise use the last week.
+          current = weeks.find(w => now < w.weekInfo.startDate) || weeks[weeks.length - 1]
+        }
         if (current) setSelectedWeek(current.weekInfo)
-      } catch {}
+        return
+      }
     }
     alignToSeason()
-  }, [validSport, currentSport])
+  }, [validSport])
   
   const [filters, setFilters] = useState<MatchupFiltersState>({})
 

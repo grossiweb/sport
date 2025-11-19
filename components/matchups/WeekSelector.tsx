@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from '@heroicons/react/24/outline'
-import { WeekInfo, getPreviousWeek, getNextWeek, getAvailableYears, getAvailableMonths, getWeeksForMonth, parseWeekString, weekInfoToString, getSeasonWeekOptions, getNFLSeasonWeekOptions } from '@/lib/utils/week-utils'
+import { WeekInfo, getPreviousWeek, getNextWeek, getAvailableYears, getAvailableMonths, getWeeksForMonth, parseWeekString, weekInfoToString, getSeasonWeekOptions, getNFLSeasonWeekOptions, getCFBSeasonWeekOptions } from '@/lib/utils/week-utils'
 import { useSport } from '@/contexts/SportContext'
 import { useEffect } from 'react'
 import { SportType } from '@/types'
@@ -57,34 +57,15 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
       return
     }
 
-    // For CFB, fetch from API
-    const sportId = currentSport === 'CFB' ? 1 : undefined
-    if (!sportId) return
-    const loadSeason = async () => {
-      try {
-        // Fetch current season
-        const res = await fetch(`/api/seasons?sport_id=${sportId}&season=${selectedYear}`)
-        const json = await res.json()
-        const season = Array.isArray(json.data) ? json.data[0] : null
-
-        const start = new Date(season.start_date)
-        // Prefer explicit end_date if provided; otherwise fall back to next season's start
-        let endDate: Date | undefined = season.end_date ? new Date(season.end_date) : undefined
-        if (!endDate) {
-          const nextRes = await fetch(`/api/seasons?sport_id=${sportId}&season=${selectedYear + 1}`)
-          const nextJson = await nextRes.json()
-          const nextSeason = Array.isArray(nextJson.data) ? nextJson.data[0] : null
-          endDate = nextSeason?.start_date ? new Date(nextSeason.start_date) : undefined
-        }
-        setSeasonStart(start)
-        const weeks = getSeasonWeekOptions({ startDate: start, endDate })
-        setSeasonWeeks(weeks)
-      } catch (e) {
-        setSeasonStart(null)
-        setSeasonWeeks([])
-      }
+    // For CFB (NCAAF), use explicit season week windows (Covers-style)
+    if (currentSport === 'CFB') {
+      const start = new Date('2025-08-23')
+      const endDate = new Date('2025-12-13')
+      setSeasonStart(start)
+      const weeks = getCFBSeasonWeekOptions(selectedYear, { startDate: start, endDate })
+      setSeasonWeeks(weeks)
+      return
     }
-    loadSeason()
   }, [currentSport, selectedYear])
 
   const handlePreviousWeek = () => {
