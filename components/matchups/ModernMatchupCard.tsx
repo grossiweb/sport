@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { Matchup, SportType, RecordSummary } from '@/types'
-import { format } from 'date-fns'
 import {
   ClockIcon,
   MapPinIcon,
@@ -12,8 +11,8 @@ import Link from 'next/link'
 import { TeamLogo } from '@/components/ui/TeamLogo'
 import { BettingLinesPopup } from './BettingLinesPopup'
 import { ScoreByPeriodPopup } from './ScoreByPeriodPopup'
-import { formatToEasternTime } from '@/lib/utils/time'
-import { parse, parseISO, format as formatDateFns, isValid as isValidDate } from 'date-fns'
+import { formatToEasternTime, formatToEasternDate, formatToEasternWeekday } from '@/lib/utils/time'
+import { parse, parseISO, isValid as isValidDate } from 'date-fns'
 import { useScoreByPeriod } from '@/hooks/useScoreByPeriod'
 import { computeConsensus, computeAtsFromConsensus } from '@/lib/utils/consensus'
 import { formatSpread as formatSpreadUtil, formatTotal as formatTotalUtil, formatPercentage } from '@/lib/utils/betting-format'
@@ -50,8 +49,8 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
   }
   const safeDate = deriveSafeDate()
   const gameTime = safeDate ? formatToEasternTime(safeDate) : '-'
-  const gameDateShort = safeDate ? formatDateFns(safeDate, 'MMM d') : ''
-  const gameDayOfWeek = safeDate ? formatDateFns(safeDate, 'EEE') : ''
+  const gameDateShort = safeDate ? formatToEasternDate(safeDate, { month: 'short', day: 'numeric' }) : ''
+  const gameDayOfWeek = safeDate ? formatToEasternWeekday(safeDate, { weekday: 'short' }) : ''
   const isScheduled = game.status === 'scheduled'
   const showPredictions = false
 
