@@ -1,19 +1,16 @@
 'use client'
 
-import { Game } from '@/types'
-import { TrophyIcon, CalendarIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline'
+import { TrophyIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { useSport } from '@/contexts/SportContext'
 import { useWeekBasedUpcomingMatchups } from '@/hooks/useOptimizedMatchups'
-import { TeamLogo } from '@/components/ui/TeamLogo'
-import { format, isToday, isTomorrow } from 'date-fns'
-import { formatToEasternTime, formatToEasternDate } from '@/lib/utils/time'
+import { ModernMatchupCard } from '@/components/matchups/ModernMatchupCard'
 
 export function UpcomingMatchups() {
   const { currentSport, currentSportData } = useSport()
 
   const { data: matchups, isLoading, error } = useWeekBasedUpcomingMatchups(currentSport, 3)
-  const games = matchups?.map((matchup: any) => matchup.game) || []
+  const upcomingMatchups = matchups ?? []
 
   if (isLoading) {
     return (
@@ -77,10 +74,14 @@ export function UpcomingMatchups() {
       </div>
 
       {/* Upcoming Games Grid */}
-      {games.length > 0 ? (
+      {upcomingMatchups.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {games.map((game) => (
-            <UpcomingGameCard key={game.id} game={game} />
+          {upcomingMatchups.map((matchup: any) => (
+            <ModernMatchupCard
+              key={matchup.game.id}
+              matchup={matchup}
+              sport={currentSport}
+            />
           ))}
         </div>
       ) : (
@@ -95,106 +96,5 @@ export function UpcomingMatchups() {
         </div>
       )}
     </div>
-  )
-}
-
-function UpcomingGameCard({ game }: { game: Game }) {
-  const gameDate = new Date(game.gameDate)
-  const isUpcomingToday = isToday(gameDate)
-  const isUpcomingTomorrow = isTomorrow(gameDate)
-  
-  const getDateLabel = () => {
-    if (isUpcomingToday) return 'Today'
-    if (isUpcomingTomorrow) return 'Tomorrow'
-    return format(gameDate, 'MMM d')
-  }
-
-  const getStatusColor = () => {
-    if (isUpcomingToday) return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-    if (isUpcomingTomorrow) return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400'
-    return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-  }
-  
-  return (
-    <Link href={`/sport/${game.league.toLowerCase()}/matchups/${game.id}`} className="group">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-all duration-200 group-hover:border-primary-300 dark:group-hover:border-primary-600">
-        <div className="flex items-center justify-between mb-4">
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor()}`}>
-            <CalendarIcon className="w-3 h-3 mr-1" />
-            {getDateLabel()}
-          </span>
-          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-            <ClockIcon className="w-3 h-3 mr-1" />
-            {formatToEasternTime(game.gameDate)}
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          {/* Away Team */}
-          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
-            <div className="flex items-center space-x-3">
-              <TeamLogo 
-                team={game.awayTeam}
-                size="sm"
-                className="flex-shrink-0"
-              />
-              <div>
-                <div className="font-medium text-gray-900 dark:text-white">
-                  {game.awayTeam.name}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {game.awayTeam.abbreviation}
-                  {game.awayTeam.record && (
-                    <span className="ml-2">({game.awayTeam.record})</span>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              @
-            </div>
-          </div>
-
-          {/* VS Divider */}
-          <div className="flex justify-center">
-            <span className="px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full">
-              VS
-            </span>
-          </div>
-
-          {/* Home Team */}
-          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
-            <div className="flex items-center space-x-3">
-              <TeamLogo 
-                team={game.homeTeam}
-                size="sm"
-                className="flex-shrink-0"
-              />
-              <div>
-                <div className="font-medium text-gray-900 dark:text-white">
-                  {game.homeTeam.name}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {game.homeTeam.abbreviation}
-                  {game.homeTeam.record && (
-                    <span className="ml-2">({game.homeTeam.record})</span>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-              HOME
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">
-            <MapPinIcon className="w-4 h-4 mr-1" />
-            <span className="truncate">{game.venue || 'TBD'}</span>
-          </div>
-        </div>
-      </div>
-    </Link>
   )
 }

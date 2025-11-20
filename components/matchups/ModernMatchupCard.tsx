@@ -99,7 +99,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
     homeRecord?: RecordSummary,
     awayRecord?: RecordSummary
   ) => (
-    <div className="grid grid-cols-5 items-center text-[11px] text-gray-600 dark:text-gray-400">
+    <div className="grid grid-cols-[1.25fr_0.9fr_1.1fr_0.9fr_1.25fr] items-center text-[11px] gap-x-1 text-gray-600 dark:text-gray-400">
       <span className="text-center f text-gray-900 dark:text-white" title={prefix}>
       {prefix}
       </span>
@@ -120,7 +120,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
 
   // Custom Win/Loss row ordering: [away overall] [away record] [label] [home record] [home record]
   const renderWinLossRow = () => (
-    <div className="grid grid-cols-5 items-center text-[11px] text-gray-600 dark:text-gray-400">
+    <div className="grid grid-cols-[1.25fr_0.9fr_1.1fr_0.9fr_1.25fr] items-center text-[11px] gap-x-1 text-gray-600 dark:text-gray-400">
       <span className="text-center f text-gray-900 dark:text-white">
         ({formatRecord(coversSummary?.away.overall)} Road)
       </span>
@@ -141,7 +141,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
 
   // Last 10 row mirrors Win/Loss layout but uses lastTen records
   const renderLastTenRow = () => (
-    <div className="grid grid-cols-5 items-center text-[11px] text-gray-600 dark:text-gray-400">
+    <div className="grid grid-cols-[1.25fr_0.9fr_1.1fr_0.9fr_1.25fr] items-center text-[11px] gap-x-1 text-gray-600 dark:text-gray-400">
       {/* 1: away lastTen overall */}
       <span className="text-center text-gray-900 dark:text-white">
         ({formatRecord(coversSummary?.away.ats?.overall)} ATS)
