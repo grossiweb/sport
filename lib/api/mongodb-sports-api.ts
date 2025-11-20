@@ -1,4 +1,4 @@
-import { Game, Team, TeamStats, BettingData, SportType, DetailedTeamStat, Player, ScoreByPeriod, MatchupCoversSummary, TeamCoversSummary, RecordSummary } from '@/types'
+import { Game, Team, TeamStats, BettingData, SportType, DetailedTeamStat, Player, PlayerStats, ScoreByPeriod, MatchupCoversSummary, TeamCoversSummary, RecordSummary } from '@/types'
 import { 
   getTeamsCollection, 
   getTeamStatsCollection, 
