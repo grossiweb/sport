@@ -258,6 +258,50 @@ export interface MongoPlayer {
   weight: number
 }
 
+// Player season stats collection (per-player, per-team, per-season)
+export interface MongoPlayerSeasonStats {
+  _id?: any
+  season_year: number
+  team_id: number
+  player_id: number
+  createdAt: string
+  meta: {
+    sourceUrl: string
+    fetchedAt: string
+  }
+  player: {
+    first_name: string
+    last_name: string
+    display_name: string
+    position: string
+    position_abbreviation: string
+    jersey: string
+    slug: string
+    status: string
+    active: boolean
+    updated_at: string
+  }
+  season_type: number
+  season_type_name: string
+  sport_id: number
+  stats: {
+    [statId: string]: {
+      stat_id: number
+      name: string
+      category: string
+      display_name: string
+      abbreviation: string
+      description: string
+      sport_id: number
+      value: number
+      display_value: string
+      per_game_value: number | null
+      per_game_display_value: string | null
+      api_updated_at: string
+    }
+  }
+}
+
 // Sport seasons collection (used for dynamic season-based weeks)
 export interface MongoSportSeason {
   _id?: any
@@ -293,6 +337,11 @@ export async function getBettingDataCollection(): Promise<Collection<MongoBettin
 export async function getPlayersCollection(): Promise<Collection<MongoPlayer>> {
   const { db } = await connectToDatabase()
   return db.collection<MongoPlayer>('players')
+}
+
+export async function getPlayerSeasonStatsCollection(): Promise<Collection<MongoPlayerSeasonStats>> {
+  const { db } = await connectToDatabase()
+  return db.collection<MongoPlayerSeasonStats>('player_season_stats')
 }
 
 export async function getSportSeasonsCollection(): Promise<Collection<MongoSportSeason>> {

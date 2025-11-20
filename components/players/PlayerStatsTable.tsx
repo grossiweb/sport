@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Player, PlayerStats, SportType } from '@/types'
 
 interface PlayerStatsTableProps {
@@ -124,7 +125,12 @@ export function PlayerStatsTable({
                   <div className="flex items-center">
                     <div>
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        {player.name}
+                        <Link
+                          href={`/sport/${sport.toLowerCase()}/teams/${player.teamId}/players/${player.id}`}
+                          className="hover:text-blue-500"
+                        >
+                          {player.name}
+                        </Link>
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">
                         #{player.jerseyNumber || 'N/A'}

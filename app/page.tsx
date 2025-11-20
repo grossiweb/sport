@@ -12,6 +12,7 @@ import { RecentMatchups } from '@/components/dashboard/RecentMatchups'
 import { UpcomingMatchups } from '@/components/dashboard/UpcomingMatchups'
 import { UpcomingScroller } from '@/components/dashboard/UpcomingScroller'
 import { MostBetMatchups } from '@/components/dashboard/MostBetMatchups'
+import { PlayerInsights } from '@/components/dashboard/PlayerInsights'
 import { useSport } from '@/contexts/SportContext'
 import toast from 'react-hot-toast'
 
@@ -67,11 +68,17 @@ function HomePageContent() {
           <MostBetMatchups />
         </Suspense>
       </section>
+
       {/* Upcoming Matchups */}
       <section>
         <Suspense fallback={<LoadingSpinner />}>
           <UpcomingMatchups />
         </Suspense>
+      </section>
+
+      {/* Player Insights (NCAAF / NFL) */}
+      <section>
+        <PlayerInsights />
       </section>
       {/* Recent Matchups */}
       {/* <section>

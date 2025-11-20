@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Player, SportType } from '@/types'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 
@@ -166,7 +167,12 @@ const TeamPlayers: React.FC<TeamPlayersProps> = ({ teamId, sport, teamName }) =>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{player.name}</div>
+                    <Link
+                      href={`/sport/${sport.toLowerCase()}/teams/${teamId}/players/${player.id}`}
+                      className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                    >
+                      {player.name}
+                    </Link>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">

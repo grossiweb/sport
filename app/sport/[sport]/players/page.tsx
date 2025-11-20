@@ -36,7 +36,7 @@ export default function SportPlayersPage() {
   const params = useParams()
   const { currentSport, currentSportData, isLoading: contextLoading } = useSport()
   const [validSport, setValidSport] = useState<SportType | null>(null)
-  const [selectedSeason, setSelectedSeason] = useState('2024')
+  const [selectedSeason, setSelectedSeason] = useState('2025')
   const [selectedTeam, setSelectedTeam] = useState<string>('')
   const [filters, setFilters] = useState({})
   const [sortOptions, setSortOptions] = useState({
