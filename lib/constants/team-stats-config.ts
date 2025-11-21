@@ -41,7 +41,12 @@ export const EXCLUDED_STAT_NAMES = [
   'rushingFumbles',
   'receivingFumbles',
   'kickReturnFumblesLost',
-  'puntReturnFumblesLost'
+  'puntReturnFumblesLost',
+  'receivingYardsPerGame',
+  'totalKickingPoints',
+  'totalTouchdowns',
+  'completions',
+  'totalPenalties'
 ]
 
 export interface StatConfig {
@@ -77,8 +82,8 @@ export const CFB_PREFERRED_STATS: StatConfig[] = [
   { stat_id: -1, abbreviation: '', display_name: 'Rushing Yards Per Game', category: 'Offense', description: 'Rushing yards per game', priority: 13 },
   { stat_id: -1, abbreviation: '', display_name: 'Completion Percentage', category: 'Offense', description: 'Completion %', priority: 14 },
   { stat_id: -1, abbreviation: '', display_name: 'Completions', category: 'Offense', description: 'Completions per game', priority: 15 },
-  { stat_id: -1, abbreviation: '', display_name: 'Yards Per Pass Attempt', category: 'Offense', description: 'Yards per completion/attempt', priority: 16 },
-  { stat_id: -1, abbreviation: '', display_name: 'Yards Per Rushing Attempt', category: 'Offense', description: 'Yards per rush attempt', priority: 17 },
+  { stat_id: -1, abbreviation: '', display_name: 'Yards Per Pass', category: 'Offense', description: 'Yards per completion/attempt', priority: 16 },
+  { stat_id: -1, abbreviation: '', display_name: 'Yards Per Rush', category: 'Offense', description: 'Yards per rush attempt', priority: 17 },
   { stat_id: -1, abbreviation: '', display_name: 'Sacks', category: 'Offense', description: 'QB sacks per game (allowed)', priority: 19 },
 
   // Defensive (best-effort mapping based on available fields)
@@ -117,8 +122,8 @@ export const NFL_PREFERRED_STATS: StatConfig[] = [
   { stat_id: -1, abbreviation: 'RECYDS', display_name: 'Receiving Yards', category: 'Offense', description: 'Total receiving yards', priority: 16 },
   { stat_id: -1, abbreviation: 'CMP%', display_name: 'Completion Percentage', category: 'Offense', description: 'Pass completion percentage', priority: 17 },
   { stat_id: -1, abbreviation: 'CMP', display_name: 'Completions', category: 'Offense', description: 'Pass completions', priority: 18 },
-  { stat_id: -1, abbreviation: 'YPA', display_name: 'Yards Per Pass Attempt', category: 'Offense', description: 'Yards per pass attempt', priority: 19 },
-  { stat_id: -1, abbreviation: 'YPRA', display_name: 'Yards Per Rushing Attempt', category: 'Offense', description: 'Yards per rushing attempt', priority: 20 },
+  { stat_id: -1, abbreviation: 'YPA', display_name: 'Yards Per Pass', category: 'Offense', description: 'Yards per pass', priority: 19 },
+  { stat_id: -1, abbreviation: 'YPRA', display_name: 'Yards Per Rush', category: 'Offense', description: 'Yards per rushing', priority: 20 },
   { stat_id: -1, abbreviation: 'PEN', display_name: 'Total Penalties', category: 'Offense', description: 'Total penalties', priority: 21 },
   
   // Turnovers & Penalties (Other)

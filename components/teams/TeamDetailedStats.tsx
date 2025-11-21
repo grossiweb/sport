@@ -59,6 +59,16 @@ export function TeamDetailedStats({
     return isNaN(num) ? null : num
   }
 
+  // Friendly overrides for certain verbose stat labels
+  const getDisplayLabel = (raw?: string | null): string => {
+    const base = (raw || '').trim()
+    if (!base) return '—'
+    const lower = base.toLowerCase()
+    if (lower === 'yards per pass attempt') return 'Yards Per Pass'
+    if (lower === 'yards per rushing attempt' || lower === 'yards per rush attempt') return 'Yards Per Rush'
+    return base
+  }
+
   // Deduplicate stats by display name (case-insensitive)
   // Preference order: has per_game_display_value > has rank > newer updated_at
   const deduplicateByDisplayName = (stats: DetailedTeamStat[]): DetailedTeamStat[] => {
@@ -622,7 +632,7 @@ export function TeamDetailedStats({
 
               {filteredData.map((stat, index) => {
                 const winner = getWinnerIndicator(stat.homeValue, stat.awayValue, stat.stat?.display_name)
-                const statLabel = stat.stat?.display_name || stat.stat?.name || '—'
+                const statLabel = getDisplayLabel(stat.stat?.display_name || stat.stat?.name)
                 const statDesc = stat.stat?.description || ''
                 const awayRaw = stat.awayValue
                 const homeRaw = stat.homeValue

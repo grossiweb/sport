@@ -1396,7 +1396,8 @@ export class MongoDBSportsAPI {
         {
           $match: {
             sport_id: sportId,
-            season_year: seasonYear
+            season_year: seasonYear,
+            'player.status': 'Active'
           }
         },
         {
@@ -1654,7 +1655,8 @@ export class MongoDBSportsAPI {
 
       const match: any = {
         sport_id: sportId,
-        season_year: seasonYear
+        season_year: seasonYear,
+        'player.status': 'Active'
       }
       if (options.teamId) {
         match.team_id = parseInt(options.teamId, 10)
@@ -1726,7 +1728,8 @@ export class MongoDBSportsAPI {
       const match: any = {
         sport_id: sportId,
         season_year: seasonYear,
-        player_id: parseInt(options.playerId, 10)
+        player_id: parseInt(options.playerId, 10),
+        'player.status': 'Active'
       }
       if (options.teamId) {
         match.team_id = parseInt(options.teamId, 10)
