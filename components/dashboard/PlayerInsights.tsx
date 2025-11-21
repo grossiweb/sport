@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useSport } from '@/contexts/SportContext'
 import { Team, SportType } from '@/types'
 import { TeamLogo } from '@/components/ui/TeamLogo'
@@ -33,6 +34,7 @@ type PlayerInsightsResponse = {
   topRushing: PlayerLeader[]
   topReceiving: PlayerLeader[]
   topPassing: PlayerLeader[]
+  topDefensiveTackles: PlayerLeader[]
   topDefensiveSacks: PlayerLeader[]
   topDefensiveInterceptions: PlayerLeader[]
 }
@@ -95,23 +97,23 @@ export function PlayerInsights() {
             Player Insights – {currentSportData.displayName}
           </h2>
           <p className="text-base text-gray-600 dark:text-gray-400 mt-1">
-            Top performers for the current {currentSportData.displayName} season (2025)
+            Top offensive and defensive leaders for the current season (2025)
           </p>
         </div>
       </div>
 
       {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3, 4].map(k => (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {[1, 2].map(k => (
             <div
               key={k}
               className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 animate-pulse"
             >
               <div className="h-5 bg-gray-300 dark:bg-gray-600 rounded w-1/3 mb-3" />
               <div className="space-y-2">
-                <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-full" />
-                <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-5/6" />
-                <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-4/6" />
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-full" />
+                ))}
               </div>
             </div>
           ))}
@@ -121,71 +123,98 @@ export function PlayerInsights() {
           {error}
         </div>
       ) : !data ? null : (
-        <div className="space-y-4">
-          <StatRow
-            title="Top Rushing Leaders"
-            sport={currentSport}
-            icon={<BoltIcon className="h-5 w-5 text-orange-500" />}
-            accentColor="from-orange-500/10 to-orange-500/0"
-            leaders={data.topRushing}
-          />
-          <StatRow
-            title="Top Receiving Leaders"
-            sport={currentSport}
-            icon={<ArrowTrendingUpIcon className="h-5 w-5 text-blue-500" />}
-            accentColor="from-blue-500/10 to-blue-500/0"
-            leaders={data.topReceiving}
-          />
-          <StatRow
-            title="Top Passing Leaders"
-            sport={currentSport}
-            icon={<TrophyIcon className="h-5 w-5 text-amber-500" />}
-            accentColor="from-amber-500/10 to-amber-500/0"
-            leaders={data.topPassing}
-          />
-          <StatRow
-            title="Defensive Leaders"
-            sport={currentSport}
-            icon={<ShieldCheckIcon className="h-5 w-5 text-emerald-500" />}
-            accentColor="from-emerald-500/10 to-emerald-500/0"
-            leaders={[
-              ...data.topDefensiveSacks.map(l => ({ ...l, statGroup: 'Sacks' as const })),
-              ...data.topDefensiveInterceptions.map(l => ({ ...l, statGroup: 'INT' as const }))
-            ]}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Offensive Leaders column */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="px-4 pt-4 pb-2 border-b border-gray-100 dark:border-gray-700">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <BoltIcon className="h-5 w-5 text-orange-500" />
+                Offensive Leaders
+              </h3>
+            </div>
+            <div className="p-4 space-y-4">
+              <LeadersTable
+                sport={currentSport}
+                title="PASSING"
+                statLabel="YDS"
+                statKey="passing"
+                leaders={data.topPassing}
+              />
+              <LeadersTable
+                sport={currentSport}
+                title="RUSHING"
+                statLabel="YDS"
+                statKey="rushing"
+                leaders={data.topRushing}
+              />
+              <LeadersTable
+                sport={currentSport}
+                title="RECEIVING"
+                statLabel="YDS"
+                statKey="receiving"
+                leaders={data.topReceiving}
+              />
+            </div>
+          </div>
+
+          {/* Defensive Leaders column */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="px-4 pt-4 pb-2 border-b border-gray-100 dark:border-gray-700">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <ShieldCheckIcon className="h-5 w-5 text-emerald-500" />
+                Defensive Leaders
+              </h3>
+            </div>
+            <div className="p-4 space-y-4">
+              <LeadersTable
+                sport={currentSport}
+                title="TACKLES"
+                statLabel="TOT"
+                statKey="tackles"
+                leaders={data.topDefensiveTackles}
+              />
+              <LeadersTable
+                sport={currentSport}
+                title="SACKS"
+                statLabel="SACK"
+                statKey="sacks"
+                leaders={data.topDefensiveSacks}
+              />
+              <LeadersTable
+                sport={currentSport}
+                title="INTERCEPTIONS"
+                statLabel="INT"
+                statKey="interceptions"
+                leaders={data.topDefensiveInterceptions}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>
   )
 }
 
-type StatRowProps = {
+type LeadersTableProps = {
   title: string
+  statLabel: string
   sport: SportType
-  icon: React.ReactNode
-  accentColor: string
-  leaders: (PlayerLeader & { statGroup?: 'Sacks' | 'INT' })[]
+  leaders: PlayerLeader[]
+  statKey: 'passing' | 'rushing' | 'receiving' | 'tackles' | 'sacks' | 'interceptions'
 }
 
-function StatRow({ title, sport, icon, accentColor, leaders }: StatRowProps) {
+function LeadersTable({ title, statLabel, sport, leaders, statKey }: LeadersTableProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-gray-50/80 to-transparent dark:from-gray-900/60">
-        <div className="flex items-center gap-3">
-          <div className={`h-9 w-9 rounded-lg flex items-center justify-center bg-gradient-to-br ${accentColor}`}>
-            {icon}
-          </div>
-          <div>
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-              {title}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Season-long leaders
-            </p>
-          </div>
-        </div>
+    <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700">
+        <span className="text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide">
+          {title}
+        </span>
+        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          {statLabel}
+        </span>
       </div>
-      <div className="px-4 py-3">
+      <div className="px-3 py-2">
         {leaders.length === 0 ? (
           <p className="text-sm text-gray-500 dark:text-gray-400">
             No stats available yet for this season.
@@ -195,63 +224,12 @@ function StatRow({ title, sport, icon, accentColor, leaders }: StatRowProps) {
             {leaders.slice(0, 5).map((leader, idx) => (
               <li
                 key={`${leader.playerId}-${leader.statName}-${idx}`}
-                className="flex items-center justify-between py-2"
+                className="flex items-center justify-between py-1.5"
               >
-                {/** Build a lightweight Team object for the logo (fallbacks handled inside TeamLogo) */}
-                {(() => {
-                  const team: Team = {
-                    id: leader.teamId,
-                    name: leader.teamName || `Team ${leader.teamId}`,
-                    city: '',
-                    abbreviation: leader.teamAbbreviation || leader.teamId,
-                    league: sport
-                  } as Team
-                  return null
-                })()}
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                    <span className="text-xs text-gray-400 dark:text-gray-500 mr-1">
-                      {idx + 1}.
-                    </span>
-                    {leader.playerName}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                    {leader.position && <span>{leader.position}</span>}
-                    {leader.position && (leader.teamAbbreviation || leader.teamName) && <span className="mx-1">•</span>}
-                    {(leader.teamAbbreviation || leader.teamName) && (
-                      <span>{leader.teamAbbreviation || leader.teamName}</span>
-                    )}
-                    {leader.age && (
-                      <>
-                        <span className="mx-1">•</span>
-                        <span>{leader.age} yrs</span>
-                      </>
-                    )}
-                    {leader.height && (
-                      <>
-                        <span className="mx-1">•</span>
-                        <span>{leader.height}</span>
-                      </>
-                    )}
-                    {leader.statGroup && (
-                      <span className="ml-1 text-xs uppercase text-gray-400">
-                        ({leader.statGroup})
-                      </span>
-                    )}
-                  </p>
-                </div>
-                <div className="ml-3 flex items-center gap-3">
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                      {leader.value}
-                      <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">
-                        {leader.abbreviation}
-                      </span>
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {leader.statDisplayName}
-                    </p>
-                  </div>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 w-4 text-right">
+                    {idx + 1}
+                  </span>
                   <div className="hidden sm:block">
                     <TeamLogo
                       team={{
@@ -264,6 +242,16 @@ function StatRow({ title, sport, icon, accentColor, leaders }: StatRowProps) {
                       size="xs"
                     />
                   </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
+                      {leader.playerName}
+                    </p>
+                  </div>
+                </div>
+                <div className="ml-3 text-right flex-shrink-0">
+                  <span className="text-xs font-semibold text-gray-900 dark:text-white">
+                    {leader.value.toLocaleString()}
+                  </span>
                 </div>
               </li>
             ))}

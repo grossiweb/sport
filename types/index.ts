@@ -213,6 +213,20 @@ export interface PlayerStats {
   minutesPlayed?: number
 }
 
+// Detailed per-stat entry for players (from player_season_stats)
+export interface PlayerDetailedStat {
+  statId: number
+  name: string
+  category: string
+  displayName: string
+  abbreviation: string
+  description: string
+  value: number
+  displayValue: string
+  perGameValue: number | null
+  perGameDisplayValue: string | null
+}
+
 // Game and Matchup Types
 export interface Game {
   id: string

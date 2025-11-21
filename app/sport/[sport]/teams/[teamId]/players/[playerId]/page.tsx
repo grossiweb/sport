@@ -4,13 +4,18 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useQuery } from 'react-query'
-import { SportType, Player, PlayerStats } from '@/types'
+import { SportType, Player, PlayerStats, PlayerDetailedStat } from '@/types'
 import { isValidSportType } from '@/lib/constants/sports'
 import { useSport } from '@/contexts/SportContext'
 
 interface PlayerSeasonStatsResponse {
   success: boolean
   data: PlayerStats[]
+}
+
+interface PlayerDetailedStatsResponse {
+  success: boolean
+  data: PlayerDetailedStat[]
 }
 
 const fetchPlayerStats = async (
@@ -31,6 +36,24 @@ const fetchPlayerStats = async (
   const result: PlayerSeasonStatsResponse = await response.json()
   const stats = result.data || []
   return stats.length > 0 ? stats[0] : null
+}
+
+const fetchPlayerDetailedStats = async (
+  sport: SportType,
+  teamId: string,
+  playerId: string
+): Promise<PlayerDetailedStat[]> => {
+  const params = new URLSearchParams()
+  params.append('sport', sport)
+  params.append('season', '2025')
+  params.append('teamId', teamId)
+
+  const response = await fetch(`/api/players/${playerId}/stats?${params.toString()}`)
+  if (!response.ok) {
+    throw new Error('Failed to fetch detailed player stats')
+  }
+  const result: PlayerDetailedStatsResponse = await response.json()
+  return result.data || []
 }
 
 const fetchPlayerInfo = async (
@@ -80,7 +103,13 @@ export default function PlayerDetailPage() {
     { enabled: !!sport && !!teamId && !!playerId }
   )
 
-  const isLoading = contextLoading || statsLoading || playerLoading
+  const { data: detailedStats, isLoading: detailedLoading } = useQuery(
+    ['playerDetailedStats', sport, teamId, playerId],
+    () => fetchPlayerDetailedStats(sport, teamId, playerId),
+    { enabled: !!sport && !!teamId && !!playerId }
+  )
+
+  const isLoading = contextLoading || statsLoading || playerLoading || detailedLoading
 
   if (contextLoading) {
     return (
@@ -193,6 +222,87 @@ export default function PlayerDetailPage() {
                 <StatRow label="Fumbles" value={stats.fumbles} />
               </dl>
             </div>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          All Season Stats by Category
+        </h2>
+
+        {isLoading ? (
+          <div className="animate-pulse space-y-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-10 bg-gray-300 dark:bg-gray-700 rounded" />
+            ))}
+          </div>
+        ) : !detailedStats || detailedStats.length === 0 ? (
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            No detailed stats available for this player.
+          </p>
+        ) : (
+          <div className="space-y-6">
+            {Object.entries(
+              detailedStats.reduce<Record<string, PlayerDetailedStat[]>>((acc, stat) => {
+                const key = stat.category || 'other'
+                if (!acc[key]) acc[key] = []
+                acc[key].push(stat)
+                return acc
+              }, {})
+            )
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([category, statsInCategory]) => (
+                <div key={category}>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 capitalize">
+                    {category}
+                  </h3>
+                  <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                      <thead className="bg-gray-50 dark:bg-gray-800/80">
+                        <tr>
+                          <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wide">
+                            Stat
+                          </th>
+                          <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wide">
+                            Value
+                          </th>
+                          <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wide">
+                            Per Game
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700/60">
+                        {statsInCategory.map((stat) => (
+                          <tr key={stat.statId}>
+                            <td className="px-4 py-2 text-sm text-gray-900 dark:text-white">
+                              <div className="font-medium">
+                                {stat.displayName}
+                                {stat.abbreviation && (
+                                  <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">
+                                    ({stat.abbreviation})
+                                  </span>
+                                )}
+                              </div>
+                              {stat.description && (
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                  {stat.description}
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-4 py-2 text-sm text-gray-900 dark:text-white">
+                              {stat.displayValue}
+                            </td>
+                            <td className="px-4 py-2 text-sm text-gray-900 dark:text-white">
+                              {stat.perGameDisplayValue ?? '-'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
           </div>
         )}
       </div>

@@ -1,4 +1,4 @@
-import { Game, Team, TeamStats, BettingData, SportType, DetailedTeamStat, Player, PlayerStats, ScoreByPeriod, MatchupCoversSummary, TeamCoversSummary, RecordSummary } from '@/types'
+import { Game, Team, TeamStats, BettingData, SportType, DetailedTeamStat, Player, PlayerStats, PlayerDetailedStat, ScoreByPeriod, MatchupCoversSummary, TeamCoversSummary, RecordSummary } from '@/types'
 import { 
   getTeamsCollection, 
   getTeamStatsCollection, 
@@ -1443,11 +1443,91 @@ export class MongoDBSportsAPI {
     }
   }
 
+  // Public helper for detailed "complete leaders" pages
+  async getPlayerLeadersByStat(
+    sport: SportType,
+    statKey: 'passing' | 'rushing' | 'receiving' | 'tackles' | 'sacks' | 'interceptions',
+    options: { limit?: number } = {}
+  ) {
+    let statName: string
+    switch (statKey) {
+      case 'passing':
+        statName = 'passingYards'
+        break
+      case 'rushing':
+        statName = 'rushingYards'
+        break
+      case 'receiving':
+        statName = 'receivingYards'
+        break
+      case 'tackles':
+        statName = 'totalTackles'
+        break
+      case 'sacks':
+        statName = 'sacks'
+        break
+      case 'interceptions':
+        statName = 'interceptions'
+        break
+      default:
+        statName = 'passingYards'
+    }
+
+    const base = await this.getTopPlayersByPlayerStat(sport, statName, {
+      limit: options.limit ?? 50
+    })
+
+    // Enrich with team and player metadata (reuse logic from getPlayerInsights)
+    const sportId = this.mapSportTypeToSportId(sport)
+    const uniquePlayerIds = Array.from(
+      new Set(base.map((l: any) => l.playerId).filter(Boolean))
+    )
+
+    const [playersCollection, teams] = await Promise.all([
+      getPlayersCollection(),
+      this.getTeams(sport)
+    ])
+
+    const numericPlayerIds = uniquePlayerIds
+      .map(id => parseInt(id, 10))
+      .filter(id => !Number.isNaN(id))
+
+    const mongoPlayers = numericPlayerIds.length
+      ? await playersCollection
+          .find({ sport_id: sportId, id: { $in: numericPlayerIds } })
+          .toArray()
+      : []
+
+    const playersById = new Map<number, MongoPlayer>(
+      mongoPlayers.map(p => [p.id, p])
+    )
+
+    const teamsById = new Map(
+      teams.map(team => [team.id, team])
+    )
+
+    return base.map((leader: any) => {
+      const numericId = parseInt(leader.playerId, 10)
+      const playerDoc = playersById.get(numericId)
+      const team = teamsById.get(leader.teamId)
+
+      return {
+        ...leader,
+        age: playerDoc?.age,
+        height: playerDoc?.display_height,
+        weight: playerDoc?.weight,
+        teamAbbreviation: team?.abbreviation,
+        teamName: team?.name
+      }
+    })
+  }
+
   // Player Insights: small leaderboards for rushing/receiving/passing + defensive
   async getPlayerInsights(sport: SportType): Promise<{
     topRushing: any[]
     topReceiving: any[]
     topPassing: any[]
+    topDefensiveTackles: any[]
     topDefensiveSacks: any[]
     topDefensiveInterceptions: any[]
   }> {
@@ -1457,20 +1537,22 @@ export class MongoDBSportsAPI {
         topRushing: [],
         topReceiving: [],
         topPassing: [],
+        topDefensiveTackles: [],
         topDefensiveSacks: [],
         topDefensiveInterceptions: []
       }
     }
 
     // NOTE: These stat "name" values come from the player_season_stats.stats.*.name field.
-    // We can clearly see 'receivingYards', 'sacks', and 'interceptions' in the sample data.
+    // We can clearly see 'receivingYards', 'sacks', 'interceptions', and 'totalTackles' in the sample data.
     // 'rushingYards' and 'passingYards' are assumed based on provider naming; adjust here if needed.
-    const [topReceiving, topSacks, topInterceptions, topRushing, topPassing] = await Promise.all([
+    const [topReceiving, topSacks, topInterceptions, topRushing, topPassing, topTackles] = await Promise.all([
       this.getTopPlayersByPlayerStat(sport, 'receivingYards', { limit: 5 }),
       this.getTopPlayersByPlayerStat(sport, 'sacks', { limit: 5 }),
       this.getTopPlayersByPlayerStat(sport, 'interceptions', { limit: 5 }),
       this.getTopPlayersByPlayerStat(sport, 'rushingYards', { limit: 5 }),
-      this.getTopPlayersByPlayerStat(sport, 'passingYards', { limit: 5 })
+      this.getTopPlayersByPlayerStat(sport, 'passingYards', { limit: 5 }),
+      this.getTopPlayersByPlayerStat(sport, 'totalTackles', { limit: 5 })
     ])
 
     // Enrich leaders with player and team metadata from MongoDB
@@ -1479,6 +1561,7 @@ export class MongoDBSportsAPI {
         ...topRushing,
         ...topReceiving,
         ...topPassing,
+        ...topTackles,
         ...topSacks,
         ...topInterceptions
       ]
@@ -1534,6 +1617,7 @@ export class MongoDBSportsAPI {
         topRushing: topRushing.map(enrichLeader),
         topReceiving: topReceiving.map(enrichLeader),
         topPassing: topPassing.map(enrichLeader),
+        topDefensiveTackles: topTackles.map(enrichLeader),
         topDefensiveSacks: topSacks.map(enrichLeader),
         topDefensiveInterceptions: topInterceptions.map(enrichLeader)
       }
@@ -1544,6 +1628,7 @@ export class MongoDBSportsAPI {
         topRushing,
         topReceiving,
         topPassing,
+        topDefensiveTackles: topTackles,
         topDefensiveSacks: topSacks,
         topDefensiveInterceptions: topInterceptions
       }
@@ -1621,6 +1706,51 @@ export class MongoDBSportsAPI {
       return docs.map(mapDocToPlayerStats)
     } catch (error) {
       console.error('Error fetching player season stats from MongoDB:', error)
+      return []
+    }
+  }
+
+  /**
+   * Get full, per-stat player season stats from Mongo (all stat IDs, grouped by category on the frontend).
+   */
+  async getPlayerDetailedSeasonStatsFromMongo(
+    sport: SportType,
+    options: { seasonYear?: number; teamId?: string; playerId: string }
+  ): Promise<PlayerDetailedStat[]> {
+    const seasonYear = options.seasonYear ?? 2025
+    const sportId = this.mapSportTypeToSportId(sport)
+
+    try {
+      const collection = await getPlayerSeasonStatsCollection()
+
+      const match: any = {
+        sport_id: sportId,
+        season_year: seasonYear,
+        player_id: parseInt(options.playerId, 10)
+      }
+      if (options.teamId) {
+        match.team_id = parseInt(options.teamId, 10)
+      }
+
+      const doc: MongoPlayerSeasonStats | null = await collection.findOne(match)
+      if (!doc || !doc.stats) return []
+
+      const statsArray = Object.values(doc.stats)
+
+      return statsArray.map((s): PlayerDetailedStat => ({
+        statId: s.stat_id,
+        name: s.name,
+        category: s.category,
+        displayName: s.display_name,
+        abbreviation: s.abbreviation,
+        description: s.description,
+        value: s.value,
+        displayValue: s.display_value,
+        perGameValue: s.per_game_value,
+        perGameDisplayValue: s.per_game_display_value
+      }))
+    } catch (error) {
+      console.error('Error fetching detailed player season stats from MongoDB:', error)
       return []
     }
   }
