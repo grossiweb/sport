@@ -1845,7 +1845,13 @@ export class MongoDBSportsAPI {
       if (completedGames.length === 0) {
         return {
           opponentThirdDownConvPct: null,
-          opponentRedZoneEfficiencyPct: null
+          opponentRedZoneEfficiencyPct: null,
+          defTotalPointsPerGame: null,
+          defPassingYardsPerGame: null,
+          defRushingYardsPerGame: null,
+          defCompletionPctAllowed: null,
+          defYardsPerPassAllowed: null,
+          defYardsPerRushAllowed: null
         }
       }
 
@@ -1858,7 +1864,13 @@ export class MongoDBSportsAPI {
       if (opponentIds.length === 0) {
         return {
           opponentThirdDownConvPct: null,
-          opponentRedZoneEfficiencyPct: null
+          opponentRedZoneEfficiencyPct: null,
+          defTotalPointsPerGame: null,
+          defPassingYardsPerGame: null,
+          defRushingYardsPerGame: null,
+          defCompletionPctAllowed: null,
+          defYardsPerPassAllowed: null,
+          defYardsPerRushAllowed: null
         }
       }
 
@@ -2049,7 +2061,13 @@ export class MongoDBSportsAPI {
       console.error('Error calculating opponent stats:', error)
       return {
         opponentThirdDownConvPct: null,
-        opponentRedZoneEfficiencyPct: null
+        opponentRedZoneEfficiencyPct: null,
+        defTotalPointsPerGame: null,
+        defPassingYardsPerGame: null,
+        defRushingYardsPerGame: null,
+        defCompletionPctAllowed: null,
+        defYardsPerPassAllowed: null,
+        defYardsPerRushAllowed: null
       }
     }
   }
