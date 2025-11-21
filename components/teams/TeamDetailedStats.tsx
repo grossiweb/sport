@@ -236,63 +236,143 @@ export function TeamDetailedStats({
       }
     })
     
-    // Inject calculated opponent stats for Key Factors (football only)
+    // Inject calculated opponent & defensive stats for football
     if (sport === 'CFB' || sport === 'NFL') {
-      // Opponent Third Down Conversion Percentage
-      comparisonMap.set('Opponent Third Down Conversion Percentage', {
+      const seasonYear = new Date().getFullYear()
+      const seasonMeta = {
+        team_id: 0,
+        season_year: seasonYear,
+        season_type: 2,
+        season_type_name: 'Regular Season',
+        value: 0,
+        display_value: '',
+        updated_at: new Date().toISOString()
+      }
+
+      // Helper to add a synthetic stat to comparisonMap
+      const addSyntheticStat = (
+        key: string,
+        opts: {
+          name: string
+          category: string
+          display_name: string
+          abbreviation: string
+          description: string
+          homeValue?: number | null
+          awayValue?: number | null
+          decimals?: number
+        }
+      ) => {
+        const { name, category, display_name, abbreviation, description, homeValue, awayValue, decimals = 1 } = opts
+        if (homeValue == null && awayValue == null) return
+        const formatVal = (v?: number | null) =>
+          v == null ? null : Number.isFinite(v) ? v.toFixed(decimals) : null
+
+        comparisonMap.set(display_name, {
           stat: {
-            id: -1,
-            name: 'opponentThirdDownConvPct',
-            category: 'Key Factors',
-            display_name: 'Opponent Third Down Conversion Percentage',
-            abbreviation: 'OPP 3RDC%',
-            description: 'Average third down conversion percentage of opponents faced',
-            sport_id: 1
+            id: -1000 - comparisonMap.size,
+            name,
+            category,
+            display_name,
+            abbreviation,
+            description,
+            sport_id: sport === 'CFB' ? 1 : 2
           },
-          homeValue: homeOpponentStats?.opponentThirdDownConvPct?.toFixed(1) || null,
+          homeValue: formatVal(homeValue),
+          awayValue: formatVal(awayValue),
           homePerGame: null,
-          homeRank: undefined,
-          awayValue: awayOpponentStats?.opponentThirdDownConvPct?.toFixed(1) || null,
           awayPerGame: null,
+          homeRank: undefined,
           awayRank: undefined,
-          team_id: 0,
           stat_id: -1,
-          season_year: new Date().getFullYear(),
-          season_type: 2,
-          season_type_name: 'Regular Season',
-          value: 0,
-          display_value: '',
-          updated_at: new Date().toISOString()
+          ...seasonMeta
         })
+      }
 
-      // Defensive Third Down Conversion Percentage — removed per request
+      // Opponent Third Down Conversion Percentage (Key Factor)
+      addSyntheticStat('opponentThirdDownConvPct', {
+        name: 'opponentThirdDownConvPct',
+        category: 'Key Factors',
+        display_name: 'Opponent Third Down Conversion Percentage',
+        abbreviation: 'OPP 3RDC%',
+        description: 'Average third down conversion percentage of opponents faced',
+        homeValue: homeOpponentStats?.opponentThirdDownConvPct ?? null,
+        awayValue: awayOpponentStats?.opponentThirdDownConvPct ?? null
+      })
 
-      // Opponent Red Zone Efficiency Percentage
-      comparisonMap.set('Opponent Red Zone Efficiency Percentage', {
-          stat: {
-            id: -3,
-            name: 'opponentRedZoneEfficiencyPct',
-            category: 'Key Factors',
-            display_name: 'Opponent Red Zone Efficiency Percentage',
-            abbreviation: 'OPP RZ%',
-            description: 'Average red zone efficiency percentage of opponents faced',
-            sport_id: 1
-          },
-          homeValue: homeOpponentStats?.opponentRedZoneEfficiencyPct?.toFixed(1) || null,
-          homePerGame: null,
-          homeRank: undefined,
-          awayValue: awayOpponentStats?.opponentRedZoneEfficiencyPct?.toFixed(1) || null,
-          awayPerGame: null,
-          awayRank: undefined,
-          team_id: 0,
-          stat_id: -3,
-          season_year: new Date().getFullYear(),
-          season_type: 2,
-          season_type_name: 'Regular Season',
-          value: 0,
-          display_value: '',
-          updated_at: new Date().toISOString()
-        })
+      // Opponent Red Zone Efficiency Percentage (Key Factor)
+      addSyntheticStat('opponentRedZoneEfficiencyPct', {
+        name: 'opponentRedZoneEfficiencyPct',
+        category: 'Key Factors',
+        display_name: 'Opponent Red Zone Efficiency Percentage',
+        abbreviation: 'OPP RZ%',
+        description: 'Average red zone efficiency percentage of opponents faced',
+        homeValue: homeOpponentStats?.opponentRedZoneEfficiencyPct ?? null,
+        awayValue: awayOpponentStats?.opponentRedZoneEfficiencyPct ?? null
+      })
+
+      // Defensive Stats (opponent production per game)
+      addSyntheticStat('defTotalPointsPerGame', {
+        name: 'defTotalPointsPerGame',
+        category: 'Defensive',
+        display_name: 'Total Points',
+        abbreviation: 'PTS',
+        description: 'Average total points scored per game by opponents faced',
+        homeValue: homeOpponentStats?.defTotalPointsPerGame ?? null,
+        awayValue: awayOpponentStats?.defTotalPointsPerGame ?? null
+      })
+
+      addSyntheticStat('defPassingYardsPerGame', {
+        name: 'defPassingYardsPerGame',
+        category: 'Defensive',
+        display_name: 'Passing Yards',
+        abbreviation: 'YDS',
+        description: 'Average passing yards per game by opponents faced',
+        homeValue: homeOpponentStats?.defPassingYardsPerGame ?? null,
+        awayValue: awayOpponentStats?.defPassingYardsPerGame ?? null
+      })
+
+      addSyntheticStat('defRushingYardsPerGame', {
+        name: 'defRushingYardsPerGame',
+        category: 'Defensive',
+        display_name: 'Rushing Yards',
+        abbreviation: 'YDS',
+        description: 'Average rushing yards per game by opponents faced',
+        homeValue: homeOpponentStats?.defRushingYardsPerGame ?? null,
+        awayValue: awayOpponentStats?.defRushingYardsPerGame ?? null
+      })
+
+      addSyntheticStat('defCompletionPctAllowed', {
+        name: 'defCompletionPctAllowed',
+        category: 'Defensive',
+        display_name: 'Completion Percentage',
+        abbreviation: 'CMP%',
+        description: 'Average completion percentage of opponents faced',
+        homeValue: homeOpponentStats?.defCompletionPctAllowed ?? null,
+        awayValue: awayOpponentStats?.defCompletionPctAllowed ?? null
+      })
+
+      addSyntheticStat('defYardsPerPassAllowed', {
+        name: 'defYardsPerPassAllowed',
+        category: 'Defensive',
+        display_name: 'Yards Per Pass',
+        abbreviation: 'YPA',
+        description: 'Average yards per pass attempt by opponents faced',
+        homeValue: homeOpponentStats?.defYardsPerPassAllowed ?? null,
+        awayValue: awayOpponentStats?.defYardsPerPassAllowed ?? null,
+        decimals: 2
+      })
+
+      addSyntheticStat('defYardsPerRushAllowed', {
+        name: 'defYardsPerRushAllowed',
+        category: 'Defensive',
+        display_name: 'Yards Per Rush',
+        abbreviation: 'YPR',
+        description: 'Average yards per rushing attempt by opponents faced',
+        homeValue: homeOpponentStats?.defYardsPerRushAllowed ?? null,
+        awayValue: awayOpponentStats?.defYardsPerRushAllowed ?? null,
+        decimals: 2
+      })
     }
 
     // Inject calculated opponent stats for NBA/NCAAB

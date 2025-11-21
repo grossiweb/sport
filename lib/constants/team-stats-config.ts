@@ -502,6 +502,8 @@ export function getCategoryDisplayName(category: string, sport: 'CFB' | 'NFL' | 
 // Map a CFB stat to one of the requested categories using display_name heuristics
 export function mapCfbStatToCategory(stat: any): string {
   const label = (stat?.stat?.display_name || stat?.stat?.name || '').toLowerCase()
+  const explicitCategory = (stat?.stat?.category || '').toLowerCase()
+  if (explicitCategory === 'defensive') return STAT_CATEGORIES.DEFENSIVE
   if (!label) return STAT_CATEGORIES.OFFENSE
 
   // Key Factors (only 4 stats)
@@ -531,6 +533,9 @@ export function mapNflStatToCategory(stat: any): string {
   const label = (stat?.stat?.display_name || stat?.stat?.name || '').toLowerCase()
   const internalName = (stat?.stat?.name || '').toLowerCase()
   const originalCategory = stat.stat?.category || 'Offense'
+  if (originalCategory.toLowerCase() === 'defensive') {
+    return STAT_CATEGORIES.DEFENSIVE
+  }
   
   if (!label) return originalCategory === 'miscellaneous' ? 'Offense' : originalCategory
 

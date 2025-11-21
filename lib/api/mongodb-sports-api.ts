@@ -1808,6 +1808,12 @@ export class MongoDBSportsAPI {
   async calculateOpponentStats(sport: SportType, teamId: string, seasonYear?: number): Promise<{
     opponentThirdDownConvPct: number | null
     opponentRedZoneEfficiencyPct: number | null
+    defTotalPointsPerGame: number | null
+    defPassingYardsPerGame: number | null
+    defRushingYardsPerGame: number | null
+    defCompletionPctAllowed: number | null
+    defYardsPerPassAllowed: number | null
+    defYardsPerRushAllowed: number | null
   }> {
     try {
       const currentYear = seasonYear || this.getSeasonYearForSport(sport)
@@ -1892,6 +1898,15 @@ export class MongoDBSportsAPI {
       let redZoneEffPctSum = 0
       let redZoneEffPctCount = 0
 
+      // Defensive opponent aggregates (cumulative opponent production divided by total games played)
+      let totalOpponentGames = 0
+      let sumOppTotalPoints = 0
+      let sumOppPassingYards = 0
+      let sumOppRushingYards = 0
+      let sumOppCompletionPct = 0
+      let sumOppYardsPerPass = 0
+      let sumOppYardsPerRush = 0
+
       for (const opponentStat of opponentStats) {
         // Third down conversions: prefer stat_id 1662 but fallback to name patterns
         const thirdDownConvsStat = findStatByIdOrName(opponentStat.stats, {
@@ -1927,6 +1942,76 @@ export class MongoDBSportsAPI {
             redZoneEffPctCount++
           }
         }
+
+        // Defensive opponent aggregates
+        // Total games played by this opponent (for weighting)
+        const gamesPlayedStat = findStatByIdOrName(opponentStat.stats, {
+          nameIncludes: ['teamgamesplayed'],
+          displayIncludes: ['team games played']
+        })
+        const gamesPlayedVal = gamesPlayedStat?.value
+        const gamesPlayed =
+          typeof gamesPlayedVal === 'number' && isFinite(gamesPlayedVal) && gamesPlayedVal > 0
+            ? gamesPlayedVal
+            : 0
+
+        if (gamesPlayed > 0) {
+          totalOpponentGames += gamesPlayed
+
+          // Total Points Per Game
+          const totalPointsPgStat = findStatByIdOrName(opponentStat.stats, {
+            nameIncludes: ['totalpointspergame'],
+            displayIncludes: ['total points per game']
+          })
+          if (totalPointsPgStat?.value) {
+            sumOppTotalPoints += totalPointsPgStat.value * gamesPlayed
+          }
+
+          // Passing Yards Per Game
+          const passingYardsPgStat = findStatByIdOrName(opponentStat.stats, {
+            nameIncludes: ['passingyardspergame'],
+            displayIncludes: ['passing yards per game']
+          })
+          if (passingYardsPgStat?.value) {
+            sumOppPassingYards += passingYardsPgStat.value * gamesPlayed
+          }
+
+          // Rushing Yards Per Game
+          const rushingYardsPgStat = findStatByIdOrName(opponentStat.stats, {
+            nameIncludes: ['rushingyardspergame'],
+            displayIncludes: ['rushing yards per game']
+          })
+          if (rushingYardsPgStat?.value) {
+            sumOppRushingYards += rushingYardsPgStat.value * gamesPlayed
+          }
+
+          // Completion Percentage
+          const completionPctStat = findStatByIdOrName(opponentStat.stats, {
+            nameIncludes: ['completionpct'],
+            displayIncludes: ['completion percentage']
+          })
+          if (completionPctStat?.value) {
+            sumOppCompletionPct += completionPctStat.value * gamesPlayed
+          }
+
+          // Yards Per Pass Attempt
+          const yardsPerPassStat = findStatByIdOrName(opponentStat.stats, {
+            nameIncludes: ['yardsperpassattempt'],
+            displayIncludes: ['yards per pass attempt']
+          })
+          if (yardsPerPassStat?.value) {
+            sumOppYardsPerPass += yardsPerPassStat.value * gamesPlayed
+          }
+
+          // Yards Per Rushing Attempt
+          const yardsPerRushStat = findStatByIdOrName(opponentStat.stats, {
+            nameIncludes: ['yardsperrushattempt'],
+            displayIncludes: ['yards per rushing attempt']
+          })
+          if (yardsPerRushStat?.value) {
+            sumOppYardsPerRush += yardsPerRushStat.value * gamesPlayed
+          }
+        }
       }
 
       const opponentThirdDownConvPct = totalThirdDownAttempts > 0 
@@ -1937,9 +2022,28 @@ export class MongoDBSportsAPI {
         ? redZoneEffPctSum / redZoneEffPctCount
         : null
 
+      const defTotalPointsPerGame =
+        totalOpponentGames > 0 ? sumOppTotalPoints / totalOpponentGames : null
+      const defPassingYardsPerGame =
+        totalOpponentGames > 0 ? sumOppPassingYards / totalOpponentGames : null
+      const defRushingYardsPerGame =
+        totalOpponentGames > 0 ? sumOppRushingYards / totalOpponentGames : null
+      const defCompletionPctAllowed =
+        totalOpponentGames > 0 ? sumOppCompletionPct / totalOpponentGames : null
+      const defYardsPerPassAllowed =
+        totalOpponentGames > 0 ? sumOppYardsPerPass / totalOpponentGames : null
+      const defYardsPerRushAllowed =
+        totalOpponentGames > 0 ? sumOppYardsPerRush / totalOpponentGames : null
+
       return {
         opponentThirdDownConvPct,
-        opponentRedZoneEfficiencyPct
+        opponentRedZoneEfficiencyPct,
+        defTotalPointsPerGame,
+        defPassingYardsPerGame,
+        defRushingYardsPerGame,
+        defCompletionPctAllowed,
+        defYardsPerPassAllowed,
+        defYardsPerRushAllowed
       }
     } catch (error) {
       console.error('Error calculating opponent stats:', error)
