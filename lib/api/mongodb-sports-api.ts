@@ -487,12 +487,18 @@ export class MongoDBSportsAPI {
       const homeVals: number[] = []
       const awayVals: number[] = []
       for (const l of lines) {
-        const h = typeof l?.spread?.point_spread_home === 'number' && isFinite(l.spread.point_spread_home)
-          ? l.spread.point_spread_home
-          : (typeof l?.spread?.point_spread_home_delta === 'number' ? l.spread.point_spread_home_delta : null)
-        const a = typeof l?.spread?.point_spread_away === 'number' && isFinite(l.spread.point_spread_away)
-          ? l.spread.point_spread_away
-          : (typeof l?.spread?.point_spread_away_delta === 'number' ? l.spread.point_spread_away_delta : null)
+        // For ATS, always prefer the *_delta spread fields (closing numbers) and
+        // only fall back to the base fields if delta values are not present.
+        const h = typeof l?.spread?.point_spread_home_delta === 'number' && isFinite(l.spread.point_spread_home_delta)
+          ? l.spread.point_spread_home_delta
+          : (typeof l?.spread?.point_spread_home === 'number' && isFinite(l.spread.point_spread_home)
+            ? l.spread.point_spread_home
+            : null)
+        const a = typeof l?.spread?.point_spread_away_delta === 'number' && isFinite(l.spread.point_spread_away_delta)
+          ? l.spread.point_spread_away_delta
+          : (typeof l?.spread?.point_spread_away === 'number' && isFinite(l.spread.point_spread_away)
+            ? l.spread.point_spread_away
+            : null)
         if (typeof h === 'number' && isFinite(h)) homeVals.push(h)
         if (typeof a === 'number' && isFinite(a)) awayVals.push(a)
       }
@@ -540,12 +546,18 @@ export class MongoDBSportsAPI {
         const moneyHome: number[] = []
         const moneyAway: number[] = []
         for (const l of lines) {
-          const h = typeof l?.spread?.point_spread_home === 'number' && isFinite(l.spread.point_spread_home)
-            ? l.spread.point_spread_home
-            : (typeof l?.spread?.point_spread_home_delta === 'number' ? l.spread.point_spread_home_delta : null)
-          const a = typeof l?.spread?.point_spread_away === 'number' && isFinite(l.spread.point_spread_away)
-            ? l.spread.point_spread_away
-            : (typeof l?.spread?.point_spread_away_delta === 'number' ? l.spread.point_spread_away_delta : null)
+          // For ATS, always prefer the *_delta spread fields (closing numbers) and
+          // only fall back to the base fields if delta values are not present.
+          const h = typeof l?.spread?.point_spread_home_delta === 'number' && isFinite(l.spread.point_spread_home_delta)
+            ? l.spread.point_spread_home_delta
+            : (typeof l?.spread?.point_spread_home === 'number' && isFinite(l.spread.point_spread_home)
+              ? l.spread.point_spread_home
+              : null)
+          const a = typeof l?.spread?.point_spread_away_delta === 'number' && isFinite(l.spread.point_spread_away_delta)
+            ? l.spread.point_spread_away_delta
+            : (typeof l?.spread?.point_spread_away === 'number' && isFinite(l.spread.point_spread_away)
+              ? l.spread.point_spread_away
+              : null)
           const t = typeof l?.total?.total_over === 'number' && isFinite(l.total.total_over) && typeof l?.total?.total_under === 'number' && isFinite(l.total.total_under)
             ? (Number(l.total.total_over) + Number(l.total.total_under)) / 2
             : (typeof l?.total?.total_over_delta === 'number' && typeof l?.total?.total_under_delta === 'number'
