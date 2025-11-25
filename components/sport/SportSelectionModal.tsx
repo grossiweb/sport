@@ -16,6 +16,8 @@ const getSportIcon = (sportType: SportType) => {
       return '/nfl.svg'
     case 'NBA':
       return '/nba.svg'
+    case 'NCAAB':
+      return '/ncaab.svg'
     default:
       return null
   }
