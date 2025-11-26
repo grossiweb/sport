@@ -365,6 +365,23 @@ export class MongoDBSportsAPI {
     }
   }
 
+  // Safely parse a date_event string from Mongo without causing off-by-one
+  // day shifts when rendering in Eastern Time. If the value is a bare
+  // YYYY-MM-DD date (no time component), we treat it as a noon UTC timestamp
+  // so that converting to America/New_York keeps the same calendar day.
+  private parseGameDate(raw: string): Date {
+    if (!raw) return new Date()
+
+    // Heuristic: if there's no 'T', assume it's a date-only string
+    if (!raw.includes('T')) {
+      // Use noon UTC to avoid timezone shifting the calendar date
+      return new Date(`${raw}T12:00:00Z`)
+    }
+
+    // Otherwise trust the full ISO string (already has time component)
+    return new Date(raw)
+  }
+
   public mapMongoGameToGame(
     mongoGame: MongoGame,
     bettingData?: MongoBettingData | null,
@@ -390,7 +407,7 @@ export class MongoDBSportsAPI {
       league: this.mapSportIdToSportType(mongoGame.sport_id),
       // Preserve exact DB date string for display consistency across time zones
       gameDateString: mongoGame.date_event,
-      gameDate: new Date(mongoGame.date_event),
+      gameDate: this.parseGameDate(mongoGame.date_event),
       status: this.mapEventStatus(mongoGame.event_status),
       statusDetail: mongoGame.event_status_detail || '',
       homeScore: mongoGame.home_score ?? 0,

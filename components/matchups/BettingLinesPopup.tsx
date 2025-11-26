@@ -11,6 +11,7 @@ import {
 import { SportType, Game } from '@/types'
 import { formatToEasternTime } from '@/lib/utils/time'
 import { formatSpread as formatSpreadUtil, formatOdds as formatOddsUtil, formatTotal as formatTotalUtil } from '@/lib/utils/betting-format'
+import { sportsAPI } from '@/lib/api/sports-api'
 
 interface BettingLine {
   affiliate: {
@@ -92,12 +93,67 @@ function BettingLinesPopup({
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(`/api/betting-lines/${gameId}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch betting data')
+      let data: BettingData | null = null
+
+      if (sport === 'NCAAB') {
+        // For NCAAB, pull lines directly from TheRundown via sportsAPI
+        const externalLines = await sportsAPI.getAllBettingLines('NCAAB', gameId)
+
+        if (externalLines && externalLines.length > 0) {
+          const lines: Record<string, BettingLine> = {}
+
+          for (const line of externalLines as any[]) {
+            const affiliateId = String(line.affiliateId ?? line.sportsbook ?? 'book')
+            lines[affiliateId] = {
+              affiliate: {
+                affiliate_id: Number.isFinite(Number(affiliateId)) ? Number(affiliateId) : 0,
+                affiliate_name: line.sportsbook || `Sportsbook ${affiliateId}`,
+                affiliate_url: line.url || ''
+              },
+              moneyline: {
+                moneyline_away: line.moneyline?.away ?? 0,
+                moneyline_home: line.moneyline?.home ?? 0,
+                date_updated: line.lastUpdated || new Date().toISOString()
+              },
+              spread: {
+                point_spread_away: line.spread?.away ?? 0,
+                point_spread_home: line.spread?.home ?? 0,
+                point_spread_away_money: line.spread?.awayOdds ?? -110,
+                point_spread_home_money: line.spread?.homeOdds ?? -110,
+                date_updated: line.lastUpdated || new Date().toISOString()
+              },
+              total: {
+                total_over: line.total?.points ?? 0,
+                total_under: line.total?.points ?? 0,
+                total_over_money: line.total?.over ?? -110,
+                total_under_money: line.total?.under ?? -110,
+                date_updated: line.lastUpdated || new Date().toISOString()
+              }
+            }
+          }
+
+          data = {
+            event_id: gameId,
+            lines
+          }
+        } else {
+          data = null
+        }
+      } else {
+        // Existing behaviour for CFB / NFL / NBA – use Mongo-backed API
+        const response = await fetch(`/api/betting-lines/${gameId}`)
+        if (!response.ok) {
+          throw new Error('Failed to fetch betting data')
+        }
+        const raw = await response.json()
+        data = raw
       }
-      const data = await response.json()
-      setBettingData(data)
+
+      if (!data) {
+        setBettingData(null)
+      } else {
+        setBettingData(data)
+      }
       
       // Set first available sportsbook as default
       if (data?.lines && Object.keys(data.lines).length > 0) {

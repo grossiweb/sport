@@ -3,8 +3,7 @@ import { mongoSportsAPI } from '@/lib/api/mongodb-sports-api'
 import { Matchup, GamePrediction, TrendData, InjuryReport, SportType } from '@/types'
 import { isValidSportType } from '@/lib/constants/sports'
 import { addDays, format, subDays } from 'date-fns'
-import { utcToZonedTime } from 'date-fns-tz'
-import { DEFAULT_TIME_ZONE } from '@/lib/utils/time'
+import { getNowInAppTimeZone } from '@/lib/utils/time'
 import { apiCache, cacheKeys, cacheTTL } from '@/lib/cache'
 
 // AI prediction service - generates basic predictions for demo purposes
@@ -98,12 +97,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const sport = searchParams.get('sport')?.toUpperCase() || 'CFB'
 
-    // Always treat "today" and date ranges in Eastern Time, since all sports we cover are EST-centric.
-    const nowUtc = new Date()
-    const nowET = utcToZonedTime(nowUtc, DEFAULT_TIME_ZONE)
+    // "Today" and date ranges are computed in the app time zone.
+    const nowInAppTZ = getNowInAppTimeZone()
 
     const dateParam = searchParams.get('date')
-    const date = dateParam || format(nowET, 'yyyy-MM-dd')
+    const date = dateParam || format(nowInAppTZ, 'yyyy-MM-dd')
     const endDate = searchParams.get('endDate') // New parameter for week-based date ranges
     const limitParam = searchParams.get('limit')
     const limit = limitParam ? parseInt(limitParam, 10) : endDate ? undefined : 10
@@ -142,14 +140,14 @@ export async function GET(request: NextRequest) {
     let fetchEndDate = endDate
     
     if (dateRange === 'past') {
-      // For recent/past games, fetch from the last few days (in EST)
-      const pastDateET = subDays(nowET, 7) // Last 7 days in Eastern
-      fetchDate = format(pastDateET, 'yyyy-MM-dd')
+      // For recent/past games, fetch from the last few days in app time zone
+      const pastDate = subDays(nowInAppTZ, 7) // Last 7 days
+      fetchDate = format(pastDate, 'yyyy-MM-dd')
       fetchEndDate = undefined // Clear end date for past range
     } else if (dateRange === 'future') {
-      // For upcoming games, fetch from tomorrow onwards (in EST)
-      const futureDateET = addDays(nowET, 1) // Starting from tomorrow in Eastern
-      fetchDate = format(futureDateET, 'yyyy-MM-dd')
+      // For upcoming games, fetch from tomorrow onwards in app time zone
+      const futureDate = addDays(nowInAppTZ, 1) // Starting from tomorrow
+      fetchDate = format(futureDate, 'yyyy-MM-dd')
       fetchEndDate = undefined // Clear end date for future range
     }
     
@@ -228,12 +226,12 @@ export async function GET(request: NextRequest) {
     
     // Filter by date range if specified
     if (dateRange === 'past') {
-      const now = nowET
+      const now = nowInAppTZ
       filteredMatchups = filteredMatchups.filter(m => 
         new Date(m.game.gameDate) < now && m.game.status === 'final'
       )
     } else if (dateRange === 'future') {
-      const today = utcToZonedTime(new Date(), DEFAULT_TIME_ZONE)
+      const today = getNowInAppTimeZone()
       today.setHours(23, 59, 59, 999) // End of today in Eastern
       filteredMatchups = filteredMatchups.filter(m => 
         new Date(m.game.gameDate) > today && m.game.status === 'scheduled'

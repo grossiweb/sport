@@ -1,6 +1,25 @@
+import { utcToZonedTime } from 'date-fns-tz'
+
 const DEFAULT_LOCALE = 'en-US'
 
+// Central app timezone (only used when conversion is enabled)
 export const DEFAULT_TIME_ZONE = 'America/New_York'
+
+// Build‑time flag (works on server + client). If not set, defaults to true.
+// Add to .env.local if you want to control it:
+// NEXT_PUBLIC_ENABLE_TIMEZONE_CONVERSION=true | false
+const ENABLE_TIMEZONE_CONVERSION =
+  typeof process !== 'undefined'
+    ? process.env.NEXT_PUBLIC_ENABLE_TIMEZONE_CONVERSION !== 'false'
+    : true
+
+export const isTimeZoneConversionEnabled = () => ENABLE_TIMEZONE_CONVERSION
+
+export const getNowInAppTimeZone = (): Date => {
+  const now = new Date()
+  if (!isTimeZoneConversionEnabled()) return now
+  return utcToZonedTime(now, DEFAULT_TIME_ZONE)
+}
 
 const toDate = (value: string | number | Date) => (value instanceof Date ? value : new Date(value))
 
@@ -13,8 +32,14 @@ const formatInEastern = (value: string | number | Date, options: Intl.DateTimeFo
     return 'Invalid Date'
   }
 
+  // If conversion is disabled, do NOT force a timeZone here – just use whatever
+  // the environment / caller specifies in options.
+  const baseOptions: Intl.DateTimeFormatOptions = isTimeZoneConversionEnabled()
+    ? { timeZone: DEFAULT_TIME_ZONE }
+    : {}
+
   const formatter = new Intl.DateTimeFormat(DEFAULT_LOCALE, {
-    timeZone: DEFAULT_TIME_ZONE,
+    ...baseOptions,
     ...options
   })
 
@@ -30,7 +55,14 @@ export const formatToEasternTime = (value: string | number | Date, options?: Int
   }
 
   const formatted = formatInEastern(value, mergedOptions)
-  const suffix = options?.timeZoneName === 'short' || options?.timeZoneName === 'long' ? '' : ' ET'
+
+  // Only append " ET" when we are actually applying the Eastern conversion and the
+  // caller hasn't requested a specific timeZoneName label.
+  const shouldAppendSuffix =
+    isTimeZoneConversionEnabled() &&
+    !(options?.timeZoneName === 'short' || options?.timeZoneName === 'long')
+
+  const suffix = shouldAppendSuffix ? ' ET' : ''
 
   return `${formatted}${suffix}`
 }

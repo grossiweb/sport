@@ -27,6 +27,7 @@ import { ScoreByPeriodSummary } from '@/components/matchups/ScoreByPeriodSummary
 import { formatToEasternTime, formatToEasternDate, formatToEasternWeekday } from '@/lib/utils/time'
 import { useScoreByPeriod } from '@/hooks/useScoreByPeriod'
 import { formatSpread as formatSpreadUtil, formatOdds as formatOddsUtil, formatTotal as formatTotalUtil } from '@/lib/utils/betting-format'
+import { sportsAPI } from '@/lib/api/sports-api'
 
 interface ModernMatchupDetailProps {
   matchup: Matchup
@@ -534,9 +535,59 @@ function DetailedBettingSection({ game, sport }: { game: Matchup['game']; sport:
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch(`/api/betting-lines/${game.id}`)
-      if (!response.ok) throw new Error('Failed to load betting data')
-      const data = await response.json()
+
+      let data: any | null = null
+
+      if (sport === 'NCAAB') {
+        // For NCAAB, pull lines directly from TheRundown via sportsAPI
+        const externalLines = await sportsAPI.getAllBettingLines('NCAAB', game.id)
+
+        if (externalLines && externalLines.length > 0) {
+          const lines: Record<string, any> = {}
+
+          for (const line of externalLines as any[]) {
+            const affiliateId = String(line.affiliateId ?? line.sportsbook ?? 'book')
+            lines[affiliateId] = {
+              affiliate: {
+                affiliate_id: Number.isFinite(Number(affiliateId)) ? Number(affiliateId) : 0,
+                affiliate_name: line.sportsbook || `Sportsbook ${affiliateId}`,
+                affiliate_url: line.url || ''
+              },
+              moneyline: {
+                moneyline_away: line.moneyline?.away ?? 0,
+                moneyline_home: line.moneyline?.home ?? 0,
+                date_updated: line.lastUpdated || new Date().toISOString()
+              },
+              spread: {
+                point_spread_away: line.spread?.away ?? 0,
+                point_spread_home: line.spread?.home ?? 0,
+                point_spread_away_money: line.spread?.awayOdds ?? -110,
+                point_spread_home_money: line.spread?.homeOdds ?? -110,
+                date_updated: line.lastUpdated || new Date().toISOString()
+              },
+              total: {
+                total_over: line.total?.points ?? 0,
+                total_under: line.total?.points ?? 0,
+                total_over_money: line.total?.over ?? -110,
+                total_under_money: line.total?.under ?? -110,
+                date_updated: line.lastUpdated || new Date().toISOString()
+              }
+            }
+          }
+
+          data = {
+            event_id: game.id,
+            lines
+          }
+        } else {
+          data = null
+        }
+      } else {
+        const response = await fetch(`/api/betting-lines/${game.id}`)
+        if (!response.ok) throw new Error('Failed to load betting data')
+        data = await response.json()
+      }
+
       setBettingData(data)
       if (data?.lines) {
         const sportsbookIds = Object.keys(data.lines)
@@ -549,7 +600,7 @@ function DetailedBettingSection({ game, sport }: { game: Matchup['game']; sport:
     } finally {
       setLoading(false)
     }
-  }, [game.id])
+  }, [game.id, sport])
 
   useEffect(() => {
     loadBettingData()

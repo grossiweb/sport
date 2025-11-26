@@ -16,6 +16,7 @@ import { parse, parseISO, isValid as isValidDate } from 'date-fns'
 import { useScoreByPeriod } from '@/hooks/useScoreByPeriod'
 import { computeConsensus, computeAtsFromConsensus } from '@/lib/utils/consensus'
 import { formatSpread as formatSpreadUtil, formatTotal as formatTotalUtil, formatPercentage } from '@/lib/utils/betting-format'
+import { sportsAPI } from '@/lib/api/sports-api'
 
 interface ModernMatchupCardProps {
   matchup: Matchup
@@ -35,8 +36,17 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
     winProbHome: number | null
   } | null>(null)
 
-  // Safely derive a Date for display without throwing on invalid values
+  // Safely derive a Date for display without throwing on invalid values.
+  // Prefer the normalized `game.gameDate` (already parsed on the server,
+  // including our date-only handling) and only fall back to parsing the
+  // raw string if needed. This avoids off‑by‑one calendar shifts when
+  // Mongo stores date-only strings.
   const deriveSafeDate = (): Date | null => {
+    if (game.gameDate) {
+      const asDate = new Date(game.gameDate as any)
+      if (isValidDate(asDate)) return asDate
+    }
+
     if (game.gameDateString) {
       // Try strict yyyy-MM-dd first, then ISO fallback
       const byPattern = parse(game.gameDateString, 'yyyy-MM-dd', new Date())
@@ -44,8 +54,8 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
       const byIso = parseISO(game.gameDateString)
       if (isValidDate(byIso)) return byIso
     }
-    const asDate = new Date(game.gameDate as any)
-    return isValidDate(asDate) ? asDate : null
+
+    return null
   }
   const safeDate = deriveSafeDate()
   const gameTime = safeDate ? formatToEasternTime(safeDate) : '-'
@@ -173,13 +183,39 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
     let isMounted = true
     ;(async () => {
       try {
-        const res = await fetch(`/api/betting-lines/${game.id}`)
-        if (!res.ok) return
-        const data = await res.json()
-        const lineArray = Object.values(data?.lines || {}) as any[]
-        if (lineArray.length === 0) return
-        const consensus = computeConsensus(
-          lineArray.map((l: any) => ({
+        let sportsbookLines: any[] = []
+
+        if (sport === 'NCAAB') {
+          // For NCAAB, pull lines directly from TheRundown via sportsAPI
+          const externalLines = await sportsAPI.getAllBettingLines('NCAAB', game.id)
+          if (!externalLines || externalLines.length === 0) return
+          // Map external structure into SportsbookLine shape expected by computeConsensus
+          sportsbookLines = (externalLines as any[]).map((l: any) => ({
+            spread: {
+              point_spread_away: l.spread?.away,
+              point_spread_home: l.spread?.home,
+              point_spread_away_money: l.spread?.awayOdds,
+              point_spread_home_money: l.spread?.homeOdds
+            },
+            moneyline: {
+              moneyline_away: l.moneyline?.away,
+              moneyline_home: l.moneyline?.home
+            },
+            total: {
+              total_over: l.total?.points,
+              total_under: l.total?.points,
+              total_over_money: l.total?.over,
+              total_under_money: l.total?.under
+            }
+          }))
+        } else {
+          // Existing behaviour for CFB / NFL / NBA – use Mongo-backed API
+          const res = await fetch(`/api/betting-lines/${game.id}`)
+          if (!res.ok) return
+          const data = await res.json()
+          const lineArray = Object.values(data?.lines || {}) as any[]
+          if (lineArray.length === 0) return
+          sportsbookLines = lineArray.map((l: any) => ({
             spread: {
               point_spread_away: l?.spread?.point_spread_away,
               point_spread_home: l?.spread?.point_spread_home,
@@ -197,7 +233,11 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
               total_under_money: l?.total?.total_under_money
             }
           }))
-        )
+        }
+
+        if (!sportsbookLines.length) return
+
+        const consensus = computeConsensus(sportsbookLines)
         if (isMounted) setConsensusData(consensus)
       } catch (e) {
         // Silently ignore for now
@@ -206,7 +246,7 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
     return () => {
       isMounted = false
     }
-  }, [game.id])
+  }, [game.id, sport])
 
   const formatPct = (p: number | null | undefined) => formatPercentage(p)
   const formatSpread = (v: number | null | undefined) => formatSpreadUtil(v)

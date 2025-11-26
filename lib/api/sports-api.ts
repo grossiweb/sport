@@ -38,48 +38,58 @@ class TheRundownAPI {
   async getGames(date?: string, limit?: number): Promise<Game[]> {
     // Use the correct schedule endpoint for TheRundown API
     const fromDate = date || new Date().toISOString().split('T')[0]
-    
+
     // Apply division filters only for CFB (sportId = '1')
     let endpoint = `/sports/${this.sportId}/schedule?include=scores&include=all_periods`
     if (this.sportId === '1') {
       // For CFB, filter to only FBS (division_id=1) and FCS (division_id=4)
       endpoint += '&division_id=1&division_id=4'
     }
-    
+
     const params = {
       from: fromDate,
       limit: limit || 10
     }
-    
+
     // Make the API request
     const data = await this.makeRequest(endpoint, params)
-  
+
          // console.log('✅ Raw API response:', data)
-  
+
     // Extract schedules safely
     const events = Array.isArray(data?.schedules) ? data.schedules : []
-  
+
          // console.log(`📌 Total events found: ${events.length}`)
     if (events.length > 0) {
              // console.log('📄 First event structure:', Object.keys(events[0]))
     }
-  
+
     // If no events found, return an empty array
     if (events.length === 0) {
              // console.warn('⚠️ No events found for date:', fromDate)
       return []
     }
-  
+
     // Map response into your Game[] structure
     return events.map((event: any) => {
              // console.log('⚡ Processing event:', {
-       //   id: event.event_id,
-       //   home: event.home_team,
-       //   away: event.away_team,
-       //   date: event.date_event,
-       //   status: event.event_status
-       // })
-  
+      //   id: event.event_id,
+      //   home: event.home_team,
+      //   away: event.away_team,
+      //   date: event.date_event,
+      //   status: event.event_status
+      // })
+
+      // Map TheRundown sport ID to our internal SportType
+      const league: SportType =
+        this.sportId === '2'
+          ? 'NFL'
+          : this.sportId === '4'
+          ? 'NBA'
+          : this.sportId === '5'
+          ? 'NCAAB'
+          : 'CFB'
+
       return {
         id: event.event_id,
         homeTeam: {
@@ -87,16 +97,16 @@ class TheRundownAPI {
           name: event.home_team || 'Home Team',
           city: '', // ❌ Not provided in response
           abbreviation: event.home_team_abbreviation || event.home_team?.substring(0, 3).toUpperCase() || 'HOM',
-          league: (this.sportId === '2' ? 'NFL' : this.sportId === '4' ? 'NBA' : 'CFB') as SportType
+      league
         },
         awayTeam: {
           id: event.away_team_id != null ? String(event.away_team_id) : 'unknown',
           name: event.away_team || 'Away Team',
           city: '', // ❌ Not provided in response
           abbreviation: event.away_team_abbreviation || event.away_team?.substring(0, 3).toUpperCase() || 'AWY',
-          league: (this.sportId === '2' ? 'NFL' : this.sportId === '4' ? 'NBA' : 'CFB') as SportType
+      league
         },
-        league: (this.sportId === '2' ? 'NFL' : this.sportId === '4' ? 'NBA' : 'CFB') as SportType,
+      league,
         gameDate: new Date(event.date_event),
         status: this.mapEventStatus(event.event_status),
         statusDetail: event.event_status_detail || '', // ✅ Added for better UI
@@ -787,12 +797,14 @@ export class SportsAPI {
   private theRundownCFB: TheRundownAPI
   private theRundownNFL: TheRundownAPI
   private theRundownNBA: TheRundownAPI
+  private theRundownNCAAB: TheRundownAPI
 
   constructor() {
     const apiKey = process.env.THERUNDOWN_API_KEY || 'daebc01578mshf1b6929ad17a9f8p19c30bjsn5ab4b86b16e7'
     this.theRundownCFB = new TheRundownAPI(apiKey, '1') // College Football
     this.theRundownNFL = new TheRundownAPI(apiKey, '2') // NFL
     this.theRundownNBA = new TheRundownAPI(apiKey, '4') // NBA
+    this.theRundownNCAAB = new TheRundownAPI(apiKey, '5') // NCAAB
   }
 
   private getAPIClient(sport: SportType): TheRundownAPI {
@@ -803,6 +815,8 @@ export class SportsAPI {
         return this.theRundownNFL
       case 'NBA':
         return this.theRundownNBA
+      case 'NCAAB':
+        return this.theRundownNCAAB
       default:
         return this.theRundownCFB
     }
