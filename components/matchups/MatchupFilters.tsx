@@ -3,6 +3,7 @@
 import { SportType } from '@/types'
 import { WeekSelector } from './WeekSelector'
 import { NcaabDatePicker } from './NcaabDatePicker'
+import { NbaDatePicker } from './NbaDatePicker'
 import { WeekInfo, getCurrentSeasonWeekForSport } from '@/lib/utils/week-utils'
 import { format } from 'date-fns'
 
@@ -25,13 +26,15 @@ export function MatchupFilters({
   onDateChange,
   onFiltersChange
 }: MatchupFiltersProps) {
-  const isNcaab = sport === 'NCAAB'
-  
+	const isNcaab = sport === 'NCAAB'
+  const isNba = sport === 'NBA'
+  const isDaily = isNcaab || isNba
+
   return (
     <div>
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">
-        {isNcaab ? 'Date Selection & Filters' : 'Week Selection & Filters'}
+        {isDaily ? 'Date Selection & Filters' : 'Week Selection & Filters'}
       </h3>
       
 		{/* Responsive: Row 1 = Week/Date; Row 2 = Search (left) + Status (right) */}
@@ -44,7 +47,13 @@ export function MatchupFilters({
 						onDateChange={onDateChange}
 						className="w-full"
 					/>
-				) : selectedWeek && onWeekChange ? (
+				) : isNba && selectedDate && onDateChange ? (
+          <NbaDatePicker
+            selectedDate={selectedDate}
+            onDateChange={onDateChange}
+            className="w-full"
+          />
+        ) : selectedWeek && onWeekChange ? (
 					<WeekSelector
 						currentWeek={selectedWeek}
 						onWeekChange={onWeekChange}
@@ -86,7 +95,7 @@ export function MatchupFilters({
 
       <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          {isNcaab && selectedDate ? (
+          {isDaily && selectedDate ? (
             <>Showing {sport} matchups for {format(selectedDate, 'MMMM d, yyyy')}</>
           ) : selectedWeek ? (
             <>Showing {sport} matchups for {selectedWeek.dateRange}</>

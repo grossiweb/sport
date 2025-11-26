@@ -54,7 +54,7 @@ export default function SportMatchupsPage() {
       if (!validSport) return
       const s = validSport
 
-      // For NFL, use provided season dates (same logic as NBA/NCAAB)
+      // For NFL, use provided season dates (same logic as NCAAB)
       if (s === 'NFL') {
         const start = new Date('2025-09-04')
         const endDate = new Date('2026-01-07')
@@ -70,17 +70,15 @@ export default function SportMatchupsPage() {
         return
       }
 
-      // For NBA, always use provided season dates
+      // For NBA, use date-based selection within the 2025-26 season window
       if (s === 'NBA') {
-        const start = new Date('2025-10-09')
-        const endDate = new Date('2026-04-12')
-        const weeks = getSeasonWeekOptions({ startDate: start, endDate })
+        const seasonStart = new Date('2025-10-03')
+        const seasonEnd = new Date('2026-04-12')
         const now = new Date()
-        let current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
-        if (!current) {
-          current = weeks.find(w => now < w.weekInfo.startDate) || weeks[weeks.length - 1]
-        }
-        if (current) setSelectedWeek(current.weekInfo)
+        let initial = now
+        if (initial < seasonStart) initial = seasonStart
+        if (initial > seasonEnd) initial = seasonEnd
+        setSelectedDate(initial)
         return
       }
 
@@ -130,16 +128,18 @@ export default function SportMatchupsPage() {
 
   const sport = validSport || currentSport
   const isNcaab = sport === 'NCAAB'
+  const isNba = sport === 'NBA'
+  const isDaily = isNcaab || isNba
 
-  // Use daily matchups for NCAAB, weekly for others
+  // Use daily matchups for NCAAB/NBA, weekly for others
   const { data: matchups, isLoading: matchupsLoading, error } = useQuery(
-    isNcaab 
+    isDaily 
       ? ['dailyMatchups', sport, format(selectedDate, 'yyyy-MM-dd')]
       : ['weekMatchups', sport, selectedWeek.weekNumber, selectedWeek.year, format(selectedWeek.startDate, 'yyyy-MM-dd'), format(selectedWeek.endDate, 'yyyy-MM-dd')],
-    isNcaab
+    isDaily
       ? () => fetchDailyMatchups(sport, selectedDate)
       : () => fetchWeekMatchups(sport, selectedWeek),
-    { enabled: !!sport && (isNcaab ? !!selectedDate : true) }
+    { enabled: !!sport && (isDaily ? !!selectedDate : true) }
   )
 
   const isLoading = contextLoading || matchupsLoading
@@ -220,11 +220,11 @@ export default function SportMatchupsPage() {
       <div className="mb-6">
         <MatchupFilters
           sport={sport}
-          selectedWeek={isNcaab ? undefined : selectedWeek}
-          selectedDate={isNcaab ? selectedDate : undefined}
+          selectedWeek={isDaily ? undefined : selectedWeek}
+          selectedDate={isDaily ? selectedDate : undefined}
           filters={filters}
-          onWeekChange={isNcaab ? undefined : setSelectedWeek}
-          onDateChange={isNcaab ? setSelectedDate : undefined}
+          onWeekChange={isDaily ? undefined : setSelectedWeek}
+          onDateChange={isDaily ? setSelectedDate : undefined}
           onFiltersChange={setFilters}
         />
       </div>
@@ -302,7 +302,7 @@ export default function SportMatchupsPage() {
             No games scheduled
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            {isNcaab ? (
+            {isDaily ? (
               <>There are no {currentSportData.displayName} games scheduled for {format(selectedDate, 'MMMM d, yyyy')}.</>
             ) : (
               <>There are no {currentSportData.displayName} games scheduled for {selectedWeek.label} ({selectedWeek.dateRange}).</>
