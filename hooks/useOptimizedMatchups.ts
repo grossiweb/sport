@@ -258,7 +258,7 @@ export function useWeekBasedUpcomingMatchups(sport: SportType, limit: number = 3
       retry: 2,
       select: (data) => {
         // Filter to only scheduled games in the next 7 days and sort by earliest first
-        const zonedNow = utcToZonedTime(new Date(), DEFAULT_TIME_ZONE)
+        const zonedNow = getNowInAppTimeZone()
         const sevenDaysFromNow = addDays(zonedNow, 7)
         
         const upcomingGames = data
