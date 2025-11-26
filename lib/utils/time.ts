@@ -2,7 +2,7 @@ import { utcToZonedTime } from 'date-fns-tz'
 
 const DEFAULT_LOCALE = 'en-US'
 
-// Central app timezone (only used when conversion is enabled)
+// Central app timezone when conversion is enabled (e.g. Eastern for US sports)
 export const DEFAULT_TIME_ZONE = 'America/New_York'
 
 // Build‑time flag (works on server + client). If not set, defaults to true.
@@ -17,7 +17,11 @@ export const isTimeZoneConversionEnabled = () => ENABLE_TIMEZONE_CONVERSION
 
 export const getNowInAppTimeZone = (): Date => {
   const now = new Date()
-  if (!isTimeZoneConversionEnabled()) return now
+  // When conversion is disabled, we want "now" in pure UTC so date math
+  // (today, last 7 days, etc.) matches the UTC timestamps stored in MongoDB.
+  if (!isTimeZoneConversionEnabled()) {
+    return utcToZonedTime(now, 'UTC')
+  }
   return utcToZonedTime(now, DEFAULT_TIME_ZONE)
 }
 
@@ -32,11 +36,9 @@ const formatInEastern = (value: string | number | Date, options: Intl.DateTimeFo
     return 'Invalid Date'
   }
 
-  // If conversion is disabled, do NOT force a timeZone here – just use whatever
-  // the environment / caller specifies in options.
   const baseOptions: Intl.DateTimeFormatOptions = isTimeZoneConversionEnabled()
     ? { timeZone: DEFAULT_TIME_ZONE }
-    : {}
+    : { timeZone: 'UTC' }
 
   const formatter = new Intl.DateTimeFormat(DEFAULT_LOCALE, {
     ...baseOptions,

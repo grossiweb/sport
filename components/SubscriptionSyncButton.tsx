@@ -50,14 +50,19 @@ export default function SubscriptionSyncButton() {
         </h3>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           Current: <span className="capitalize font-semibold text-blue-600 dark:text-blue-400">
-            {subscriptionTier === 'free' ? 'Free Subscriber' : 
+          {subscriptionTier === 'free' ? 'Free Subscriber' : 
              subscriptionTier === 'pro' ? 'Pro Subscriber' :
              subscriptionTier === 'enterprise' ? 'Enterprise Subscriber' :
              subscriptionTier === 'trial' ? 'Trial' : 'Unknown'}
           </span>
           {user.subscriptionExpiry && new Date(user.subscriptionExpiry).getFullYear() < 2030 && (
             <span className="ml-2 text-orange-600 dark:text-orange-400">
-              (Expires: {new Date(user.subscriptionExpiry).toLocaleDateString()})
+              (Expires: {new Date(user.subscriptionExpiry).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                timeZone: 'UTC'
+              })})
             </span>
           )}
         </p>

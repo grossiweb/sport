@@ -91,7 +91,7 @@ export function UpcomingScroller() {
             <Link key={`${g.id}-${idx}`} href={`/sport/${g.league.toLowerCase()}/matchups/${g.id}`} className="min-w-[280px]">
               <div className="h-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 hover:shadow-sm transition-shadow">
                 <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                  {new Date(g.gameDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} • {formatToEasternTime(g.gameDate)} ET
+                  {new Date(g.gameDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} • {formatToEasternTime(g.gameDate)}
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 min-w-0">
