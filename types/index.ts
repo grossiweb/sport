@@ -282,6 +282,9 @@ export interface Matchup {
   closingConsensus?: {
     winProbHome: number | null
     winProbAway: number | null
+    spreadHome?: number | null
+    spreadAway?: number | null
+    totalPoints?: number | null
   }
 }
 

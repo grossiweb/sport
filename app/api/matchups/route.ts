@@ -180,7 +180,10 @@ export async function GET(request: NextRequest) {
       }
     }))
 
-    // Preload closing moneylines for all games and compute implied probabilities (finals preferred)
+    // Preload closing betting summaries (spreads, totals, moneylines) for all games
+    // and compute implied win probabilities once on the server. This allows
+    // matchup list cards to render consensus data without firing additional
+    // `/api/betting-lines` requests per game.
     const allEventIds = games.map(g => g.id)
     const bulkBetting = await (mongoSportsAPI as any).getBettingSummariesForEvents(allEventIds)
 
@@ -197,9 +200,14 @@ export async function GET(request: NextRequest) {
         // Use precomputed covers summary for this pair
         const coversSummary = coversByPair.get(pairKey(game.homeTeam.id, game.awayTeam.id)) || null
 
-        // Use closing moneylines consensus to compute win probabilities
+        // Use preloaded betting summaries (if available) to compute implied
+        // win probabilities and expose a lightweight “closingConsensus”
+        // object for the list page. This avoids per-card betting-lines
+        // fetches on the client while still giving us spreads/totals.
         const betting = bulkBetting.get(game.id)
-        const probs = betting ? mongoSportsAPI.computeWinProbFromMoneylines(betting.moneylineHome, betting.moneylineAway) : { winProbHome: null, winProbAway: null }
+        const probs = betting
+          ? mongoSportsAPI.computeWinProbFromMoneylines(betting.moneylineHome, betting.moneylineAway)
+          : { winProbHome: null, winProbAway: null }
 
         const item: Matchup = {
           game,
@@ -212,7 +220,13 @@ export async function GET(request: NextRequest) {
           headToHead: [], // Will be loaded on demand
           teamStats: null, // Will be loaded on demand
           coversSummary: coversSummary ?? undefined,
-          closingConsensus: probs
+          closingConsensus: {
+            winProbHome: probs.winProbHome,
+            winProbAway: probs.winProbAway,
+            spreadHome: betting?.spreadHome ?? null,
+            spreadAway: betting?.spreadAway ?? null,
+            totalPoints: betting?.totalPoints ?? null
+          }
         }
         return item
       })

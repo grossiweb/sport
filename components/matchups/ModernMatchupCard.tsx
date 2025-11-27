@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Matchup, SportType, RecordSummary } from '@/types'
 import {
   ClockIcon,
@@ -14,9 +14,8 @@ import { ScoreByPeriodPopup } from './ScoreByPeriodPopup'
 import { formatToEasternTime, formatToEasternDate, formatToEasternWeekday } from '@/lib/utils/time'
 import { parse, parseISO, isValid as isValidDate } from 'date-fns'
 import { useScoreByPeriod } from '@/hooks/useScoreByPeriod'
-import { computeConsensus, computeAtsFromConsensus } from '@/lib/utils/consensus'
+import { computeAtsFromConsensus } from '@/lib/utils/consensus'
 import { formatSpread as formatSpreadUtil, formatTotal as formatTotalUtil, formatPercentage } from '@/lib/utils/betting-format'
-import { sportsAPI } from '@/lib/api/sports-api'
 
 interface ModernMatchupCardProps {
   matchup: Matchup
@@ -28,13 +27,6 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [showBettingPopup, setShowBettingPopup] = useState(false)
   const [showScorePopup, setShowScorePopup] = useState(false)
-  const [consensusData, setConsensusData] = useState<{
-    spreadAway: number | null
-    spreadHome: number | null
-    totalPoints: number | null
-    winProbAway: number | null
-    winProbHome: number | null
-  } | null>(null)
 
   // Safely derive a Date for display without throwing on invalid values.
   // Prefer the normalized `game.gameDate` (already parsed on the server,
@@ -82,6 +74,19 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
     if (percentage >= 50) return 'text-blue-600 dark:text-blue-400'
     return 'text-red-600 dark:text-red-400'
   }
+
+  // Prefer server-side “closingConsensus” so the list page does not need to
+  // fire an additional `/api/betting-lines` request per game. We keep the
+  // same shape the UI expects and only fall back to nulls when missing.
+  const consensusData = matchup.closingConsensus
+    ? {
+        spreadAway: matchup.closingConsensus.spreadAway ?? null,
+        spreadHome: matchup.closingConsensus.spreadHome ?? null,
+        totalPoints: matchup.closingConsensus.totalPoints ?? null,
+        winProbAway: matchup.closingConsensus.winProbAway ?? null,
+        winProbHome: matchup.closingConsensus.winProbHome ?? null
+      }
+    : null
 
   const { hasScores: hasScoreByPeriod } = useScoreByPeriod(game.scoreByPeriod)
   const shouldShowScoreButton = hasScoreByPeriod && game.status === 'final'
@@ -178,76 +183,6 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
   
 
   
-  // Fetch all sportsbook lines for the game and compute consensus on mount
-  useEffect(() => {
-    let isMounted = true
-    ;(async () => {
-      try {
-        let sportsbookLines: any[] = []
-
-        if (sport === 'NCAAB') {
-          // For NCAAB, pull lines directly from TheRundown via sportsAPI
-          const externalLines = await sportsAPI.getAllBettingLines('NCAAB', game.id)
-          if (!externalLines || externalLines.length === 0) return
-          // Map external structure into SportsbookLine shape expected by computeConsensus
-          sportsbookLines = (externalLines as any[]).map((l: any) => ({
-            spread: {
-              point_spread_away: l.spread?.away,
-              point_spread_home: l.spread?.home,
-              point_spread_away_money: l.spread?.awayOdds,
-              point_spread_home_money: l.spread?.homeOdds
-            },
-            moneyline: {
-              moneyline_away: l.moneyline?.away,
-              moneyline_home: l.moneyline?.home
-            },
-            total: {
-              total_over: l.total?.points,
-              total_under: l.total?.points,
-              total_over_money: l.total?.over,
-              total_under_money: l.total?.under
-            }
-          }))
-        } else {
-          // Existing behaviour for CFB / NFL / NBA – use Mongo-backed API
-          const res = await fetch(`/api/betting-lines/${game.id}`)
-          if (!res.ok) return
-          const data = await res.json()
-          const lineArray = Object.values(data?.lines || {}) as any[]
-          if (lineArray.length === 0) return
-          sportsbookLines = lineArray.map((l: any) => ({
-            spread: {
-              point_spread_away: l?.spread?.point_spread_away,
-              point_spread_home: l?.spread?.point_spread_home,
-              point_spread_away_money: l?.spread?.point_spread_away_money,
-              point_spread_home_money: l?.spread?.point_spread_home_money
-            },
-            moneyline: {
-              moneyline_away: l?.moneyline?.moneyline_away,
-              moneyline_home: l?.moneyline?.moneyline_home
-            },
-            total: {
-              total_over: l?.total?.total_over,
-              total_under: l?.total?.total_under,
-              total_over_money: l?.total?.total_over_money,
-              total_under_money: l?.total?.total_under_money
-            }
-          }))
-        }
-
-        if (!sportsbookLines.length) return
-
-        const consensus = computeConsensus(sportsbookLines)
-        if (isMounted) setConsensusData(consensus)
-      } catch (e) {
-        // Silently ignore for now
-      }
-    })()
-    return () => {
-      isMounted = false
-    }
-  }, [game.id, sport])
-
   const formatPct = (p: number | null | undefined) => formatPercentage(p)
   const formatSpread = (v: number | null | undefined) => formatSpreadUtil(v)
   const formatTotal = (v: number | null | undefined) => formatTotalUtil(v)
@@ -259,13 +194,20 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
       : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'
   }
 
-  const canComputeATS = game.status === 'final' && consensusData &&
-    typeof consensusData.spreadAway === 'number' && typeof consensusData.spreadHome === 'number'
+  const canComputeATS =
+    game.status === 'final' &&
+    consensusData &&
+    typeof consensusData.spreadAway === 'number' &&
+    typeof consensusData.spreadHome === 'number'
+
   const atsResult = canComputeATS
     ? computeAtsFromConsensus(
         game.awayScore ?? 0,
         game.homeScore ?? 0,
-        { spreadAway: consensusData!.spreadAway!, spreadHome: consensusData!.spreadHome! }
+        {
+          spreadAway: consensusData.spreadAway!,
+          spreadHome: consensusData.spreadHome!
+        }
       )
     : null
 

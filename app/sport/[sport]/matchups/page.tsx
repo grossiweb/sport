@@ -41,10 +41,11 @@ const fetchDailyMatchups = async (sport: SportType, date: Date): Promise<Matchup
 
 export default function SportMatchupsPage() {
   const params = useParams()
-  const { currentSport, currentSportData, isLoading: contextLoading } = useSport()
+  const { currentSportData, isLoading: contextLoading } = useSport()
   const [validSport, setValidSport] = useState<SportType | null>(null)
   const [selectedWeek, setSelectedWeek] = useState<WeekInfo>(getCurrentWeek())
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [isInitialized, setIsInitialized] = useState(false)
   
   // Align initial selectedWeek/date to current season-relative week based on the route sport only.
   // We intentionally use `validSport` (from the URL) instead of `currentSport` from context
@@ -67,6 +68,7 @@ export default function SportMatchupsPage() {
           current = weeks.find(w => now < w.weekInfo.startDate) || weeks[weeks.length - 1]
         }
         if (current) setSelectedWeek(current.weekInfo)
+        setIsInitialized(true)
         return
       }
 
@@ -79,6 +81,7 @@ export default function SportMatchupsPage() {
         if (initial < seasonStart) initial = seasonStart
         if (initial > seasonEnd) initial = seasonEnd
         setSelectedDate(initial)
+        setIsInitialized(true)
         return
       }
 
@@ -93,6 +96,7 @@ export default function SportMatchupsPage() {
           current = weeks.find(w => now < w.weekInfo.startDate) || weeks[weeks.length - 1]
         }
         if (current) setSelectedWeek(current.weekInfo)
+        setIsInitialized(true)
         return
       }
 
@@ -109,8 +113,13 @@ export default function SportMatchupsPage() {
           current = weeks.find(w => now < w.weekInfo.startDate) || weeks[weeks.length - 1]
         }
         if (current) setSelectedWeek(current.weekInfo)
+        setIsInitialized(true)
         return
       }
+
+      // Fallback: if no sport-specific alignment applied, mark initialized so
+      // the query can run using the default week/date.
+      setIsInitialized(true)
     }
     alignToSeason()
   }, [validSport])
@@ -126,7 +135,10 @@ export default function SportMatchupsPage() {
     }
   }, [params.sport])
 
-  const sport = validSport || currentSport
+  // Only trust the sport from the route for this page to avoid double-fetching
+  // when the global context sport changes. This ensures we align weeks/dates
+  // based purely on the URL segment and only fire one matchups query.
+  const sport = validSport
   const isNcaab = sport === 'NCAAB'
   const isNba = sport === 'NBA'
   const isDaily = isNcaab || isNba
@@ -137,9 +149,14 @@ export default function SportMatchupsPage() {
       ? ['dailyMatchups', sport, format(selectedDate, 'yyyy-MM-dd')]
       : ['weekMatchups', sport, selectedWeek.weekNumber, selectedWeek.year, format(selectedWeek.startDate, 'yyyy-MM-dd'), format(selectedWeek.endDate, 'yyyy-MM-dd')],
     isDaily
-      ? () => fetchDailyMatchups(sport, selectedDate)
-      : () => fetchWeekMatchups(sport, selectedWeek),
-    { enabled: !!sport && (isDaily ? !!selectedDate : true) }
+      ? () => fetchDailyMatchups(sport!, selectedDate)
+      : () => fetchWeekMatchups(sport!, selectedWeek),
+    {
+      // Wait until we've aligned the initial week/date for the sport from
+      // the URL to avoid an extra `/api/matchups` call with a temporary
+      // week range.
+      enabled: isInitialized && !!sport && (isDaily ? !!selectedDate : true)
+    }
   )
 
   const isLoading = contextLoading || matchupsLoading
