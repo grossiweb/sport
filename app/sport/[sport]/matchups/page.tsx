@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { format } from 'date-fns'
 import { SportType, Matchup } from '@/types'
 import { isValidSportType } from '@/lib/constants/sports'
 import { useSport } from '@/contexts/SportContext'
 import { ModernMatchupCard } from '@/components/matchups/ModernMatchupCard'
+import { MatchupCardSkeleton } from '@/components/matchups/MatchupCardSkeleton'
 import { MatchupFilters } from '@/components/matchups/MatchupFilters'
 import { WeekInfo, getCurrentWeek, getWeekDateRange, getSeasonWeekOptions, getNFLSeasonWeekOptions, getCurrentSeasonWeekForSport, getCFBSeasonWeekOptions } from '@/lib/utils/week-utils'
 import { formatToEasternWeekday } from '@/lib/utils/time'
@@ -125,6 +126,9 @@ export default function SportMatchupsPage() {
   }, [validSport])
   
   const [filters, setFilters] = useState<MatchupFiltersState>({})
+  const [displayedCount, setDisplayedCount] = useState(12) // Initial batch size
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const observerTarget = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const sportParam = params.sport as string
@@ -161,8 +165,11 @@ export default function SportMatchupsPage() {
 
   const isLoading = contextLoading || matchupsLoading
 
-  // Apply filters to matchups
-  const filteredMatchups = matchups?.filter(matchup => {
+  // Apply filters to matchups using useMemo for performance
+  const filteredMatchups = useMemo(() => {
+    if (!matchups) return []
+    
+    return matchups.filter(matchup => {
     // Debug: log team division data for first matchup
     if (matchups?.indexOf(matchup) === 0 && sport === 'CFB') {
       console.log('First matchup team divisions:', {
@@ -194,7 +201,53 @@ export default function SportMatchupsPage() {
     // Division filtering is now handled at API level for CFB (only FBS and FCS teams)
     
     return true
-  }) || []
+    })
+  }, [matchups, filters, sport])
+
+  // Get the visible matchups for progressive loading
+  const visibleMatchups = useMemo(() => {
+    return filteredMatchups.slice(0, displayedCount)
+  }, [filteredMatchups, displayedCount])
+
+  // Load more handler
+  const loadMore = () => {
+    if (displayedCount < filteredMatchups.length) {
+      setIsLoadingMore(true)
+      // Use setTimeout to allow UI to update
+      setTimeout(() => {
+        setDisplayedCount(prev => Math.min(prev + 12, filteredMatchups.length))
+        setIsLoadingMore(false)
+      }, 100)
+    }
+  }
+
+  // Reset displayed count when filters or data change
+  useEffect(() => {
+    setDisplayedCount(12)
+  }, [filters, matchups])
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && displayedCount < filteredMatchups.length && !isLoadingMore) {
+          loadMore()
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    )
+
+    const currentTarget = observerTarget.current
+    if (currentTarget) {
+      observer.observe(currentTarget)
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget)
+      }
+    }
+  }, [displayedCount, filteredMatchups.length, isLoadingMore])
 
   if (contextLoading) {
     return (
@@ -249,17 +302,8 @@ export default function SportMatchupsPage() {
       {/* Matchups List */}
       {isLoading ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
-              <div className="space-y-4">
-                <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
-                <div className="flex justify-between">
-                  <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded w-32"></div>
-                  <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded w-32"></div>
-                </div>
-                <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/2"></div>
-              </div>
-            </div>
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <MatchupCardSkeleton key={i} />
           ))}
         </div>
       ) : error ? (
@@ -269,41 +313,48 @@ export default function SportMatchupsPage() {
           </p>
         </div>
       ) : filteredMatchups && filteredMatchups.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredMatchups.map((matchup) => (
-            <ModernMatchupCard
-              key={matchup.game.id}
-              matchup={matchup}
-              sport={sport}
-            />
-          ))}
+        <>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {visibleMatchups.map((matchup) => (
+              <ModernMatchupCard
+                key={matchup.game.id}
+                matchup={matchup}
+                sport={sport}
+              />
+            ))}
+          </div>
 
-          {/* Demo: Covers-style cards using provided betting JSON (renders if IDs match) */}
-          {/*} 
-          {Array.isArray(sampleBetting) && sampleBetting.map((evt: any) => (
-            <CoversStyleMatchupCard
-              key={evt.event_id}
-              away={{
-                id: evt.teams?.find((t: any) => t.is_away)?.team_id || 'away',
-                name: evt.teams_normalized?.find((t: any) => t.is_away)?.name || 'Away',
-                abbreviation: evt.teams_normalized?.find((t: any) => t.is_away)?.abbreviation,
-                city: evt.teams_normalized?.find((t: any) => t.is_away)?.name,
-                league: 'NFL',
-                score: evt.score?.score_away ?? 0
-              }}
-              home={{
-                id: evt.teams?.find((t: any) => t.is_home)?.team_id || 'home',
-                name: evt.teams_normalized?.find((t: any) => t.is_home)?.name || 'Home',
-                abbreviation: evt.teams_normalized?.find((t: any) => t.is_home)?.abbreviation,
-                city: evt.teams_normalized?.find((t: any) => t.is_home)?.name,
-                league: 'NFL',
-                score: evt.score?.score_home ?? 0
-              }}
-              lines={evt.lines}
-            />
-          ))}
-            */}
-        </div>
+          {/* Infinite Scroll Trigger & Load More Button */}
+          {displayedCount < filteredMatchups.length && (
+            <>
+              {/* Intersection Observer Target */}
+              <div ref={observerTarget} className="h-10" />
+              
+              <div className="mt-4 text-center">
+                {isLoadingMore ? (
+                  <div className="flex items-center justify-center gap-2 text-blue-600 dark:text-blue-400">
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span className="font-medium">Loading more games...</span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={loadMore}
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-colors duration-200"
+                  >
+                    Load More ({filteredMatchups.length - displayedCount} remaining)
+                  </button>
+                )}
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  Showing {displayedCount} of {filteredMatchups.length} games
+                </p>
+              </div>
+            </>
+          )}
+
+        </>
       ) : matchups && matchups.length > 0 ? (
         <div className="text-center py-12">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">

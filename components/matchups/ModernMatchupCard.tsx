@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { Matchup, SportType, RecordSummary } from '@/types'
 import {
   ClockIcon,
@@ -22,7 +22,7 @@ interface ModernMatchupCardProps {
   sport: SportType
 }
 
-export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
+const ModernMatchupCardComponent = ({ matchup, sport }: ModernMatchupCardProps) => {
   const { game, predictions, coversSummary } = matchup
   const [isHovered, setIsHovered] = useState(false)
   const [showBettingPopup, setShowBettingPopup] = useState(false)
@@ -392,3 +392,15 @@ export function ModernMatchupCard({ matchup, sport }: ModernMatchupCardProps) {
     </>
   )
 }
+
+// Memoize the component to prevent unnecessary re-renders
+export const ModernMatchupCard = memo(ModernMatchupCardComponent, (prev, next) => {
+  // Only re-render if game ID, status, or scores change
+  return (
+    prev.matchup.game.id === next.matchup.game.id &&
+    prev.matchup.game.status === next.matchup.game.status &&
+    prev.matchup.game.homeScore === next.matchup.game.homeScore &&
+    prev.matchup.game.awayScore === next.matchup.game.awayScore &&
+    prev.sport === next.sport
+  )
+})
