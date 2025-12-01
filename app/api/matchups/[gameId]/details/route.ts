@@ -121,20 +121,9 @@ export async function GET(
       )
     }
 
-    // For now, we'll generate mock detailed data since we don't have real detailed endpoints
-    // In production, you would fetch from your real API
-    
-    // Get basic game info - try by sport first, then fall back to direct event_id lookup
-    const games = await mongoSportsAPI.getGames(sport as SportType)
-    let enrichedGame = games.find(g => g.id === gameId)
-
-    // Fallback for misclassified/mismatched sport_id documents
-    if (!enrichedGame) {
-      const fallback = await mongoSportsAPI.getGameByEventId(gameId)
-      if (fallback) {
-        enrichedGame = fallback
-      }
-    }
+    // PERFORMANCE FIX: Fetch single game directly instead of loading ALL games
+    // This is much faster, especially for NCAAB with 200+ games per day
+    let enrichedGame = await mongoSportsAPI.getGameByEventId(gameId)
     
     if (!enrichedGame) {
       return NextResponse.json(

@@ -64,6 +64,12 @@ async function createIndexes() {
       { sport_id: 1, season_year: 1, away_team_id: 1 },
       { name: 'idx_sport_season_away', background: true }
     )
+    
+    console.log('  - Creating CRITICAL index: event_id (for detail page single game lookup)')
+    await db.collection('games').createIndex(
+      { event_id: 1 },
+      { name: 'idx_games_event_id', unique: true, background: true }
+    )
 
     console.log('✅ Games indexes created!\n')
 
