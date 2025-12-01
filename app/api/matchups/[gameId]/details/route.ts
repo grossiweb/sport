@@ -156,13 +156,9 @@ export async function GET(
       console.warn(`Failed to fetch betting data for game ${gameId}:`, error)
     }
 
-    const coversSummary = await mongoSportsAPI.buildMatchupCoversSummary(
-      sport as SportType,
-      enrichedGame.homeTeam.id,
-      enrichedGame.awayTeam.id,
-      enrichedGame.homeTeam.name,
-      enrichedGame.awayTeam.name
-    )
+    // OPTIMIZATION: Don't fetch coversSummary on initial load
+    // It will be fetched lazily when user clicks "Trends & Analysis" tab
+    // This avoids the expensive "fetch all games" operation on page load
 
     // Real data for analysis
     const [
@@ -197,7 +193,7 @@ export async function GET(
         home: homeTeamStats,
         away: awayTeamStats
       },
-      coversSummary: coversSummary ?? undefined
+      coversSummary: undefined // Loaded lazily on Trends & Analysis tab
     }
 
     return NextResponse.json({
