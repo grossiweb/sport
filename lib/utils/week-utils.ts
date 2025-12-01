@@ -174,7 +174,8 @@ export function formatDateRange(startDate: Date, endDate: Date): string {
   return `${format(startDate, 'MMM d')} - ${format(endDate, 'MMM d, yyyy')}`
 }
 
-const NFL_2025_WEEKS: Array<{ weekNumber: number; start: string; end: string }> = [
+// Hard-coded NFL 2025 regular-season weeks, aligned to official schedule
+export const NFL_2025_WEEKS: Array<{ weekNumber: number; start: string; end: string }> = [
   { weekNumber: 1, start: '2025-09-04', end: '2025-09-08' },
   { weekNumber: 2, start: '2025-09-11', end: '2025-09-15' },
   { weekNumber: 3, start: '2025-09-18', end: '2025-09-22' },
@@ -231,7 +232,8 @@ export function getNFLSeasonWeekOptions(seasonYear: number, _fallback: SeasonWee
   return getSeasonWeekOptions(_fallback)
 }
 
-const CFB_2025_WEEKS: Array<{ weekNumber: number; start: string; end: string }> = [
+// Hard-coded CFB 2025 regular-season weeks, aligned to Covers-style schedule
+export const CFB_2025_WEEKS: Array<{ weekNumber: number; start: string; end: string }> = [
   { weekNumber: 1, start: '2025-08-23', end: '2025-09-01' },
   { weekNumber: 2, start: '2025-09-05', end: '2025-09-07' },
   { weekNumber: 3, start: '2025-09-11', end: '2025-09-14' },

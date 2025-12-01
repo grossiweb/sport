@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from '@heroicons/react/24/outline'
-import { WeekInfo, getPreviousWeek, getNextWeek, getAvailableYears, getAvailableMonths, getWeeksForMonth, parseWeekString, weekInfoToString, getSeasonWeekOptions, getNFLSeasonWeekOptions, getCFBSeasonWeekOptions } from '@/lib/utils/week-utils'
+import { WeekInfo, getPreviousWeek, getNextWeek, getAvailableYears, getAvailableMonths, getWeeksForMonth, parseWeekString, weekInfoToString, getSeasonWeekOptions, getNFLSeasonWeekOptions, getCFBSeasonWeekOptions, NFL_2025_WEEKS, CFB_2025_WEEKS } from '@/lib/utils/week-utils'
 import { useSport } from '@/contexts/SportContext'
 import { useEffect } from 'react'
 import { SportType } from '@/types'
@@ -27,10 +27,10 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
 
   // Load season start date from API based on sport and year, then compute weeks dynamically
   useEffect(() => {
-    // For NFL, use provided season dates (same logic as NBA/NCAAB)
+    // For NFL, use the hard-coded 2025 NFL weeks from week-utils
     if (currentSport === 'NFL') {
-      const start = new Date('2025-09-04')
-      const endDate = new Date('2026-01-07')
+      const start = new Date(NFL_2025_WEEKS[0].start)
+      const endDate = new Date(NFL_2025_WEEKS[NFL_2025_WEEKS.length - 1].end)
       setSeasonStart(start)
       const weeks = getNFLSeasonWeekOptions(selectedYear, { startDate: start, endDate })
       setSeasonWeeks(weeks)
@@ -57,10 +57,10 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
       return
     }
 
-    // For CFB (NCAAF), use explicit season week windows (Covers-style)
+    // For CFB (NCAAF), use the hard-coded 2025 CFB weeks from week-utils
     if (currentSport === 'CFB') {
-      const start = new Date('2025-08-23')
-      const endDate = new Date('2025-12-13')
+      const start = new Date(CFB_2025_WEEKS[0].start)
+      const endDate = new Date(CFB_2025_WEEKS[CFB_2025_WEEKS.length - 1].end)
       setSeasonStart(start)
       const weeks = getCFBSeasonWeekOptions(selectedYear, { startDate: start, endDate })
       setSeasonWeeks(weeks)

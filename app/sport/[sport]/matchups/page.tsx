@@ -9,7 +9,7 @@ import { useSport } from '@/contexts/SportContext'
 import { ModernMatchupCard } from '@/components/matchups/ModernMatchupCard'
 import { MatchupCardSkeleton } from '@/components/matchups/MatchupCardSkeleton'
 import { MatchupFilters } from '@/components/matchups/MatchupFilters'
-import { WeekInfo, getCurrentWeek, getWeekDateRange, getSeasonWeekOptions, getNFLSeasonWeekOptions, getCurrentSeasonWeekForSport, getCFBSeasonWeekOptions } from '@/lib/utils/week-utils'
+import { WeekInfo, getCurrentWeek, getWeekDateRange, getSeasonWeekOptions, getNFLSeasonWeekOptions, getCurrentSeasonWeekForSport, getCFBSeasonWeekOptions, NFL_2025_WEEKS, CFB_2025_WEEKS } from '@/lib/utils/week-utils'
 import { formatToEasternWeekday } from '@/lib/utils/time'
 import { useQuery } from 'react-query'
 import { CoversStyleMatchupCard } from '@/components/matchups/CoversStyleMatchupCard'
@@ -56,10 +56,10 @@ export default function SportMatchupsPage() {
       if (!validSport) return
       const s = validSport
 
-      // For NFL, use provided season dates (same logic as NCAAB)
+      // For NFL, use the hard-coded 2025 season weeks from week-utils
       if (s === 'NFL') {
-        const start = new Date('2025-09-04')
-        const endDate = new Date('2026-01-07')
+        const start = new Date(NFL_2025_WEEKS[0].start)
+        const endDate = new Date(NFL_2025_WEEKS[NFL_2025_WEEKS.length - 1].end)
         const weeks = getNFLSeasonWeekOptions(2025, { startDate: start, endDate })
         const now = new Date()
         let current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
@@ -101,10 +101,10 @@ export default function SportMatchupsPage() {
         return
       }
 
-      // For CFB (NCAAF), use explicit season week windows (Covers-style)
+      // For CFB (NCAAF), use the hard-coded 2025 season weeks from week-utils
       if (s === 'CFB') {
-        const start = new Date('2025-08-23')
-        const endDate = new Date('2025-12-13')
+        const start = new Date(CFB_2025_WEEKS[0].start)
+        const endDate = new Date(CFB_2025_WEEKS[CFB_2025_WEEKS.length - 1].end)
         const weeks = getCFBSeasonWeekOptions(2025, { startDate: start, endDate })
         const now = new Date()
         let current = weeks.find(w => now >= w.weekInfo.startDate && now <= w.weekInfo.endDate)
