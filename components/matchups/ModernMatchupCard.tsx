@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useState } from 'react'
+import { memo, useState, useMemo } from 'react'
 import { Matchup, SportType, RecordSummary } from '@/types'
 import {
   ClockIcon,
@@ -28,12 +28,8 @@ const ModernMatchupCardComponent = ({ matchup, sport }: ModernMatchupCardProps) 
   const [showBettingPopup, setShowBettingPopup] = useState(false)
   const [showScorePopup, setShowScorePopup] = useState(false)
 
-  // Safely derive a Date for display without throwing on invalid values.
-  // Prefer the normalized `game.gameDate` (already parsed on the server,
-  // including our date-only handling) and only fall back to parsing the
-  // raw string if needed. This avoids off‑by‑one calendar shifts when
-  // Mongo stores date-only strings.
-  const deriveSafeDate = (): Date | null => {
+  // Memoize date parsing and formatting to avoid re-computation on every render
+  const safeDate = useMemo((): Date | null => {
     if (game.gameDate) {
       const asDate = new Date(game.gameDate as any)
       if (isValidDate(asDate)) return asDate
@@ -48,64 +44,55 @@ const ModernMatchupCardComponent = ({ matchup, sport }: ModernMatchupCardProps) 
     }
 
     return null
-  }
-  const safeDate = deriveSafeDate()
-  const gameTime = safeDate ? formatToEasternTime(safeDate) : '-'
-  const gameDateShort = safeDate ? formatToEasternDate(safeDate, { month: 'short', day: 'numeric' }) : ''
-  const gameDayOfWeek = safeDate ? formatToEasternWeekday(safeDate, { weekday: 'short' }) : ''
+  }, [game.gameDate, game.gameDateString])
+
+  const gameTime = useMemo(() => 
+    safeDate ? formatToEasternTime(safeDate) : '-'
+  , [safeDate])
+  
+  const gameDateShort = useMemo(() => 
+    safeDate ? formatToEasternDate(safeDate, { month: 'short', day: 'numeric' }) : ''
+  , [safeDate])
+  
+  const gameDayOfWeek = useMemo(() => 
+    safeDate ? formatToEasternWeekday(safeDate, { weekday: 'short' }) : ''
+  , [safeDate])
+
   const isScheduled = game.status === 'scheduled'
   const showPredictions = false
 
-  const formatScoreValue = (value: number) => (Number.isInteger(value) ? value.toString() : value.toFixed(1))
   const displayScore = (val: unknown) => (typeof val === 'number' ? val.toString() : val === 0 ? '0' : '-')
 
-  const predictionInfo = null
+  const awayScoreDisplay = useMemo(() => displayScore(game.awayScore), [game.awayScore])
+  const homeScoreDisplay = useMemo(() => displayScore(game.homeScore), [game.homeScore])
 
-  const awayScoreDisplay = displayScore(game.awayScore)
-
-  const homeScoreDisplay = displayScore(game.homeScore)
-
-  const homeWinPercentage = undefined
-  const awayWinPercentage = undefined
-
-  // Color functions for percentages
-  const getPercentageColor = (percentage: number) => {
-    if (percentage >= 70) return 'text-green-600 dark:text-green-400'
-    if (percentage >= 50) return 'text-blue-600 dark:text-blue-400'
-    return 'text-red-600 dark:text-red-400'
-  }
-
-  // Prefer server-side “closingConsensus” so the list page does not need to
-  // fire an additional `/api/betting-lines` request per game. We keep the
-  // same shape the UI expects and only fall back to nulls when missing.
-  const consensusData = matchup.closingConsensus
-    ? {
-        spreadAway: matchup.closingConsensus.spreadAway ?? null,
-        spreadHome: matchup.closingConsensus.spreadHome ?? null,
-        totalPoints: matchup.closingConsensus.totalPoints ?? null,
-        winProbAway: matchup.closingConsensus.winProbAway ?? null,
-        winProbHome: matchup.closingConsensus.winProbHome ?? null
-      }
-    : null
+  // Memoize consensus data extraction
+  const consensusData = useMemo(() => 
+    matchup.closingConsensus
+      ? {
+          spreadAway: matchup.closingConsensus.spreadAway ?? null,
+          spreadHome: matchup.closingConsensus.spreadHome ?? null,
+          totalPoints: matchup.closingConsensus.totalPoints ?? null,
+          winProbAway: matchup.closingConsensus.winProbAway ?? null,
+          winProbHome: matchup.closingConsensus.winProbHome ?? null
+        }
+      : null
+  , [matchup.closingConsensus])
 
   const { hasScores: hasScoreByPeriod } = useScoreByPeriod(game.scoreByPeriod)
   const shouldShowScoreButton = hasScoreByPeriod && game.status === 'final'
 
-  const formatRecord = (record?: RecordSummary) => {
+  // Memoize formatting functions to avoid recreation on every render
+  const formatRecord = useMemo(() => (record?: RecordSummary) => {
     if (!record) return '0-0-0'
     return `${record.wins}-${record.losses}-${record.pushes}`
-  }
+  }, [])
 
-  const formatRecordCompact = (record?: RecordSummary) => {
+  const formatRecordCompact = useMemo(() => (record?: RecordSummary) => {
     if (!record) return '0-0'
     const { wins, losses, pushes } = record
     return pushes > 0 ? `${wins}-${losses}-${pushes}` : `${wins}-${losses}`
-  }
-
-  const getWinLossRecord = (recordString?: string, fallback?: RecordSummary) => {
-    if (recordString && recordString.trim().length > 0) return recordString.trim()
-    return formatRecordCompact(fallback)
-  }
+  }, [])
 
   const renderCoversRow = (
     label: any,
@@ -194,22 +181,25 @@ const ModernMatchupCardComponent = ({ matchup, sport }: ModernMatchupCardProps) 
       : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'
   }
 
-  const canComputeATS =
-    game.status === 'final' &&
-    consensusData &&
-    typeof consensusData.spreadAway === 'number' &&
-    typeof consensusData.spreadHome === 'number'
+  // Memoize ATS computation - only recompute if scores or consensus change
+  const atsResult = useMemo(() => {
+    const canComputeATS =
+      game.status === 'final' &&
+      consensusData &&
+      typeof consensusData.spreadAway === 'number' &&
+      typeof consensusData.spreadHome === 'number'
 
-  const atsResult = canComputeATS
-    ? computeAtsFromConsensus(
-        game.awayScore ?? 0,
-        game.homeScore ?? 0,
-        {
-          spreadAway: consensusData.spreadAway!,
-          spreadHome: consensusData.spreadHome!
-        }
-      )
-    : null
+    return canComputeATS
+      ? computeAtsFromConsensus(
+          game.awayScore ?? 0,
+          game.homeScore ?? 0,
+          {
+            spreadAway: consensusData.spreadAway!,
+            spreadHome: consensusData.spreadHome!
+          }
+        )
+      : null
+  }, [game.status, game.awayScore, game.homeScore, consensusData])
 
   return (
     <>

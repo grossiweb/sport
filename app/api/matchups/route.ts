@@ -126,11 +126,15 @@ export async function GET(request: NextRequest) {
     
     if (cachedData) {
       console.log(`Cache hit for matchups: ${cacheKey}`)
-      return NextResponse.json({
+      // Return cached data with Cache-Control header for browser caching
+      const response = NextResponse.json({
         ...cachedData,
         cached: true,
         cacheTimestamp: new Date().toISOString()
       })
+      // Allow browser to cache for 60 seconds, stale-while-revalidate for 5 minutes
+      response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
+      return response
     }
 
     console.log(`Cache miss for matchups: ${cacheKey}, fetching fresh data...`)
@@ -287,7 +291,10 @@ export async function GET(request: NextRequest) {
     apiCache.set(cacheKey, response, cacheTTL.matchups)
     console.log(`Cached matchups data: ${cacheKey} (${filteredMatchups.length} items)`)
 
-    return NextResponse.json(response)
+    const nextResponse = NextResponse.json(response)
+    // Add Cache-Control header for browser-level caching with stale-while-revalidate
+    nextResponse.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
+    return nextResponse
   } catch (error) {
     console.error('Matchups API error:', error)
     return NextResponse.json(

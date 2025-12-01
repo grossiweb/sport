@@ -159,50 +159,58 @@ export default function SportMatchupsPage() {
       // Wait until we've aligned the initial week/date for the sport from
       // the URL to avoid an extra `/api/matchups` call with a temporary
       // week range.
-      enabled: isInitialized && !!sport && (isDaily ? !!selectedDate : true)
+      enabled: isInitialized && !!sport && (isDaily ? !!selectedDate : true),
+      // Add aggressive caching to speed up repeated views
+      staleTime: 2 * 60 * 1000, // Consider data fresh for 2 minutes
+      cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+      refetchOnWindowFocus: false, // Don't refetch when user returns to tab
+      refetchOnMount: false // Don't refetch on remount if data exists
     }
   )
 
   const isLoading = contextLoading || matchupsLoading
 
   // Apply filters to matchups using useMemo for performance
+  // Optimize by extracting search query once and normalizing it
+  const normalizedSearch = useMemo(() => 
+    filters.search ? filters.search.trim().toLowerCase() : null
+  , [filters.search])
+
   const filteredMatchups = useMemo(() => {
     if (!matchups) return []
     
     return matchups.filter(matchup => {
-    // Debug: log team division data for first matchup
-    if (matchups?.indexOf(matchup) === 0 && sport === 'CFB') {
-      console.log('First matchup team divisions:', {
-        homeTeam: matchup.game.homeTeam.name,
-        homeTeamDivision: matchup.game.homeTeam.division?.name,
-        awayTeam: matchup.game.awayTeam.name,
-        awayTeamDivision: matchup.game.awayTeam.division?.name,
-        selectedDivision: filters.division
-      })
-    }
-    // Status filter
-    if (filters.status && matchup.game.status !== filters.status) {
-      return false
-    }
-    
-    // Search filter (team name, abbreviation, weekday)
-    if (filters.search && filters.search.trim().length > 0) {
-      const q = filters.search.trim().toLowerCase()
-      const homeName = matchup.game.homeTeam.name?.toLowerCase() || ''
-      const awayName = matchup.game.awayTeam.name?.toLowerCase() || ''
-      const homeAbbr = matchup.game.homeTeam.abbreviation?.toLowerCase() || ''
-      const awayAbbr = matchup.game.awayTeam.abbreviation?.toLowerCase() || ''
-      const weekdayET = formatToEasternWeekday(matchup.game.gameDate).toLowerCase()
-      const weekdayShort = weekdayET.slice(0, 3)
-      const matches = [homeName, awayName, homeAbbr, awayAbbr, weekdayET, weekdayShort].some(val => val.includes(q))
-      if (!matches) return false
-    }
-    
-    // Division filtering is now handled at API level for CFB (only FBS and FCS teams)
-    
-    return true
+      // Status filter - fast comparison first
+      if (filters.status && matchup.game.status !== filters.status) {
+        return false
+      }
+      
+      // Search filter - optimized with pre-normalized search
+      if (normalizedSearch) {
+        const homeName = matchup.game.homeTeam.name?.toLowerCase() || ''
+        const awayName = matchup.game.awayTeam.name?.toLowerCase() || ''
+        const homeAbbr = matchup.game.homeTeam.abbreviation?.toLowerCase() || ''
+        const awayAbbr = matchup.game.awayTeam.abbreviation?.toLowerCase() || ''
+        
+        // Quick check on team names/abbreviations first (most common searches)
+        if (homeName.includes(normalizedSearch) || 
+            awayName.includes(normalizedSearch) ||
+            homeAbbr.includes(normalizedSearch) || 
+            awayAbbr.includes(normalizedSearch)) {
+          return true
+        }
+        
+        // Only compute weekday formatting if name/abbr didn't match
+        const weekdayET = formatToEasternWeekday(matchup.game.gameDate).toLowerCase()
+        const weekdayShort = weekdayET.slice(0, 3)
+        if (!weekdayET.includes(normalizedSearch) && !weekdayShort.includes(normalizedSearch)) {
+          return false
+        }
+      }
+      
+      return true
     })
-  }, [matchups, filters, sport])
+  }, [matchups, filters.status, normalizedSearch])
 
   // Get the visible matchups for progressive loading
   const visibleMatchups = useMemo(() => {
