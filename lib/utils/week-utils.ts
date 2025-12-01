@@ -1,4 +1,4 @@
-import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, getWeek, getYear, startOfYear, isAfter, parseISO } from 'date-fns'
+import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, getWeek, getYear, startOfYear, isAfter, parseISO, endOfDay } from 'date-fns'
 import type { SportType } from '@/types'
 
 export interface WeekInfo {
@@ -199,7 +199,7 @@ export const NFL_2025_WEEKS: Array<{ weekNumber: number; start: string; end: str
 function getNFLSeasonRange(): SeasonWeeksOptions {
   return {
     startDate: parseISO(NFL_2025_WEEKS[0].start),
-    endDate: parseISO(NFL_2025_WEEKS[NFL_2025_WEEKS.length - 1].end)
+    endDate: endOfDay(parseISO(NFL_2025_WEEKS[NFL_2025_WEEKS.length - 1].end))
   }
 }
 
@@ -211,7 +211,7 @@ export function getNFLSeasonWeekOptions(seasonYear: number, _fallback: SeasonWee
   if (seasonYear === 2025) {
     return NFL_2025_WEEKS.map(({ weekNumber, start, end }) => {
       const startDate = parseISO(start)
-      const endDate = parseISO(end)
+      const endDate = endOfDay(parseISO(end))
       const weekInfo: WeekInfo = {
         weekNumber,
         year: startDate.getFullYear(),
@@ -255,7 +255,7 @@ export const CFB_2025_WEEKS: Array<{ weekNumber: number; start: string; end: str
 function getCFBSeasonRange(): SeasonWeeksOptions {
   return {
     startDate: parseISO(CFB_2025_WEEKS[0].start),
-    endDate: parseISO(CFB_2025_WEEKS[CFB_2025_WEEKS.length - 1].end)
+    endDate: endOfDay(parseISO(CFB_2025_WEEKS[CFB_2025_WEEKS.length - 1].end))
   }
 }
 
@@ -267,7 +267,7 @@ export function getCFBSeasonWeekOptions(seasonYear: number, _fallback: SeasonWee
   if (seasonYear === 2025) {
     return CFB_2025_WEEKS.map(({ weekNumber, start, end }) => {
       const startDate = parseISO(start)
-      const endDate = parseISO(end)
+      const endDate = endOfDay(parseISO(end))
       const weekInfo: WeekInfo = {
         weekNumber,
         year: startDate.getFullYear(),
