@@ -1,0 +1,18 @@
+{
+    "name": "statspro/ats-computer",
+    "description": "Pre-compute ATS records for sports teams",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "mongodb/mongodb": "^1.15"
+    },
+    "autoload": {
+        "psr-4": {
+            "StatsPro\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}
+

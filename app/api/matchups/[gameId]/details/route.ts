@@ -145,13 +145,51 @@ export async function GET(
       console.warn(`Failed to fetch betting data for game ${gameId}:`, error)
     }
 
-    const coversSummary = await mongoSportsAPI.buildMatchupCoversSummary(
-      sport as SportType,
+    // OPTIMIZATION: Fetch pre-computed ATS records instead of expensive computation
+    const { getMatchupAtsRecords, getSportIdFromType, getCurrentSeasonYear } = await import('@/lib/api/ats-records-api')
+    
+    const sportId = getSportIdFromType(sport as SportType)
+    const season = getCurrentSeasonYear(sport as SportType)
+    
+    console.log(`[MatchupDetails] Fetching ATS records for sport_id=${sportId}, season=${season}`)
+    const atsRecords = await getMatchupAtsRecords(
+      sportId,
       enrichedGame.homeTeam.id,
       enrichedGame.awayTeam.id,
-      enrichedGame.homeTeam.name,
-      enrichedGame.awayTeam.name
+      season
     )
+    
+    // Build coversSummary structure from pre-computed ATS records
+    const coversSummary = (atsRecords.home || atsRecords.away) ? {
+      home: {
+        teamId: enrichedGame.homeTeam.id,
+        teamName: enrichedGame.homeTeam.name,
+        overall: atsRecords.home?.overall || { wins: 0, losses: 0, pushes: 0, gamesPlayed: 0 },
+        home: atsRecords.home?.home || { wins: 0, losses: 0, pushes: 0, gamesPlayed: 0 },
+        road: atsRecords.home?.road || { wins: 0, losses: 0, pushes: 0, gamesPlayed: 0 },
+        lastTen: atsRecords.home?.lastTen || { wins: 0, losses: 0, pushes: 0, gamesPlayed: 0 },
+        ats: atsRecords.home ? {
+          overall: atsRecords.home.overall,
+          home: atsRecords.home.home,
+          road: atsRecords.home.road,
+          lastTen: atsRecords.home.lastTen
+        } : undefined
+      },
+      away: {
+        teamId: enrichedGame.awayTeam.id,
+        teamName: enrichedGame.awayTeam.name,
+        overall: atsRecords.away?.overall || { wins: 0, losses: 0, pushes: 0, gamesPlayed: 0 },
+        home: atsRecords.away?.home || { wins: 0, losses: 0, pushes: 0, gamesPlayed: 0 },
+        road: atsRecords.away?.road || { wins: 0, losses: 0, pushes: 0, gamesPlayed: 0 },
+        lastTen: atsRecords.away?.lastTen || { wins: 0, losses: 0, pushes: 0, gamesPlayed: 0 },
+        ats: atsRecords.away ? {
+          overall: atsRecords.away.overall,
+          home: atsRecords.away.home,
+          road: atsRecords.away.road,
+          lastTen: atsRecords.away.lastTen
+        } : undefined
+      }
+    } : null
 
     // Real data for analysis
     const [

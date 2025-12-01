@@ -348,3 +348,8 @@ export async function getSportSeasonsCollection(): Promise<Collection<MongoSport
   const { db } = await connectToDatabase()
   return db.collection<MongoSportSeason>('sport_seasons')
 }
+
+export async function getAtsRecordsCollection(): Promise<Collection<any>> {
+  const { db } = await connectToDatabase()
+  return db.collection('ats_records')
+}
