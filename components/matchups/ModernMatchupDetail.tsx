@@ -35,7 +35,7 @@ interface ModernMatchupDetailProps {
 }
 
 export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps) {
-  const { game, predictions, trends, injuries, matchupAnalysis, headToHead, teamStats } = matchup
+  const { game, predictions, trends, injuries, matchupAnalysis, headToHead, coversSummary, teamStats } = matchup
   const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'trends' | 'betting'>('stats')
   const [homeTeamDetailedStats, setHomeTeamDetailedStats] = useState<DetailedTeamStat[]>([])
   const [awayTeamDetailedStats, setAwayTeamDetailedStats] = useState<DetailedTeamStat[]>([])
@@ -44,10 +44,6 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
   const [showScorePopup, setShowScorePopup] = useState(false)
   const [homeOpponentStats, setHomeOpponentStats] = useState<any>(null)
   const [awayOpponentStats, setAwayOpponentStats] = useState<any>(null)
-  
-  // Lazy load covers summary (ATS data) only when Trends & Analysis tab is clicked
-  const [coversSummary, setCoversSummary] = useState<any>(matchup.coversSummary || null)
-  const [loadingCoversSummary, setLoadingCoversSummary] = useState(false)
   
 
   const gameTime = formatToEasternTime(game.gameDate)
@@ -102,37 +98,6 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
 
     fetchDetailedStats()
   }, [activeTab, game.homeTeam.id, game.awayTeam.id, sport, homeTeamDetailedStats.length, awayTeamDetailedStats.length])
-
-  // Fetch covers summary (ATS data) when Trends & Analysis tab is clicked
-  useEffect(() => {
-    const fetchCoversSummary = async () => {
-      if (activeTab === 'trends' && !coversSummary && !loadingCoversSummary) {
-        setLoadingCoversSummary(true)
-        console.log('[ModernMatchupDetail] Loading ATS data for Trends & Analysis tab...')
-        try {
-          const params = new URLSearchParams({
-            sport,
-            homeTeamId: game.homeTeam.id,
-            awayTeamId: game.awayTeam.id,
-            homeTeamName: game.homeTeam.name || '',
-            awayTeamName: game.awayTeam.name || ''
-          })
-          const response = await fetch(`/api/matchups/${game.id}/covers-summary?${params}`)
-          if (response.ok) {
-            const result = await response.json()
-            setCoversSummary(result.data)
-            console.log('[ModernMatchupDetail] ATS data loaded successfully')
-          }
-        } catch (error) {
-          console.error('Failed to fetch covers summary:', error)
-        } finally {
-          setLoadingCoversSummary(false)
-        }
-      }
-    }
-
-    fetchCoversSummary()
-  }, [activeTab, coversSummary, loadingCoversSummary, game.id, game.homeTeam.id, game.awayTeam.id, game.homeTeam.name, game.awayTeam.name, sport])
 
   const tabs = [
     // { id: 'overview', name: 'Overview', icon: TrophyIcon }, // hidden
@@ -342,16 +307,6 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
 
         {activeTab === 'trends' && (
           <div className="space-y-6">
-            {/* Loading State for ATS Data */}
-            {loadingCoversSummary && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mr-3"></div>
-                  <span className="text-gray-600 dark:text-gray-400">Loading ATS data & trends...</span>
-                </div>
-              </div>
-            )}
-            
             {/* Head-to-Head */}
             {headToHead && headToHead.length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
