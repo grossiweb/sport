@@ -136,19 +136,19 @@ class TheRundownAPI {
             url: line.affiliate.affiliate_url,
             affiliateId: affiliateId,
             spread: {
-              home: line.spread.point_spread_home_delta || 0,
-              away: line.spread.point_spread_away_delta || 0,
-              homeOdds: line.spread.point_spread_home_money_delta || -110,
-              awayOdds: line.spread.point_spread_away_money_delta || -110
+              home: line.spread.point_spread_home || 0,
+              away: line.spread.point_spread_away || 0,
+              homeOdds: line.spread.point_spread_home_money || -110,
+              awayOdds: line.spread.point_spread_away_money || -110
             },
             moneyline: {
-              home: line.moneyline.moneyline_home_delta || 0,
-              away: line.moneyline.moneyline_away_delta || 0
+              home: line.moneyline.moneyline_home || 0,
+              away: line.moneyline.moneyline_away || 0
             },
             total: {
-              points: Math.abs(line.total.total_over_delta || 50),
-              over: line.total.total_over_money_delta || -110,
-              under: line.total.total_under_money_delta || -110
+              points: Math.abs(line.total.total_over || 50),
+              over: line.total.total_over_money || -110,
+              under: line.total.total_under_money || -110
             },
             lastUpdated: line.spread.date_updated || line.moneyline.date_updated || line.total.date_updated
           })
@@ -210,32 +210,32 @@ class TheRundownAPI {
       const total = selectedLine.total || {}
       const affiliate = selectedLine.affiliate || {}
 
-      // Parse actual betting values from delta fields
-      // Looking at the API response, delta fields contain the actual betting values
-      const parseValue = (deltaValue: number, defaultValue: number = 0) => {
-        if (deltaValue === 0.0001 || deltaValue === 0) return defaultValue
-        return deltaValue
+      // Parse actual betting values from the base fields (not delta)
+      // Delta fields represent the movement/change, not the actual values
+      const parseValue = (value: number, defaultValue: number = 0) => {
+        if (value === 0.0001 || value === 0) return defaultValue
+        return value
       }
 
       // For spread - home team gets negative spread, away team gets positive
-      const homeSpread = parseValue(spread.point_spread_home_delta || 0)
-      const awaySpread = parseValue(spread.point_spread_away_delta || 0)
+      const homeSpread = parseValue(spread.point_spread_home || 0)
+      const awaySpread = parseValue(spread.point_spread_away || 0)
       
       // For moneyline - values can be positive (underdog) or negative (favorite)
-      const homeMoneyline = parseValue(moneyline.moneyline_home_delta || 0)
-      const awayMoneyline = parseValue(moneyline.moneyline_away_delta || 0)
+      const homeMoneyline = parseValue(moneyline.moneyline_home || 0)
+      const awayMoneyline = parseValue(moneyline.moneyline_away || 0)
       
       // For totals - the total points line
-      const totalPoints = Math.abs(parseValue(total.total_over_delta || 0, 50)) // Use absolute value for total points
-      const overMoney = parseValue(total.total_over_money_delta || -110, -110)
-      const underMoney = parseValue(total.total_under_money_delta || -110, -110)
+      const totalPoints = Math.abs(parseValue(total.total_over || 0, 50)) // Use absolute value for total points
+      const overMoney = parseValue(total.total_over_money || -110, -110)
+      const underMoney = parseValue(total.total_under_money || -110, -110)
 
       return {
         gameId: eventId,
         spread: {
           home: homeSpread,
           away: awaySpread,
-          juice: parseValue(spread.point_spread_home_money_delta || -110, -110)
+          juice: parseValue(spread.point_spread_home_money || -110, -110)
         },
         moneyLine: {
           home: homeMoneyline,

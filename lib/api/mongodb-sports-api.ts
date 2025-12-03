@@ -504,18 +504,14 @@ export class MongoDBSportsAPI {
       const homeVals: number[] = []
       const awayVals: number[] = []
       for (const l of lines) {
-        // For ATS, always prefer the *_delta spread fields (closing numbers) and
-        // only fall back to the base fields if delta values are not present.
-        const h = typeof l?.spread?.point_spread_home_delta === 'number' && isFinite(l.spread.point_spread_home_delta)
-          ? l.spread.point_spread_home_delta
-          : (typeof l?.spread?.point_spread_home === 'number' && isFinite(l.spread.point_spread_home)
-            ? l.spread.point_spread_home
-            : null)
-        const a = typeof l?.spread?.point_spread_away_delta === 'number' && isFinite(l.spread.point_spread_away_delta)
-          ? l.spread.point_spread_away_delta
-          : (typeof l?.spread?.point_spread_away === 'number' && isFinite(l.spread.point_spread_away)
-            ? l.spread.point_spread_away
-            : null)
+        // Use the actual spread values (point_spread_home/away), not delta values
+        // Delta values represent the movement/change, not the actual spread
+        const h = typeof l?.spread?.point_spread_home === 'number' && isFinite(l.spread.point_spread_home)
+          ? l.spread.point_spread_home
+          : null
+        const a = typeof l?.spread?.point_spread_away === 'number' && isFinite(l.spread.point_spread_away)
+          ? l.spread.point_spread_away
+          : null
         if (typeof h === 'number' && isFinite(h)) homeVals.push(h)
         if (typeof a === 'number' && isFinite(a)) awayVals.push(a)
       }
@@ -563,32 +559,26 @@ export class MongoDBSportsAPI {
         const moneyHome: number[] = []
         const moneyAway: number[] = []
         for (const l of lines) {
-          // For ATS, always prefer the *_delta spread fields (closing numbers) and
-          // only fall back to the base fields if delta values are not present.
-          const h = typeof l?.spread?.point_spread_home_delta === 'number' && isFinite(l.spread.point_spread_home_delta)
-            ? l.spread.point_spread_home_delta
-            : (typeof l?.spread?.point_spread_home === 'number' && isFinite(l.spread.point_spread_home)
-              ? l.spread.point_spread_home
-              : null)
-          const a = typeof l?.spread?.point_spread_away_delta === 'number' && isFinite(l.spread.point_spread_away_delta)
-            ? l.spread.point_spread_away_delta
-            : (typeof l?.spread?.point_spread_away === 'number' && isFinite(l.spread.point_spread_away)
-              ? l.spread.point_spread_away
-              : null)
+          // Use the actual spread values (point_spread_home/away), not delta values
+          // Delta values represent the movement/change, not the actual spread
+          const h = typeof l?.spread?.point_spread_home === 'number' && isFinite(l.spread.point_spread_home)
+            ? l.spread.point_spread_home
+            : null
+          const a = typeof l?.spread?.point_spread_away === 'number' && isFinite(l.spread.point_spread_away)
+            ? l.spread.point_spread_away
+            : null
           const t = typeof l?.total?.total_over === 'number' && isFinite(l.total.total_over) && typeof l?.total?.total_under === 'number' && isFinite(l.total.total_under)
             ? (Number(l.total.total_over) + Number(l.total.total_under)) / 2
-            : (typeof l?.total?.total_over_delta === 'number' && typeof l?.total?.total_under_delta === 'number'
-              ? (Number(l.total.total_over_delta) + Number(l.total.total_under_delta)) / 2
-              : null)
+            : null
           if (typeof h === 'number' && isFinite(h)) homeSpreads.push(h)
           if (typeof a === 'number' && isFinite(a)) awaySpreads.push(a)
           if (typeof t === 'number' && isFinite(t)) totals.push(t)
           const mh = typeof l?.moneyline?.moneyline_home === 'number' && isFinite(l.moneyline.moneyline_home)
             ? l.moneyline.moneyline_home
-            : (typeof l?.moneyline?.moneyline_home_delta === 'number' ? l.moneyline.moneyline_home_delta : null)
+            : null
           const ma = typeof l?.moneyline?.moneyline_away === 'number' && isFinite(l.moneyline.moneyline_away)
             ? l.moneyline.moneyline_away
-            : (typeof l?.moneyline?.moneyline_away_delta === 'number' ? l.moneyline.moneyline_away_delta : null)
+            : null
           if (typeof mh === 'number' && isFinite(mh)) moneyHome.push(mh)
           if (typeof ma === 'number' && isFinite(ma)) moneyAway.push(ma)
         }
@@ -1015,18 +1005,18 @@ export class MongoDBSportsAPI {
     return {
       gameId: mongoBetting.event_id,
       spread: {
-        home: line.spread.point_spread_home_delta || 0,
-        away: line.spread.point_spread_away_delta || 0,
-        juice: line.spread.point_spread_home_money_delta || -110
+        home: line.spread.point_spread_home || 0,
+        away: line.spread.point_spread_away || 0,
+        juice: line.spread.point_spread_home_money || -110
       },
       moneyLine: {
-        home: line.moneyline.moneyline_home_delta || 0,
-        away: line.moneyline.moneyline_away_delta || 0
+        home: line.moneyline.moneyline_home || 0,
+        away: line.moneyline.moneyline_away || 0
       },
       total: {
-        over: line.total.total_over_money_delta || -110,
-        under: line.total.total_under_money_delta || -110,
-        points: Math.abs(line.total.total_over_delta || 50)
+        over: line.total.total_over_money || -110,
+        under: line.total.total_under_money || -110,
+        points: Math.abs(line.total.total_over || 50)
       },
       publicBets: {
         homePercentage: 50, // Not available in MongoDB
@@ -1340,19 +1330,19 @@ export class MongoDBSportsAPI {
             url: line.affiliate.affiliate_url,
             affiliateId: affiliateId,
             spread: {
-              home: line.spread.point_spread_home_delta || 0,
-              away: line.spread.point_spread_away_delta || 0,
-              homeOdds: line.spread.point_spread_home_money_delta || -110,
-              awayOdds: line.spread.point_spread_away_money_delta || -110
+              home: line.spread.point_spread_home || 0,
+              away: line.spread.point_spread_away || 0,
+              homeOdds: line.spread.point_spread_home_money || -110,
+              awayOdds: line.spread.point_spread_away_money || -110
             },
             moneyline: {
-              home: line.moneyline.moneyline_home_delta || 0,
-              away: line.moneyline.moneyline_away_delta || 0
+              home: line.moneyline.moneyline_home || 0,
+              away: line.moneyline.moneyline_away || 0
             },
             total: {
-              points: Math.abs(line.total.total_over_delta || 50),
-              over: line.total.total_over_money_delta || -110,
-              under: line.total.total_under_money_delta || -110
+              points: Math.abs(line.total.total_over || 50),
+              over: line.total.total_over_money || -110,
+              under: line.total.total_under_money || -110
             },
             lastUpdated: line.spread.date_updated || line.moneyline.date_updated || line.total.date_updated
           })
