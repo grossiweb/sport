@@ -248,7 +248,7 @@ export const CFB_2025_WEEKS: Array<{ weekNumber: number; start: string; end: str
   { weekNumber: 12, start: '2025-11-11', end: '2025-11-15' },
   { weekNumber: 13, start: '2025-11-18', end: '2025-11-22' },
   { weekNumber: 14, start: '2025-11-25', end: '2025-11-29' },
-  // Note: schedule provided skips "Week 15" and goes to Week 16 on Dec 13
+  { weekNumber: 15, start: '2025-12-05', end: '2025-12-06' }, // Conference Championship
   { weekNumber: 16, start: '2025-12-13', end: '2025-12-13' }
 ]
 

@@ -186,6 +186,15 @@ export async function GET(request: NextRequest) {
     // `/api/betting-lines` requests per game.
     const allEventIds = games.map(g => g.id)
     const bulkBetting = await (mongoSportsAPI as any).getBettingSummariesForEvents(allEventIds)
+    
+    // Debug logging for NCAAB betting data
+    if (sport === 'NCAAB') {
+      console.log(`NCAAB: Found betting data for ${bulkBetting.size} out of ${allEventIds.length} games`)
+      if (bulkBetting.size > 0) {
+        const firstEntry = Array.from(bulkBetting.entries())[0]
+        console.log(`NCAAB Sample betting data:`, firstEntry)
+      }
+    }
 
     // Generate matchup data for each game
     const matchups: Matchup[] = await Promise.all(
