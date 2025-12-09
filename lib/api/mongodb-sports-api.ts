@@ -20,15 +20,23 @@ export class MongoDBSportsAPI {
   private teamSeasonGamesCache = new Map<string, { seasonYear: number; games: Game[]; createdAt: number }>()
   private coversSummaryCache = new Map<string, { seasonYear: number; summary: MatchupCoversSummary; createdAt: number }>()
   
-  // Determine appropriate season year per sport (handles NBA cross-year seasons)
+  // Determine appropriate season year per sport (handles cross-year seasons)
   private getSeasonYearForSport(sport: SportType, referenceDate: Date = new Date()): number {
     const year = referenceDate.getFullYear()
+
+    // Explicit override: current NCAAB data uses season_year = 2026
+    // for the 2025-11-03 to 2026-03-xx season window.
+    if (sport === 'NCAAB') {
+      return 2026
+    }
+
     if (sport === 'NBA') {
       // NBA season starts around October and runs into the next calendar year
       const month = referenceDate.getMonth() // 0-11
       // If before October (month < 9), we are still in the season that started last calendar year
       return month >= 9 ? year : year - 1
     }
+
     return year
   }
 
@@ -242,8 +250,8 @@ export class MongoDBSportsAPI {
         })
       }
 
-      // Default behavior (CFB/NFL): use current season-year games
-      const currentYear = new Date().getFullYear()
+      // Default behavior (CFB/NFL/NCAAB): use sport-aware season year
+      const currentYear = this.getSeasonYearForSport(sport)
       const games = await this.getTeamSeasonGames(sport, teamId, currentYear)
       const recentFinal = games
         .filter(g => g.status === 'final')
@@ -504,14 +512,12 @@ export class MongoDBSportsAPI {
       const homeVals: number[] = []
       const awayVals: number[] = []
       for (const l of lines) {
-        // Use the actual spread values (point_spread_home/away), not delta values
-        // Delta values represent the movement/change, not the actual spread
-        const h = typeof l?.spread?.point_spread_home === 'number' && isFinite(l.spread.point_spread_home)
-          ? l.spread.point_spread_home
-          : null
-        const a = typeof l?.spread?.point_spread_away === 'number' && isFinite(l.spread.point_spread_away)
-          ? l.spread.point_spread_away
-          : null
+        // Use the actual spread values (point_spread_home/away), not delta values.
+        // Coerce numeric strings as well, since some imports may store odds as strings.
+        const rawHome = l?.spread?.point_spread_home
+        const rawAway = l?.spread?.point_spread_away
+        const h = rawHome != null && !Number.isNaN(Number(rawHome)) ? Number(rawHome) : null
+        const a = rawAway != null && !Number.isNaN(Number(rawAway)) ? Number(rawAway) : null
         if (typeof h === 'number' && isFinite(h)) homeVals.push(h)
         if (typeof a === 'number' && isFinite(a)) awayVals.push(a)
       }
@@ -559,26 +565,30 @@ export class MongoDBSportsAPI {
         const moneyHome: number[] = []
         const moneyAway: number[] = []
         for (const l of lines) {
-          // Use the actual spread values (point_spread_home/away), not delta values
-          // Delta values represent the movement/change, not the actual spread
-          const h = typeof l?.spread?.point_spread_home === 'number' && isFinite(l.spread.point_spread_home)
-            ? l.spread.point_spread_home
+          // Use the actual spread values (point_spread_home/away), not delta values.
+          // Coerce numeric strings as well, since some imports may store odds as strings.
+          const rawHomeSpread = l?.spread?.point_spread_home
+          const rawAwaySpread = l?.spread?.point_spread_away
+          const rawTotalOver = l?.total?.total_over
+          const rawTotalUnder = l?.total?.total_under
+          const rawMoneyHome = l?.moneyline?.moneyline_home
+          const rawMoneyAway = l?.moneyline?.moneyline_away
+
+          const h = rawHomeSpread != null && !Number.isNaN(Number(rawHomeSpread)) ? Number(rawHomeSpread) : null
+          const a = rawAwaySpread != null && !Number.isNaN(Number(rawAwaySpread)) ? Number(rawAwaySpread) : null
+          const over = rawTotalOver != null && !Number.isNaN(Number(rawTotalOver)) ? Number(rawTotalOver) : null
+          const under = rawTotalUnder != null && !Number.isNaN(Number(rawTotalUnder)) ? Number(rawTotalUnder) : null
+
+          const t = typeof over === 'number' && isFinite(over) && typeof under === 'number' && isFinite(under)
+            ? (over + under) / 2
             : null
-          const a = typeof l?.spread?.point_spread_away === 'number' && isFinite(l.spread.point_spread_away)
-            ? l.spread.point_spread_away
-            : null
-          const t = typeof l?.total?.total_over === 'number' && isFinite(l.total.total_over) && typeof l?.total?.total_under === 'number' && isFinite(l.total.total_under)
-            ? (Number(l.total.total_over) + Number(l.total.total_under)) / 2
-            : null
+
+          const mh = rawMoneyHome != null && !Number.isNaN(Number(rawMoneyHome)) ? Number(rawMoneyHome) : null
+          const ma = rawMoneyAway != null && !Number.isNaN(Number(rawMoneyAway)) ? Number(rawMoneyAway) : null
+
           if (typeof h === 'number' && isFinite(h)) homeSpreads.push(h)
           if (typeof a === 'number' && isFinite(a)) awaySpreads.push(a)
           if (typeof t === 'number' && isFinite(t)) totals.push(t)
-          const mh = typeof l?.moneyline?.moneyline_home === 'number' && isFinite(l.moneyline.moneyline_home)
-            ? l.moneyline.moneyline_home
-            : null
-          const ma = typeof l?.moneyline?.moneyline_away === 'number' && isFinite(l.moneyline.moneyline_away)
-            ? l.moneyline.moneyline_away
-            : null
           if (typeof mh === 'number' && isFinite(mh)) moneyHome.push(mh)
           if (typeof ma === 'number' && isFinite(ma)) moneyAway.push(ma)
         }
@@ -1085,7 +1095,7 @@ export class MongoDBSportsAPI {
   async getTeamStatsByTeamId(sport: SportType = 'CFB', teamId: string): Promise<TeamStats | null> {
     try {
       const collection = await getTeamStatsCollection()
-      const currentYear = new Date().getFullYear()
+      const currentYear = this.getSeasonYearForSport(sport)
       
       const mongoStats = await collection.findOne({ 
         team_id: parseInt(teamId),
@@ -1105,23 +1115,12 @@ export class MongoDBSportsAPI {
   async getDetailedTeamStats(sport: SportType = 'CFB', teamId: string): Promise<DetailedTeamStat[]> {
     try {
       const collection = await getTeamStatsCollection()
-      const currentYear = new Date().getFullYear()
+      const currentYear = this.getSeasonYearForSport(sport)
       
-      // For NCAAB, try current year first, then fall back to previous year if no data
-      // (NCAAB season spans across calendar years, e.g., 2024-2025 season)
       let mongoStats = await collection.findOne({ 
         team_id: parseInt(teamId),
         season_year: currentYear
       })
-      
-      // If no stats found for NCAAB in current year, try previous year
-      if (!mongoStats && sport === 'NCAAB') {
-        console.log(`[${sport}] No stats found for team ${teamId} in year ${currentYear}, trying ${currentYear - 1}`)
-        mongoStats = await collection.findOne({ 
-          team_id: parseInt(teamId),
-          season_year: currentYear - 1
-        })
-      }
       
       if (!mongoStats) {
         console.log(`[${sport}] No stats found for team ${teamId} in MongoDB`)

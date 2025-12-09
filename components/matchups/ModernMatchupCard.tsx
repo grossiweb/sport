@@ -80,7 +80,10 @@ const ModernMatchupCardComponent = ({ matchup, sport }: ModernMatchupCardProps) 
   , [matchup.closingConsensus])
 
   const { hasScores: hasScoreByPeriod } = useScoreByPeriod(game.scoreByPeriod)
-  const shouldShowScoreButton = hasScoreByPeriod && game.status === 'final'
+  // For final games, always prefer showing the Box Score button for NCAAB,
+  // even if score-by-period data is sparse. For other sports, require scores.
+  const shouldShowScoreButton =
+    game.status === 'final' && (hasScoreByPeriod || sport === 'NCAAB')
 
   // Memoize formatting functions to avoid recreation on every render
   const formatRecord = useMemo(() => (record?: RecordSummary) => {
@@ -274,8 +277,51 @@ const ModernMatchupCardComponent = ({ matchup, sport }: ModernMatchupCardProps) 
           </div>
         </div>
 
-        {/* Consensus Lines aligned under team logos */}
-        {game.status !== 'final' && consensusData ? (
+        {/* Consensus Lines or Final Score Summary */}
+        {game.status === 'final' && sport !== 'NCAAB' ? (
+          // Show final score summary for completed games
+          <div className="mt-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-600">
+            <div className="w-full grid grid-cols-3 items-center">
+              {/* Left: Away ATS Result */}
+              <div className="flex items-center gap-2 justify-start">
+                {atsResult?.away && (
+                  <span className={`px-2 py-1 rounded text-sm font-semibold ${
+                    atsResult.away === 'ATS Win' 
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                      : atsResult.away === 'ATS Push'
+                      ? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                      : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                  }`}>
+                    {atsResult.away}
+                  </span>
+                )}
+              </div>
+
+              {/* Center: Final Label */}
+              <div className="flex items-center justify-center">
+                <span className="px-3 py-1 rounded bg-gray-800 dark:bg-gray-600 text-white text-sm font-bold uppercase tracking-wide">
+                  Final
+                </span>
+              </div>
+
+              {/* Right: Home ATS Result */}
+              <div className="flex items-center gap-2 justify-end">
+                {atsResult?.home && (
+                  <span className={`px-2 py-1 rounded text-sm font-semibold ${
+                    atsResult.home === 'ATS Win' 
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                      : atsResult.home === 'ATS Push'
+                      ? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                      : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                  }`}>
+                    {atsResult.home}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (game.status !== 'final' && consensusData) ? (
+          // Show consensus lines for scheduled/live games
           <div className="mt-3 p-3 rounded-lg min-h-[38px]">
             <div className="w-full grid grid-cols-3 items-center">
               {/* Left: Away% and Away Spread */}
@@ -306,10 +352,7 @@ const ModernMatchupCardComponent = ({ matchup, sport }: ModernMatchupCardProps) 
               </div>
             </div>
           </div>
-        ) : (
-          // Placeholder to preserve height when consensus is hidden on final games
-          <div className="mt-3 p-3 rounded-lg min-h-[38px]"></div>
-        )}
+        ) : null}
 
         {/* Matchup of Covers */}
         {coversSummary && (

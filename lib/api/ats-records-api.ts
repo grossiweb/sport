@@ -136,7 +136,9 @@ export function getSportIdFromType(sportType: SportType): number {
   const sportMap: Record<SportType, number> = {
     'CFB': 1,
     'NFL': 2,
-    'NCAAB': 3,
+    // NCAAB uses sport_id = 5 in your Mongo collections (games, teams, ats_records).
+    // This must stay in sync with how the PHP ATS script writes sport_id.
+    'NCAAB': 5,
     'NBA': 4
   }
   return sportMap[sportType] || 1
@@ -146,12 +148,17 @@ export function getSportIdFromType(sportType: SportType): number {
  * Get current season year for a sport
  */
 export function getCurrentSeasonYear(sportType: SportType): number {
+  // Explicit override: NCAAB is currently using the 2026 season in your data.
+  if (sportType === 'NCAAB') {
+    return 2026
+  }
+
   const now = new Date()
   const currentYear = now.getFullYear()
   
   // For sports that span calendar years (NBA, NCAAB), 
   // if we're before July, use previous year as season
-  if ((sportType === 'NBA' || sportType === 'NCAAB') && now.getMonth() < 6) {
+  if (sportType === 'NBA' && now.getMonth() < 6) {
     return currentYear - 1
   }
   
