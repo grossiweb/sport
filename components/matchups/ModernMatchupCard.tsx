@@ -14,7 +14,6 @@ import { ScoreByPeriodPopup } from './ScoreByPeriodPopup'
 import { formatToEasternTime, formatToEasternDate, formatToEasternWeekday } from '@/lib/utils/time'
 import { parse, parseISO, isValid as isValidDate } from 'date-fns'
 import { useScoreByPeriod } from '@/hooks/useScoreByPeriod'
-import { computeAtsFromConsensus } from '@/lib/utils/consensus'
 import { formatSpread as formatSpreadUtil, formatTotal as formatTotalUtil, formatPercentage } from '@/lib/utils/betting-format'
 
 interface ModernMatchupCardProps {
@@ -184,26 +183,6 @@ const ModernMatchupCardComponent = ({ matchup, sport }: ModernMatchupCardProps) 
       : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'
   }
 
-  // Memoize ATS computation - only recompute if scores or consensus change
-  const atsResult = useMemo(() => {
-    const canComputeATS =
-      game.status === 'final' &&
-      consensusData &&
-      typeof consensusData.spreadAway === 'number' &&
-      typeof consensusData.spreadHome === 'number'
-
-    return canComputeATS
-      ? computeAtsFromConsensus(
-          game.awayScore ?? 0,
-          game.homeScore ?? 0,
-          {
-            spreadAway: consensusData.spreadAway!,
-            spreadHome: consensusData.spreadHome!
-          }
-        )
-      : null
-  }, [game.status, game.awayScore, game.homeScore, consensusData])
-
   return (
     <>
     <div 
@@ -277,50 +256,8 @@ const ModernMatchupCardComponent = ({ matchup, sport }: ModernMatchupCardProps) 
           </div>
         </div>
 
-        {/* Consensus Lines or Final Score Summary */}
-        {game.status === 'final' && sport !== 'NCAAB' ? (
-          // Show final score summary for completed games
-          <div className="mt-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-600">
-            <div className="w-full grid grid-cols-3 items-center">
-              {/* Left: Away ATS Result */}
-              <div className="flex items-center gap-2 justify-start">
-                {atsResult?.away && (
-                  <span className={`px-2 py-1 rounded text-sm font-semibold ${
-                    atsResult.away === 'ATS Win' 
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                      : atsResult.away === 'ATS Push'
-                      ? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                      : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-                  }`}>
-                    {atsResult.away}
-                  </span>
-                )}
-              </div>
-
-              {/* Center: Final Label */}
-              <div className="flex items-center justify-center">
-                <span className="px-3 py-1 rounded bg-gray-800 dark:bg-gray-600 text-white text-sm font-bold uppercase tracking-wide">
-                  Final
-                </span>
-              </div>
-
-              {/* Right: Home ATS Result */}
-              <div className="flex items-center gap-2 justify-end">
-                {atsResult?.home && (
-                  <span className={`px-2 py-1 rounded text-sm font-semibold ${
-                    atsResult.home === 'ATS Win' 
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                      : atsResult.home === 'ATS Push'
-                      ? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                      : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-                  }`}>
-                    {atsResult.home}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (game.status !== 'final' && consensusData) ? (
+        {/* Consensus Lines (only for non-final games) */}
+        {game.status !== 'final' && consensusData ? (
           // Show consensus lines for scheduled/live games
           <div className="mt-3 p-3 rounded-lg min-h-[38px]">
             <div className="w-full grid grid-cols-3 items-center">
