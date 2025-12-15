@@ -25,6 +25,21 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
   const availableMonths = getAvailableMonths()
   const weeksForSelectedMonth = getWeeksForMonth(selectedYear, selectedMonth)
 
+  // Determine current season week (if aligned to a defined season window)
+  const seasonIndex =
+    seasonWeeks.length > 0
+      ? seasonWeeks.findIndex(
+          (w) =>
+            currentWeek.startDate >= w.weekInfo.startDate &&
+            currentWeek.startDate <= w.weekInfo.endDate
+        )
+      : -1
+  const activeSeasonWeek = seasonIndex !== -1 ? seasonWeeks[seasonIndex] : undefined
+  const isBowlWeek =
+    currentSport === 'CFB' &&
+    !!activeSeasonWeek &&
+    activeSeasonWeek.weekInfo.weekNumber === 16
+
   // Load season start date from API based on sport and year, then compute weeks dynamically
   useEffect(() => {
     // For NFL, use the hard-coded 2025 NFL weeks from week-utils
@@ -70,9 +85,8 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
 
   const handlePreviousWeek = () => {
     if (seasonWeeks.length > 0) {
-      const idx = seasonWeeks.findIndex(w => currentWeek.startDate >= w.weekInfo.startDate && currentWeek.startDate <= w.weekInfo.endDate)
-      if (idx > 0) {
-        onWeekChange(seasonWeeks[idx - 1].weekInfo)
+      if (seasonIndex > 0) {
+        onWeekChange(seasonWeeks[seasonIndex - 1].weekInfo)
         return
       }
     }
@@ -81,10 +95,10 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
   }
 
   const handleNextWeek = () => {
+    if (isBowlWeek) return
     if (seasonWeeks.length > 0) {
-      const idx = seasonWeeks.findIndex(w => currentWeek.startDate >= w.weekInfo.startDate && currentWeek.startDate <= w.weekInfo.endDate)
-      if (idx !== -1 && idx < seasonWeeks.length - 1) {
-        onWeekChange(seasonWeeks[idx + 1].weekInfo)
+      if (seasonIndex !== -1 && seasonIndex < seasonWeeks.length - 1) {
+        onWeekChange(seasonWeeks[seasonIndex + 1].weekInfo)
         return
       }
     }
@@ -132,16 +146,14 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
         <div className="flex items-center space-x-3 absolute left-1/2 -translate-x-1/2 sm:static sm:transform-none">
           <div className="text-center">
             <div className="text-lg font-semibold text-gray-900 dark:text-white">
-              {seasonWeeks.length > 0 ? (() => {
-                const idx = seasonWeeks.findIndex(w => currentWeek.startDate >= w.weekInfo.startDate && currentWeek.startDate <= w.weekInfo.endDate)
-                return idx !== -1 ? `Week ${idx + 1}` : currentWeek.label
-              })() : currentWeek.label}
+              {seasonWeeks.length > 0
+                ? activeSeasonWeek?.weekInfo.label ?? currentWeek.label
+                : currentWeek.label}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              {seasonWeeks.length > 0 ? (() => {
-                const m = seasonWeeks.find(w => currentWeek.startDate >= w.weekInfo.startDate && currentWeek.startDate <= w.weekInfo.endDate)
-                return m ? m.weekInfo && `${m.weekInfo.dateRange}` : currentWeek.dateRange
-              })() : currentWeek.dateRange}
+              {seasonWeeks.length > 0
+                ? activeSeasonWeek?.weekInfo.dateRange ?? currentWeek.dateRange
+                : currentWeek.dateRange}
             </div>
           </div>
 
@@ -158,7 +170,12 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
         {/* Next Week Button */}
         <button
           onClick={handleNextWeek}
-          className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors"
+          disabled={isBowlWeek}
+          className={`p-2 rounded-lg border border-gray-300 dark:border-gray-600 transition-colors ${
+            isBowlWeek
+              ? 'opacity-40 cursor-not-allowed'
+              : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+          }`}
           title="Next Week"
         >
           <ChevronRightIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />

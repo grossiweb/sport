@@ -249,7 +249,8 @@ export const CFB_2025_WEEKS: Array<{ weekNumber: number; start: string; end: str
   { weekNumber: 13, start: '2025-11-18', end: '2025-11-22' },
   { weekNumber: 14, start: '2025-11-25', end: '2025-11-29' },
   { weekNumber: 15, start: '2025-12-05', end: '2025-12-06' }, // Conference Championship
-  { weekNumber: 16, start: '2025-12-13', end: '2025-12-13' }
+  // Bowl season: Dec 13, 2025 – Jan 2, 2026
+  { weekNumber: 16, start: '2025-12-13', end: '2026-01-02' }
 ]
 
 function getCFBSeasonRange(): SeasonWeeksOptions {
@@ -268,12 +269,14 @@ export function getCFBSeasonWeekOptions(seasonYear: number, _fallback: SeasonWee
     return CFB_2025_WEEKS.map(({ weekNumber, start, end }) => {
       const startDate = parseISO(start)
       const endDate = endOfDay(parseISO(end))
+      const isBowlWeek = weekNumber === 16
+      const label = isBowlWeek ? 'BOWL' : `Week ${weekNumber}`
       const weekInfo: WeekInfo = {
         weekNumber,
         year: startDate.getFullYear(),
         startDate,
         endDate,
-        label: `Week ${weekNumber}`,
+        label,
         dateRange: formatDateRange(startDate, endDate)
       }
       return {
