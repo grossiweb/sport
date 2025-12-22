@@ -6,7 +6,7 @@ import { generateApiKey, getKeyPrefix, hashApiKey } from '@/lib/api-service/keys
 
 export async function GET(request: NextRequest) {
   const admin = await requireAdmin(request)
-  if (!admin.ok) return jsonError(admin.error, { status: admin.status, code: admin.code })
+  if (admin.ok === false) return jsonError(admin.error, { status: admin.status, code: admin.code })
 
   const { db } = await connectToDatabase()
   const clients = await db
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const admin = await requireAdmin(request)
-  if (!admin.ok) return jsonError(admin.error, { status: admin.status, code: admin.code })
+  if (admin.ok === false) return jsonError(admin.error, { status: admin.status, code: admin.code })
 
   const body = await request.json().catch(() => null)
   if (!body?.name || !body?.planId) {

@@ -6,7 +6,7 @@ import { connectToDatabase } from '@/lib/mongodb'
 
 export async function POST(request: NextRequest) {
   const admin = await requireAdmin(request)
-  if (!admin.ok) return jsonError(admin.error, { status: admin.status, code: admin.code })
+  if (admin.ok === false) return jsonError(admin.error, { status: admin.status, code: admin.code })
 
   const { db } = await connectToDatabase()
 
