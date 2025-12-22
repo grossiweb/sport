@@ -26,14 +26,14 @@ export async function GET(request: NextRequest) {
     endpoint: '/teams',
     sport,
   })
-  if (!auth.ok) return jsonError(auth.error, { status: auth.status, code: auth.code, headers: cors })
+  if (auth.ok === false) return jsonError(auth.error, { status: auth.status, code: auth.code, headers: cors })
 
   const limits = await enforceLimits({
     clientId: auth.client.clientId,
     plan: auth.client.plan,
     endpoint: '/teams',
   })
-  if (!limits.ok) {
+  if (limits.ok === false) {
     return jsonError(limits.error, {
       status: limits.status,
       code: limits.code,
