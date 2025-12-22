@@ -10,9 +10,9 @@ import { SportSelectionWrapper } from '@/components/sport/SportSelectionWrapper'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'StatsPro Sports Analytics',
-  description: 'Professional sports analytics platform with advanced statistics, predictions, and betting insights',
-  keywords: 'sports analytics, college football, CFB, betting, predictions, college sports',
+  title: 'Big Balls Bets',
+  description: 'Big Balls Bets – bold sports betting analytics with advanced stats, AI predictions, and betting insights.',
+  keywords: 'big balls bets, sports betting, sports analytics, college football, CFB, betting, predictions',
 }
 
 export default function RootLayout({

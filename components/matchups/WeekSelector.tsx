@@ -35,6 +35,7 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
         )
       : -1
   const activeSeasonWeek = seasonIndex !== -1 ? seasonWeeks[seasonIndex] : undefined
+  const isLastSeasonWeek = seasonWeeks.length > 0 && seasonIndex === seasonWeeks.length - 1
   const isBowlWeek =
     currentSport === 'CFB' &&
     !!activeSeasonWeek &&
@@ -95,12 +96,13 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
   }
 
   const handleNextWeek = () => {
-    if (isBowlWeek) return
     if (seasonWeeks.length > 0) {
       if (seasonIndex !== -1 && seasonIndex < seasonWeeks.length - 1) {
         onWeekChange(seasonWeeks[seasonIndex + 1].weekInfo)
         return
       }
+      // At or beyond last defined season week – do not advance further
+      return
     }
     const nextWeek = getNextWeek(currentWeek)
     onWeekChange(nextWeek)
@@ -170,9 +172,9 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
         {/* Next Week Button */}
         <button
           onClick={handleNextWeek}
-          disabled={isBowlWeek}
+        disabled={isLastSeasonWeek}
           className={`p-2 rounded-lg border border-gray-300 dark:border-gray-600 transition-colors ${
-            isBowlWeek
+          isLastSeasonWeek
               ? 'opacity-40 cursor-not-allowed'
               : 'hover:bg-gray-50 dark:hover:bg-gray-700'
           }`}

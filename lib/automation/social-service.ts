@@ -66,9 +66,9 @@ export class SocialService {
 
 ${gameList}
 
-Get expert analysis, predictions, and betting insights at StatsPro 📊
+Get bold analysis, AI predictions, and betting insights at Big Balls Bets 📊
 
-#SportsBetting #SportsAnalytics #${topGames[0]?.league || 'Sports'} #StatsPro #PredictionsDaily`
+#SportsBetting #SportsAnalytics #${topGames[0]?.league || 'Sports'} #BigBallsBets #PredictionsDaily`
 
     return {
       platform: 'instagram',
@@ -84,7 +84,7 @@ Get expert analysis, predictions, and betting insights at StatsPro 📊
     if (!featuredGame) {
       return {
         platform: 'facebook',
-        content: 'Check out today\'s sports analytics and predictions at StatsPro!',
+        content: 'Check out today\'s sports betting analytics and AI predictions at Big Balls Bets!',
         scheduledDate: this.getScheduledTime(10, 0),
         status: 'scheduled'
       }
@@ -97,11 +97,11 @@ ${featuredGame.awayTeam.city} ${featuredGame.awayTeam.name} vs ${featuredGame.ho
 📍 ${featuredGame.venue || 'TBD'}
 ⏰ ${format(featuredGame.gameDate, 'h:mm a')}
 
-Our AI analysis is predicting an exciting game! Get detailed breakdowns, player props, and betting insights with your StatsPro subscription.
+Our AI analysis is predicting an exciting game! Get detailed breakdowns, player props, and betting insights with your Big Balls Bets subscription.
 
 What's your prediction? Drop it in the comments! 👇
 
-#${featuredGame.league} #SportsAnalytics #SportsPredictions #StatsPro`
+#${featuredGame.league} #SportsAnalytics #SportsPredictions #BigBallsBets`
 
     return {
       platform: 'facebook',
@@ -116,7 +116,7 @@ What's your prediction? Drop it in the comments! 👇
     if (!featuredGame) {
       return {
         platform: 'twitter',
-        content: '📊 Daily sports analytics and predictions now live at StatsPro! #SportsAnalytics',
+        content: '📊 Daily sports analytics and predictions now live at Big Balls Bets! #SportsAnalytics #BigBallsBets',
         scheduledDate: this.getScheduledTime(12, 0),
         status: 'scheduled'
       }
@@ -128,7 +128,7 @@ What's your prediction? Drop it in the comments! 👇
 🤖 AI predictions  
 💰 Betting insights
 
-All available now at StatsPro!
+All available now at Big Balls Bets!
 
 #${featuredGame.league} #SportsBetting #Analytics`
 

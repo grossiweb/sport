@@ -38,7 +38,7 @@ export class EmailService {
       const textContent = this.generateDailyEmailText(allGames)
 
       return {
-        subject: `StatsPro Daily Report - ${format(new Date(), 'MMMM do, yyyy')}`,
+        subject: `Big Balls Bets Daily Report - ${format(new Date(), 'MMMM do, yyyy')}`,
         htmlContent,
         textContent,
         recipients: await this.getSubscriberEmails()
@@ -98,7 +98,7 @@ export class EmailService {
         </head>
         <body>
           <div class="header">
-            <h1>StatsPro Daily Report</h1>
+            <h1>Big Balls Bets Daily Report</h1>
             <p>${format(new Date(), 'EEEE, MMMM do, yyyy')}</p>
           </div>
           <div class="content">
@@ -128,10 +128,10 @@ export class EmailService {
     })
 
     html += `
-            <p>Get detailed analysis, predictions, and betting insights at <a href="http://localhost:3000">StatsPro</a></p>
+            <p>Get detailed analysis, predictions, and betting insights at <a href="http://localhost:3000">Big Balls Bets</a></p>
           </div>
           <div class="footer">
-            <p>© 2024 StatsPro. All rights reserved.</p>
+            <p>© 2024 Big Balls Bets. All rights reserved.</p>
             <p><a href="#unsubscribe">Unsubscribe</a> | <a href="#preferences">Preferences</a></p>
           </div>
         </body>
@@ -163,7 +163,7 @@ export class EmailService {
     })
 
     text += `Get detailed analysis at: http://localhost:3000\n\n`
-    text += `© 2024 StatsPro. All rights reserved.`
+    text += `© 2024 Big Balls Bets. All rights reserved.`
 
     return text
   }

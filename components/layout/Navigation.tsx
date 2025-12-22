@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import { useSport } from '@/contexts/SportContext'
@@ -46,15 +47,21 @@ export function Navigation() {
   return (
     <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 justify-between">
+        <div className="flex h-20 justify-between">
           {/* Logo and primary navigation */}
           <div className="flex">
             <div className="flex flex-shrink-0 items-center">
-              <Link href="/" className="flex items-center space-x-2">
-                <ChartBarIcon className="h-8 w-8 text-primary-600" />
-                <span className="text-xl font-bold gradient-text">
-                  StatsPro
-                </span>
+              <Link href="/" className="flex items-center space-x-3">
+                <div className="relative h-10 w-40 sm:h-12 sm:w-48">
+                  <Image
+                    src={theme === 'dark' ? '/logo_dark.png' : '/logo_light.png'}
+                    alt="Big Balls Bets"
+                    fill
+                    sizes="128px"
+                    className="object-contain"
+                    priority
+                  />
+                </div>
               </Link>
             </div>
             

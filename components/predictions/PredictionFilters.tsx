@@ -205,7 +205,7 @@ export function PredictionFilters({
             <div className="flex items-center space-x-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-md">
               <ChartBarIcon className="h-4 w-4 text-blue-500" />
               <span className="text-xs text-gray-600 dark:text-gray-400">
-                StatsPro ML v2.1
+                Big Balls Bets ML v2.1
               </span>
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-500">
