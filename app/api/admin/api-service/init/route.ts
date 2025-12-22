@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/api-service/admin-auth'
 import { jsonError, jsonOk } from '@/lib/api-service/json'
 import { DEFAULT_PLANS } from '@/lib/api-service/plans'
+import type { ApiPlan } from '@/lib/api-service/types'
 import { connectToDatabase } from '@/lib/mongodb'
 
 export async function POST(request: NextRequest) {
@@ -11,7 +12,7 @@ export async function POST(request: NextRequest) {
   const { db } = await connectToDatabase()
 
   // Seed default plans (upsert)
-  const plansCol = db.collection('api_plans')
+  const plansCol = db.collection<ApiPlan>('api_plans')
   const now = new Date()
   for (const p of DEFAULT_PLANS) {
     await plansCol.updateOne(
