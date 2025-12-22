@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/api-service/admin-auth'
 import { jsonError, jsonOk } from '@/lib/api-service/json'
+import type { ApiPlan } from '@/lib/api-service/types'
 import { connectToDatabase } from '@/lib/mongodb'
 
 export async function GET(request: NextRequest) {
@@ -8,7 +9,7 @@ export async function GET(request: NextRequest) {
   if (admin.ok === false) return jsonError(admin.error, { status: admin.status, code: admin.code })
 
   const { db } = await connectToDatabase()
-  const plans = await db.collection('api_plans').find({}).sort({ createdAt: -1 }).toArray()
+  const plans = await db.collection<ApiPlan>('api_plans').find({}).sort({ createdAt: -1 }).toArray()
   return jsonOk({ plans })
 }
 
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { db } = await connectToDatabase()
-  await db.collection('api_plans').updateOne(
+  await db.collection<ApiPlan>('api_plans').updateOne(
     { _id: plan._id },
     {
       $set: {

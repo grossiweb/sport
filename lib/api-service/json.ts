@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server'
 
 export type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: JsonValue }
-  | JsonValue[]
+  // We intentionally keep this loose because MongoDB documents can contain
+  // ObjectId/Date values (both serialize fine via NextResponse.json), and
+  // strict JSON typing becomes noisy across many API handlers.
+  unknown
 
-export function jsonOk<T extends JsonValue>(
+export function jsonOk<T = unknown>(
   data: T,
   init?: { status?: number; headers?: Record<string, string> }
 ) {
