@@ -1,10 +1,10 @@
 import { MongoClient, Db, Collection } from 'mongodb'
 
-const MONGODB_URI = "mongodb+srv://stefano:Ar99uZ48gq4x1O9l@cluster0.xikytgx.mongodb.net/sportStats?retryWrites=true&w=majority&appName=Cluster0"
-const MONGODB_DB = "sportStats"
+const MONGODB_URI = process.env.MONGODB_URI || ''
+const MONGODB_DB = process.env.MONGODB_DB || 'sportStats'
 
 if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local')
+  throw new Error('Please define the MONGODB_URI environment variable inside .env.local (and in Vercel env vars).')
 }
 
 /**

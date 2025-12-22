@@ -23,6 +23,22 @@ const adminRoutes = [
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const host = request.headers.get('host') || ''
+
+  // If the request is coming from the API subdomain, only allow API routes.
+  // This keeps `api.bigballsbets.com` strictly for API usage (Option A on Vercel).
+  if (host.toLowerCase().startsWith('api.')) {
+    const isAllowedApiRoute =
+      pathname.startsWith('/api/external') ||
+      pathname.startsWith('/api/admin/api-service') ||
+      pathname.startsWith('/api/auth') // allow auth endpoints if you ever need them for admin tooling
+
+    if (!isAllowedApiRoute) {
+      const redirectUrl = new URL(`https://www.${host.replace(/^api\./i, '')}${pathname}`, request.url)
+      redirectUrl.search = request.nextUrl.search
+      return NextResponse.redirect(redirectUrl, 308)
+    }
+  }
   
   // Allow public routes
   if (publicRoutes.some(route => pathname.startsWith(route))) {

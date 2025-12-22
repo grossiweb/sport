@@ -20,7 +20,7 @@ try {
   process.exit(1);
 }
 
-const logosDir = path.join(__dirname, '..', 'public', 'ncaab-svg');
+const logosDir = path.join(__dirname, '..', 'public', 'ncaab');
 
 if (!fs.existsSync(logosDir)) {
   console.error(`\n[convert-ncaab-svgs-to-png] Directory not found: ${logosDir}\n`);

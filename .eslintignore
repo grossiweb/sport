@@ -1,0 +1,9 @@
+.next
+node_modules
+public
+wordpress-integration
+scripts/php
+*.min.js
+*.min.css
+
+
