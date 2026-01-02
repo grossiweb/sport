@@ -14,6 +14,7 @@ import {
   MoonIcon,
   UserCircleIcon,
   ChartBarIcon,
+  CodeBracketIcon,
   HomeIcon,
   UsersIcon,
   TrophyIcon,
@@ -98,7 +99,7 @@ export function Navigation() {
             {/* Theme toggle */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="hidden sm:inline-flex rounded-lg p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200"
+              className="inline-flex rounded-lg p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200"
             >
               {theme === 'dark' ? (
                 <SunIcon className="h-5 w-5" />

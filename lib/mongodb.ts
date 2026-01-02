@@ -1,12 +1,5 @@
 import { MongoClient, Db, Collection } from 'mongodb'
 
-const MONGODB_URI = process.env.MONGODB_URI || ''
-const MONGODB_DB = process.env.MONGODB_DB || 'sportStats'
-
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local (and in Vercel env vars).')
-}
-
 /**
  * Global is used here to maintain a cached connection across hot reloads
  * in development. This prevents connections growing exponentially
@@ -19,6 +12,17 @@ if (!cached) {
 }
 
 export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db }> {
+  const MONGODB_URI = process.env.MONGODB_URI || ''
+  const MONGODB_DB = process.env.MONGODB_DB || 'sportStats'
+
+  // IMPORTANT: don't throw at module import time (Vercel/Next can import during build).
+  // Only throw when a request actually tries to connect.
+  if (!MONGODB_URI) {
+    throw new Error(
+      'Missing MONGODB_URI environment variable. Set it in .env.local (local dev) and Vercel Environment Variables (production).'
+    )
+  }
+
   if (cached.conn) {
     return cached.conn
   }
