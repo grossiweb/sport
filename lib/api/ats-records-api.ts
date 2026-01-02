@@ -5,6 +5,7 @@
 
 import { getAtsRecordsCollection } from '@/lib/mongodb'
 import { SportType } from '@/types'
+import { getSeasonYearOverride } from '@/lib/config/season-years'
 
 export interface AtsRecord {
   wins: number
@@ -148,10 +149,10 @@ export function getSportIdFromType(sportType: SportType): number {
  * Get current season year for a sport
  */
 export function getCurrentSeasonYear(sportType: SportType): number {
-  // Explicit override: NCAAB is currently using the 2026 season in your data.
-  if (sportType === 'NCAAB') {
-    return 2026
-  }
+  // Keep ATS season-year selection in sync with team stats selection.
+  // This ensures coversSummary (ats_records) matches the season_year used for team stats/games.
+  const override = getSeasonYearOverride(sportType)
+  if (override) return override
 
   const now = new Date()
   const currentYear = now.getFullYear()
