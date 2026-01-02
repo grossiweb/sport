@@ -223,7 +223,7 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 flex items-center justify-center px-4 py-3 text-sm font-medium rounded-md transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-white dark:bg-gray-700 text-blue-700 dark:text-blue-400 shadow-sm'
+                    ? 'bg-white dark:bg-gray-700 text-primary-700 dark:text-primary-400 shadow-sm'
                     : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                 }`}
               >
@@ -626,7 +626,7 @@ function DetailedBettingSection({ game, sport }: { game: Matchup['game']; sport:
             setSelectedSportsbook('')
             loadBettingData()
           }}
-          className="text-sm text-blue-600 dark:text-blue-300 hover:underline"
+          className="text-sm text-primary-600 dark:text-primary-300 hover:underline"
         >
           Refresh
         </button>
@@ -645,7 +645,7 @@ function DetailedBettingSection({ game, sport }: { game: Matchup['game']; sport:
               setSelectedSportsbook('')
               loadBettingData()
             }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+            className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors text-sm"
           >
             Retry
           </button>
@@ -664,7 +664,7 @@ function DetailedBettingSection({ game, sport }: { game: Matchup['game']; sport:
               <select
                 value={selectedSportsbook}
                 onChange={(e) => setSelectedSportsbook(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none"
               >
                 {availableSportsbooks.map((sportsbookId) => {
                   const sportsbook = bettingData.lines[sportsbookId]
@@ -684,7 +684,7 @@ function DetailedBettingSection({ game, sport }: { game: Matchup['game']; sport:
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <BettingLineCard
                   title="Moneyline"
-                  color="from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30"
+                  color="from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20"
                   updatedAt={selectedLine.moneyline?.date_updated}
                   items={[
                     {

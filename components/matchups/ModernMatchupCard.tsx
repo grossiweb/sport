@@ -231,7 +231,7 @@ const ModernMatchupCardComponent = ({ matchup, sport }: ModernMatchupCardProps) 
             <div className="inline-block text-[10px] text-gray-700 dark:text-gray-800 font-medium bg-[#fff7d1] px-2 py-0.5 rounded">
               {`${gameDayOfWeek}, ${gameDateShort}`}
             </div>
-            <div className="text-[10px] font-semibold text-blue-600 dark:text-blue-400">
+            <div className="text-[10px] font-semibold text-primary-600 dark:text-primary-400">
               {gameTime}
             </div>
             {game.venue && (
@@ -316,21 +316,21 @@ const ModernMatchupCardComponent = ({ matchup, sport }: ModernMatchupCardProps) 
         <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <Link
             href={`/sport/${sport.toLowerCase()}/matchups/${game.id}`}
-            className={`h-[35px] w-auto px-4 inline-flex items-center justify-center border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200`}
+            className={`h-[35px] w-auto px-4 inline-flex items-center justify-center border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 transition-all duration-200`}
           >
             Matchup
           </Link>
           {shouldShowScoreButton ? (
             <button
               onClick={() => setShowScorePopup(true)}
-              className="h-[35px] w-auto px-4 inline-flex items-center justify-center text-sm font-semibold rounded-lg border border-blue-100 dark:border-blue-500/40 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
+              className="h-[35px] w-auto px-4 inline-flex items-center justify-center text-sm font-semibold rounded-lg border border-primary-100 dark:border-primary-500/40 text-primary-600 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors"
             >
               View Box Score
             </button>
           ) : (
             <button
               onClick={() => setShowBettingPopup(true)}
-              className="h-[35px] w-auto px-4 inline-flex items-center justify-center text-sm font-semibold rounded-lg border border-blue-100 dark:border-blue-500/40 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
+              className="h-[35px] w-auto px-4 inline-flex items-center justify-center text-sm font-semibold rounded-lg border border-primary-100 dark:border-primary-500/40 text-primary-600 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors"
             >
               View Betting Lines
             </button>

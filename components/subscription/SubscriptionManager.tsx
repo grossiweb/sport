@@ -115,7 +115,7 @@ export function SubscriptionManager() {
       case 'active':
         return 'text-green-600 bg-green-100'
       case 'trialing':
-        return 'text-blue-600 bg-blue-100'
+        return 'text-primary-600 bg-primary-100'
       case 'past_due':
         return 'text-yellow-600 bg-yellow-100'
       case 'cancelled':
@@ -175,7 +175,7 @@ export function SubscriptionManager() {
           </p>
           <button
             onClick={fetchSubscriptionData}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
           >
             Retry
           </button>
@@ -280,7 +280,7 @@ export function SubscriptionManager() {
           {isFreePlan || !hasActiveSubscription ? (
             <button
               onClick={handleUpgrade}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
             >
               <ArrowUpIcon className="h-4 w-4 mr-2" />
               Upgrade Plan
@@ -289,7 +289,7 @@ export function SubscriptionManager() {
             <>
               <button
                 onClick={handleUpgrade}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
               >
                 <ArrowUpIcon className="h-4 w-4 mr-2" />
                 Change Plan

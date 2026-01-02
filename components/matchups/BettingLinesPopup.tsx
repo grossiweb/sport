@@ -232,7 +232,7 @@ function BettingLinesPopup({
               <p className="text-sm text-red-600 dark:text-red-400 mb-3">{error}</p>
               <button
                 onClick={fetchBettingData}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors text-sm"
               >
                 Try Again
               </button>
@@ -254,7 +254,7 @@ function BettingLinesPopup({
                   <select
                     value={selectedSportsbook}
                     onChange={(e) => setSelectedSportsbook(e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none"
                   >
                     {availableSportsbooks.map((sportsbookId) => {
                       const sportsbook = bettingData?.lines?.[sportsbookId]
@@ -273,7 +273,7 @@ function BettingLinesPopup({
               {selectedLine && (
                 <div className="space-y-2.5">
                   {/* Moneyline */}
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 p-2.5 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 p-2.5 rounded-lg border border-primary-200 dark:border-primary-800">
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Moneyline</h4>
                       <div className="flex items-center text-[11px] text-gray-500 dark:text-gray-400">

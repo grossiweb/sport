@@ -13,7 +13,8 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
+    /* Brand primary: #C62828 */
+    --primary: 0 67% 47%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222.2 84% 4.9%;
@@ -25,18 +26,20 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --ring: 0 67% 47%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    /* Dark mode background: #020202 */
+    --background: 0 0% 0.8%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
+    /* Slightly brighter red for dark mode */
+    --primary: 0 75% 58%;
     --primary-foreground: 222.2 84% 4.9%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -48,7 +51,14 @@
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
+    --ring: 0 75% 58%;
+  }
+}
+
+@layer base {
+  /* Force any Tailwind `dark:bg-gray-*` backgrounds to use the global dark background */
+  .dark [class*="dark:bg-gray"] {
+    background-color: #020202 !important;
   }
 }
 
@@ -95,7 +105,7 @@
   }
   
   .performance-good {
-    @apply text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20;
+    @apply text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20;
   }
   
   .performance-average {

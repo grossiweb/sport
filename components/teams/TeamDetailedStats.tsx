@@ -648,7 +648,7 @@ export function TeamDetailedStats({
               onClick={() => setActiveView(view.id as any)}
               className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 activeView === view.id
-                  ? 'bg-white dark:bg-gray-600 text-blue-700 dark:text-blue-400 shadow-sm'
+                  ? 'bg-white dark:bg-gray-600 text-primary-700 dark:text-primary-400 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
             >
@@ -675,7 +675,7 @@ export function TeamDetailedStats({
             onClick={() => setSelectedCategory(category)}
             className={`px-3 py-1 text-sm font-medium rounded-full transition-colors ${
               selectedCategory === category
-                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
             }`}
           >
@@ -1076,7 +1076,7 @@ export function TeamDetailedStats({
                       <div className="text-sm font-medium text-gray-900 dark:text-white truncate" title={stat.stat?.description || ''}>
                         {labelText}
                       </div>
-                      <div className="text-sm font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">
+                      <div className="text-sm font-semibold text-primary-600 dark:text-primary-400 whitespace-nowrap">
                         {mainDisplay}
                       </div>
                     </div>
@@ -1140,7 +1140,7 @@ export function TeamDetailedStats({
                             : (stat.display_value ?? stat.value)
                           const isTurnover = isTurnoverRatioStat(stat)
                           return (
-                            <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                            <div className="text-sm font-semibold text-primary-600 dark:text-primary-400">
                               {isTurnover
                                 ? formatValueDisplay((stat as any).display_value ?? stat.value)
                                 : withPercentIfNeeded(
@@ -1186,7 +1186,7 @@ export function TeamDetailedStats({
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
       <div className="p-4">
         <div className="flex items-center mb-6">
-          <ChartBarIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
+          <ChartBarIcon className="h-5 w-5 text-primary-600 dark:text-primary-400 mr-2" />
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             Team Statistics Comparison
           </h2>

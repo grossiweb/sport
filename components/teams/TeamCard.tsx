@@ -12,7 +12,7 @@ interface TeamCardProps {
 export function TeamCard({ team, sport }: TeamCardProps) {
   const href = `/sport/${sport.toLowerCase()}/teams/${team.id}`
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-2 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-2 hover:shadow-md hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
       {/* Logo row */}
       <div className="w-full flex items-center justify-center mb-1.5">
         <Link href={href} className="inline-block">
@@ -23,7 +23,7 @@ export function TeamCard({ team, sport }: TeamCardProps) {
       {/* Team name row */}
       <div className="text-center">
         <Link href={href} className="block">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
             {team.name}
           </h3>
         </Link>

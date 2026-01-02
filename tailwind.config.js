@@ -22,16 +22,17 @@ module.exports = {
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          // Brand palette (Big Balls Bets) — base: #C62828
+          50: '#ffebee',
+          100: '#ffcdd2',
+          200: '#ef9a9a',
+          300: '#e57373',
+          400: '#ef5350',
+          500: '#e53935',
+          600: '#c62828', // primary brand
+          700: '#b71c1c',
+          800: '#8e1515',
+          900: '#6f1111',
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',

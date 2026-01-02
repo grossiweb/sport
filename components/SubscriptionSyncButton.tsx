@@ -49,7 +49,7 @@ export default function SubscriptionSyncButton() {
           Subscription Status
         </h3>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Current: <span className="capitalize font-semibold text-blue-600 dark:text-blue-400">
+          Current: <span className="capitalize font-semibold text-primary-600 dark:text-primary-400">
           {subscriptionTier === 'free' ? 'Free Subscriber' : 
              subscriptionTier === 'pro' ? 'Pro Subscriber' :
              subscriptionTier === 'enterprise' ? 'Enterprise Subscriber' :

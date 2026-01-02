@@ -68,7 +68,7 @@ const TeamPlayers: React.FC<TeamPlayersProps> = ({ teamId, sport, teamName }) =>
         </div>
         <button 
           onClick={() => window.location.reload()} 
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           Try Again
         </button>
@@ -117,7 +117,7 @@ const TeamPlayers: React.FC<TeamPlayersProps> = ({ teamId, sport, teamName }) =>
             id="position-filter"
             value={selectedPosition}
             onChange={(e) => setSelectedPosition(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
             {positions.map(position => (
               <option key={position} value={position}>
@@ -169,7 +169,7 @@ const TeamPlayers: React.FC<TeamPlayersProps> = ({ teamId, sport, teamName }) =>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Link
                       href={`/sport/${sport.toLowerCase()}/teams/${teamId}/players/${player.id}`}
-                      className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                      className="text-sm font-medium text-primary-600 hover:text-primary-800"
                     >
                       {player.name}
                     </Link>
@@ -221,7 +221,7 @@ const TeamPlayers: React.FC<TeamPlayersProps> = ({ teamId, sport, teamName }) =>
               .sort(([a], [b]) => a.localeCompare(b))
               .map(([position, positionPlayers]) => (
                 <div key={position} className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-2xl font-bold text-primary-600">
                     {positionPlayers.length}
                   </div>
                   <div className="text-sm text-gray-600 font-medium">

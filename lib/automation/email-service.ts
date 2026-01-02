@@ -86,11 +86,11 @@ export class EmailService {
         <head>
           <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .header { background: #2563eb; color: white; padding: 20px; text-align: center; }
+            .header { background: #C62828; color: white; padding: 20px; text-align: center; }
             .content { padding: 20px; }
             .league-section { margin-bottom: 30px; }
-            .league-title { color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 5px; }
-            .game { background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid #2563eb; }
+            .league-title { color: #C62828; border-bottom: 2px solid #C62828; padding-bottom: 5px; }
+            .game { background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid #C62828; }
             .teams { font-weight: bold; }
             .time { color: #666; }
             .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #666; }
