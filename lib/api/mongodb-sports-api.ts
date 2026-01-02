@@ -13,6 +13,7 @@ import {
   MongoPlayer,
   MongoPlayerSeasonStats
 } from '@/lib/mongodb'
+import { getSeasonYearOverride } from '@/lib/config/season-years'
 
 // MongoDB-based Sports API service
 export class MongoDBSportsAPI {
@@ -24,11 +25,9 @@ export class MongoDBSportsAPI {
   private getSeasonYearForSport(sport: SportType, referenceDate: Date = new Date()): number {
     const year = referenceDate.getFullYear()
 
-    // Explicit override: current NCAAB data uses season_year = 2026
-    // for the 2025-11-03 to 2026-03-xx season window.
-    if (sport === 'NCAAB') {
-      return 2026
-    }
+    // Per-sport override (configured via env vars + defaults)
+    const override = getSeasonYearOverride(sport)
+    if (override) return override
 
     if (sport === 'NBA') {
       // NBA season starts around October and runs into the next calendar year
