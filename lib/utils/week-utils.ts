@@ -228,12 +228,12 @@ export function getNFLSeasonWeekOptions(seasonYear: number, _fallback: SeasonWee
     })
   }
 
-  // Fallback: build generic Monday–Sunday weeks using provided season window
+  // Fallback: build generic Monday-Sunday weeks using provided season window
   return getSeasonWeekOptions(_fallback)
 }
 
 // Hard-coded CFB 2025 regular-season weeks, aligned to Covers-style schedule
-export const CFB_2025_WEEKS: Array<{ weekNumber: number; start: string; end: string }> = [
+export const CFB_2025_WEEKS: Array<{ weekNumber: number; start: string; end: string; label?: string }> = [
   { weekNumber: 1, start: '2025-08-23', end: '2025-09-01' },
   { weekNumber: 2, start: '2025-09-05', end: '2025-09-07' },
   { weekNumber: 3, start: '2025-09-11', end: '2025-09-14' },
@@ -248,9 +248,10 @@ export const CFB_2025_WEEKS: Array<{ weekNumber: number; start: string; end: str
   { weekNumber: 12, start: '2025-11-11', end: '2025-11-15' },
   { weekNumber: 13, start: '2025-11-18', end: '2025-11-22' },
   { weekNumber: 14, start: '2025-11-25', end: '2025-11-29' },
-  { weekNumber: 15, start: '2025-12-05', end: '2025-12-06' }, // Conference Championship
-  // Bowl season: Dec 13, 2025 – Jan 2, 2026
-  { weekNumber: 16, start: '2025-12-13', end: '2026-01-02' }
+  { weekNumber: 15, start: '2025-12-05', end: '2025-12-06', label: 'Conference Championship' },
+  { weekNumber: 16, start: '2025-12-13', end: '2025-12-13' },
+  { weekNumber: 17, start: '2025-12-13', end: '2026-01-02', label: 'Bowl' },
+  { weekNumber: 18, start: '2026-01-08', end: '2026-01-09', label: 'Bowl Semifinal' }
 ]
 
 function getCFBSeasonRange(): SeasonWeeksOptions {
@@ -266,11 +267,10 @@ function getCFBSeasonRange(): SeasonWeeksOptions {
  */
 export function getCFBSeasonWeekOptions(seasonYear: number, _fallback: SeasonWeeksOptions): WeekOption[] {
   if (seasonYear === 2025) {
-    return CFB_2025_WEEKS.map(({ weekNumber, start, end }) => {
+    return CFB_2025_WEEKS.map(({ weekNumber, start, end, label: customLabel }) => {
       const startDate = parseISO(start)
       const endDate = endOfDay(parseISO(end))
-      const isBowlWeek = weekNumber === 16
-      const label = isBowlWeek ? 'BOWL' : `Week ${weekNumber}`
+      const label = customLabel || `Week ${weekNumber}`
       const weekInfo: WeekInfo = {
         weekNumber,
         year: startDate.getFullYear(),
@@ -287,7 +287,7 @@ export function getCFBSeasonWeekOptions(seasonYear: number, _fallback: SeasonWee
     })
   }
 
-  // Fallback: build generic Monday–Sunday weeks using provided season window
+  // Fallback: build generic Monday-Sunday weeks using provided season window
   return getSeasonWeekOptions(_fallback)
 }
 
@@ -295,7 +295,7 @@ export function getCFBSeasonWeekOptions(seasonYear: number, _fallback: SeasonWee
  * Get the correct "current week" for a sport based on season-specific mappings when available.
  * - NFL: If today falls within the 2025 season window (2025-09-04 to 2026-01-07), use season-specific weeks.
  * - NBA: Uses the 2025-26 season window defined in UI.
- * - Others: fallback to ISO Monday–Sunday week.
+ * - Others: fallback to ISO Monday-Sunday week.
  */
 export function getCurrentSeasonWeekForSport(sport: SportType): WeekInfo {
   const now = new Date()

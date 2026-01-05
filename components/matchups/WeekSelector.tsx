@@ -39,7 +39,7 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
   const isBowlWeek =
     currentSport === 'CFB' &&
     !!activeSeasonWeek &&
-    activeSeasonWeek.weekInfo.weekNumber === 16
+    activeSeasonWeek.weekInfo.weekNumber === 18
 
   // Load season start date from API based on sport and year, then compute weeks dynamically
   useEffect(() => {
@@ -101,7 +101,7 @@ export function WeekSelector({ currentWeek, onWeekChange, className = '' }: Week
         onWeekChange(seasonWeeks[seasonIndex + 1].weekInfo)
         return
       }
-      // At or beyond last defined season week – do not advance further
+      // At or beyond last defined season week Ã¢â‚¬â€œ do not advance further
       return
     }
     const nextWeek = getNextWeek(currentWeek)
