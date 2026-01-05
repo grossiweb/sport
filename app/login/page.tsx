@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
-import { ChartBarIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 
 export default function LoginPage() {
@@ -38,11 +38,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <div className="flex justify-center">
-            <ChartBarIcon className="h-12 w-12 text-primary-600" />
-          </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-            Sign in to StatsPro
+          <h2 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+            Sign in
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             Access professional sports analytics and insights
