@@ -1,14 +1,14 @@
 import Stripe from 'stripe'
 
 // Initialize Stripe with correct API version
-export const stripe = new Stripe('sk_test_51SmHsWBsfc1fMnM5XcAFKo4HPyAdh7oVk5IdiRtHCb2dMuRhMe63QxAgzWpHLhA41pzTIM1gaj7vbd74KlyZKFWF00awWcDmsF'!, {
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16',
 } as any)
 
 // Stripe configuration
 export const stripeConfig = {
-  publishableKey: 'pk_test_51SmHsWBsfc1fMnM5iS0W3mNjxRK2wn1BBkeyHr8or8umyDbpiSg7E0p9AZY3bIhyqaL5eEGDqs2BDa5qqxSf1bXn00t72v7OcM'!,
-  secretKey: 'sk_test_51SmHsWBsfc1fMnM5XcAFKo4HPyAdh7oVk5IdiRtHCb2dMuRhMe63QxAgzWpHLhA41pzTIM1gaj7vbd74KlyZKFWF00awWcDmsF'!,
+  publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+  secretKey: process.env.STRIPE_SECRET_KEY!,
   webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
   currency: 'usd',
 }
@@ -33,8 +33,8 @@ export const subscriptionPlans = {
   },
   pro: {
     name: 'Pro',
-    productId: 'prod_Tk111AdNojfJdZ',
-    priceId: 'price_1SmWzsBsfc1fMnM5lpwnHNJT',
+    productId: process.env.STRIPE_PRO_PRODUCT_ID!,
+    priceId: process.env.STRIPE_PRO_PRICE_ID!,
     price: 29.99,
     interval: 'month',
     features: [
@@ -53,8 +53,8 @@ export const subscriptionPlans = {
   },
   enterprise: {
     name: 'Enterprise',
-    productId: 'prod_Tk116wbfmvhkOo',
-    priceId: 'price_1SmWzWBsfc1fMnM57LdsAiqR',
+    productId: process.env.STRIPE_ENTERPRISE_PRODUCT_ID!,
+    priceId: process.env.STRIPE_ENTERPRISE_PRICE_ID!,
     price: 99.99,
     interval: 'month',
     features: [
