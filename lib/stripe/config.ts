@@ -1,14 +1,14 @@
 import Stripe from 'stripe'
 
 // Initialize Stripe with correct API version
-export const stripe = new Stripe('sk_test_51S6KgJGvrsxygb8jMDqvR5au47FoVNqMTvmEMAJM1CtUBA2KSqFcoxGtxCtYXi6I1RUMYeVqijWAi2wpnZPDTXLX00vCWN9W3s'!, {
+export const stripe = new Stripe('sk_test_51SmHsWBsfc1fMnM5XcAFKo4HPyAdh7oVk5IdiRtHCb2dMuRhMe63QxAgzWpHLhA41pzTIM1gaj7vbd74KlyZKFWF00awWcDmsF'!, {
   apiVersion: '2023-10-16',
 } as any)
 
 // Stripe configuration
 export const stripeConfig = {
-  publishableKey: 'pk_test_51S6KgJGvrsxygb8jOS1jaSno3dOzkGH3OMPOVeBwpm2VVZy9S3ngikyUXAOaKV1DZ1MRXsFYbv3DZz2Hp5NiiYKF00KghpkSXX'!,
-  secretKey: 'sk_test_51S6KgJGvrsxygb8jMDqvR5au47FoVNqMTvmEMAJM1CtUBA2KSqFcoxGtxCtYXi6I1RUMYeVqijWAi2wpnZPDTXLX00vCWN9W3s'!,
+  publishableKey: 'pk_test_51SmHsWBsfc1fMnM5iS0W3mNjxRK2wn1BBkeyHr8or8umyDbpiSg7E0p9AZY3bIhyqaL5eEGDqs2BDa5qqxSf1bXn00t72v7OcM'!,
+  secretKey: 'sk_test_51SmHsWBsfc1fMnM5XcAFKo4HPyAdh7oVk5IdiRtHCb2dMuRhMe63QxAgzWpHLhA41pzTIM1gaj7vbd74KlyZKFWF00awWcDmsF'!,
   webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
   currency: 'usd',
 }
@@ -33,7 +33,8 @@ export const subscriptionPlans = {
   },
   pro: {
     name: 'Pro',
-    priceId: process.env.STRIPE_PRO_PRICE_ID!,
+    productId: 'prod_Tk111AdNojfJdZ',
+    priceId: 'price_1SmWzsBsfc1fMnM5lpwnHNJT',
     price: 29.99,
     interval: 'month',
     features: [
@@ -52,7 +53,8 @@ export const subscriptionPlans = {
   },
   enterprise: {
     name: 'Enterprise',
-    priceId: process.env.STRIPE_ENTERPRISE_PRICE_ID!,
+    productId: 'prod_Tk116wbfmvhkOo',
+    priceId: 'price_1SmWzWBsfc1fMnM57LdsAiqR',
     price: 99.99,
     interval: 'month',
     features: [
