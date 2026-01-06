@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe/config'
+import Stripe from 'stripe'
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const subscription = subscriptions.data[0]
+    const subscription: Stripe.Subscription = subscriptions.data[0]
     const priceId = subscription.items.data[0]?.price.id
 
     // Determine plan type
@@ -93,13 +94,16 @@ export async function POST(request: NextRequest) {
       )
     }
     
+    // Extract current_period_end safely (TypeScript has issues with this property)
+    const currentPeriodEnd = (subscription as any).current_period_end as number
+    
     const subscriptionData = {
       subscription_status: subscription.status,
       subscription_plan: planType,
       stripe_subscription_id: subscription.id,
       stripe_customer_id: customer.id,
-      subscription_start_date: new Date((subscription.start_date || subscription.created) * 1000).toISOString(),
-      subscription_end_date: new Date(subscription.currentPeriodEnd * 1000).toISOString(),
+      subscription_start_date: new Date(subscription.created * 1000).toISOString(),
+      subscription_end_date: new Date(currentPeriodEnd * 1000).toISOString(),
     }
 
     // Try the REST API endpoint
