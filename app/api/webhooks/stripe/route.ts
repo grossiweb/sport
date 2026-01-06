@@ -147,9 +147,9 @@ async function createOrUpdateSubscription(subscription: Stripe.Subscription, use
     let planType = 'free'
     
     // Map Stripe price IDs to plan types
-    if (priceId === 'price_1S6Z5AGvrsxygb8jFBqyViDi') {
+    if (priceId === 'price_1SmWzsBsfc1fMnM5lpwnHNJT') {
       planType = 'pro'
-    } else if (priceId === 'price_1S6Z5pGvrsxygb8jBKesWPko') {
+    } else if (priceId === 'price_1SmWzWBsfc1fMnM57LdsAiqR') {
       planType = 'enterprise'
     }
 
