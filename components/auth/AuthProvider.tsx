@@ -193,8 +193,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const syncSubscriptionStatus = async () => {
     const token = localStorage.getItem('authToken')
     
-    if (authState.isAuthenticated && token) {
+    if (authState.isAuthenticated && token && authState.user) {
       try {
+        // First, sync from Stripe to WordPress
+        console.log('Syncing Stripe subscription to WordPress...')
+        try {
+          const manualSyncResponse = await fetch('/api/subscriptions/manual-sync', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: authState.user.id,
+              userEmail: authState.user.email,
+            }),
+          })
+          
+          if (manualSyncResponse.ok) {
+            console.log('Stripe to WordPress sync successful')
+          } else {
+            console.warn('Stripe to WordPress sync failed, continuing with WordPress sync...')
+          }
+        } catch (manualSyncError) {
+          console.warn('Manual sync error:', manualSyncError)
+        }
+        
+        // Then sync WordPress data to local state
         console.log('Syncing subscription status with WordPress...')
         const response = await fetch('/api/sync-subscription', {
           method: 'POST',

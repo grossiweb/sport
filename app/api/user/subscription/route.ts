@@ -287,25 +287,72 @@ async function fallbackToRoleBasedSubscription(token: string, userId: string) {
     // Determine subscription based on user roles (fallback)
     let plan, limits, status
 
+    // Check subscription tier from user object
+    const subscriptionTier = user.subscriptionTier || 'free'
+    
     if (user.subscriptionStatus === 'active') {
-      // Default to pro plan for active users
-      plan = {
-        id: 'pro',
-        name: 'Pro',
-        price: 29.99,
-        interval: 'month',
-        features: [
-          'Advanced team statistics',
-          'Unlimited matchup data',
-          'AI predictions',
-          'Priority support',
-          'Export data'
-        ]
-      }
-      limits = {
-        apiRateLimit: 100,
-        teamLimit: 25,
-        matchupLimit: 50
+      // Determine plan based on subscription tier
+      if (subscriptionTier === 'enterprise') {
+        plan = {
+          id: 'enterprise',
+          name: 'Enterprise',
+          price: 99.99,
+          interval: 'month',
+          features: [
+            'Everything in Pro',
+            '5,000 API requests per hour',
+            'Custom integrations',
+            'Priority support',
+            'Custom analytics dashboard',
+            'White-label options',
+            'Dedicated account manager'
+          ]
+        }
+        limits = {
+          apiRateLimit: 5000,
+          teamLimit: -1,
+          matchupLimit: -1
+        }
+      } else if (subscriptionTier === 'pro') {
+        plan = {
+          id: 'pro',
+          name: 'Pro',
+          price: 29.99,
+          interval: 'month',
+          features: [
+            'Unlimited team pages',
+            'Unlimited matchup pages',
+            '1,000 API requests per hour',
+            'Advanced analytics',
+            'Premium predictions',
+            'Email support',
+            'Export data to CSV'
+          ]
+        }
+        limits = {
+          apiRateLimit: 1000,
+          teamLimit: -1,
+          matchupLimit: -1
+        }
+      } else {
+        // Default to free for unknown tiers
+        plan = {
+          id: 'free',
+          name: 'Free',
+          price: 0,
+          interval: 'month',
+          features: [
+            '3 team pages per day',
+            '5 matchup pages per day',
+            '10 API requests per hour',
+            'Basic analytics'
+          ]
+        }
+        limits = {
+          apiRateLimit: 10,
+          teamLimit: 3,
+          matchupLimit: 5
+        }
       }
       status = 'active'
     } else if (user.subscriptionStatus === 'trial') {

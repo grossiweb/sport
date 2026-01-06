@@ -32,6 +32,11 @@ export default function SubscriptionSyncButton() {
     try {
       await syncSubscription()
       toast.success('Subscription status synced successfully!')
+      
+      // Force page reload to refresh all subscription data
+      setTimeout(() => {
+        window.location.reload()
+      }, 500)
     } catch (error) {
       console.error('Sync error:', error)
       toast.error('Failed to sync subscription status')

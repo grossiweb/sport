@@ -42,43 +42,23 @@ export async function GET(request: NextRequest) {
       let subscriptionPlan = 'free'
       let stripeSubscriptionId = null
       
-      // Use WordPress data if available
+      // Use WordPress data as source of truth if available
       if (wordpressUserData && wordpressUserData.success) {
         const wpMeta = wordpressUserData.subscription_meta
         subscriptionStatus = wpMeta.subscription_status || 'inactive'
         subscriptionPlan = wpMeta.subscription_plan || 'free'
         stripeSubscriptionId = wpMeta.stripe_subscription_id
         
+        console.log('WordPress User Data:', JSON.stringify(wordpressUserData, null, 2))
         console.log('Using WordPress subscription data:', { subscriptionStatus, subscriptionPlan, stripeSubscriptionId })
-      }
-      
-      // Try to find active subscription by customer email if we have it
-      // This is a temporary solution - you should store the relationship properly
-      try {
-        // For demonstration, let's assume we can get active subscriptions
-        // In practice, you'd need to store the customer-user mapping
-        const subscriptions = await stripe.subscriptions.list({
-          status: 'active',
-          limit: 100,
-        })
         
-        // This is not ideal - you should have a proper customer-user mapping
-        // For now, just check if there are any active subscriptions
-        if (subscriptions.data.length > 0) {
-          const activeSubscription = subscriptions.data[0] // This is just for demo
-          subscriptionStatus = activeSubscription.status
-          stripeSubscriptionId = activeSubscription.id
-          
-          // Determine plan based on price ID
-          const priceId = activeSubscription.items.data[0]?.price.id
-          if (priceId === 'price_1SmWzsBsfc1fMnM5lpwnHNJT') {
-            subscriptionPlan = 'pro'
-          } else if (priceId === 'price_1SmWzWBsfc1fMnM57LdsAiqR') {
-            subscriptionPlan = 'enterprise'
-          }
+        // If subscription plan is set in WordPress, mark as active
+        if (subscriptionPlan && subscriptionPlan !== 'free') {
+          subscriptionStatus = 'active'
+          console.log(`Subscription plan is ${subscriptionPlan}, setting status to active`)
         }
-      } catch (stripeError) {
-        console.warn('Could not fetch Stripe subscriptions:', stripeError)
+      } else {
+        console.log('No WordPress user data available or success=false')
       }
 
       // Get subscription details from Stripe if available
@@ -146,8 +126,13 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // If no active subscription, return free tier
-      if (!stripeSubscription || stripeSubscription.status !== 'active') {
+      // Check if we should return free tier (only if no WordPress data AND no Stripe subscription)
+      const hasWordPressSubscription = wordpressUserData && wordpressUserData.success && subscriptionPlan !== 'free'
+      const hasStripeSubscription = stripeSubscription && stripeSubscription.status === 'active'
+      
+      if (!hasWordPressSubscription && !hasStripeSubscription) {
+        // No subscription found anywhere, return free tier
+        console.log('No subscription found in WordPress or Stripe, returning free tier')
         return NextResponse.json({
           success: true,
           subscription: null,
@@ -159,10 +144,22 @@ export async function GET(request: NextRequest) {
           }
         })
       }
+      
+      // If we have WordPress subscription data, use it (WordPress is source of truth)
+      if (hasWordPressSubscription) {
+        console.log('Using WordPress subscription data (WordPress is source of truth)')
+      }
 
-      return NextResponse.json({
+      // Build subscription response
+      const subscriptionResponse: any = {
         success: true,
-        subscription: {
+        plan: planDetails,
+        limits: limits
+      }
+
+      // Add subscription details if we have them
+      if (stripeSubscription && stripeSubscription.status === 'active') {
+        subscriptionResponse.subscription = {
           id: stripeSubscriptionId,
           stripeId: stripeSubscriptionId,
           status: stripeSubscription.status,
@@ -171,10 +168,25 @@ export async function GET(request: NextRequest) {
           apiUsageCount: 0,
           currentPeriodEnd: stripeSubscription.current_period_end,
           cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end || false,
-        },
-        plan: planDetails,
-        limits: limits
-      })
+        }
+      } else if (wordpressUserData && wordpressUserData.success && subscriptionPlan !== 'free') {
+        // Use WordPress data even if Stripe subscription not retrieved
+        const wpMeta = wordpressUserData.subscription_meta
+        subscriptionResponse.subscription = {
+          id: stripeSubscriptionId,
+          stripeId: stripeSubscriptionId,
+          status: subscriptionStatus,
+          startDate: wpMeta.subscription_start_date || new Date().toISOString(),
+          endDate: wpMeta.subscription_end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          apiUsageCount: 0,
+          currentPeriodEnd: Math.floor(new Date(wpMeta.subscription_end_date || Date.now() + 30 * 24 * 60 * 60 * 1000).getTime() / 1000),
+          cancelAtPeriodEnd: false,
+        }
+      } else {
+        subscriptionResponse.subscription = null
+      }
+
+      return NextResponse.json(subscriptionResponse)
 
     } catch (error) {
       console.error('Subscription status error:', error)
