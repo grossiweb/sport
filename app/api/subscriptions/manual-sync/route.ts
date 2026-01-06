@@ -98,8 +98,8 @@ export async function POST(request: NextRequest) {
       subscription_plan: planType,
       stripe_subscription_id: subscription.id,
       stripe_customer_id: customer.id,
-      subscription_start_date: new Date(subscription.start_date * 1000).toISOString(),
-      subscription_end_date: new Date(subscription.current_period_end * 1000).toISOString(),
+      subscription_start_date: new Date((subscription.start_date || subscription.created) * 1000).toISOString(),
+      subscription_end_date: new Date(subscription.currentPeriodEnd * 1000).toISOString(),
     }
 
     // Try the REST API endpoint
