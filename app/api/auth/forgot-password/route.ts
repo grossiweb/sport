@@ -1,62 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GraphQLClient } from 'graphql-request'
+import { passwordResetService } from '@/lib/email/password-reset-service'
 
 const client = new GraphQLClient(process.env.WORDPRESS_API_URL || 'https://wordpress-1521448-5854014.cloudwaysapps.com/graphql')
 
-// WordPress GraphQL mutation for sending password reset email
-const SEND_PASSWORD_RESET_EMAIL_MUTATION = `
-  mutation SendPasswordResetEmail($username: String!) {
-    sendPasswordResetEmail(input: {
-      username: $username
-    }) {
-      success
-      user {
+// WordPress GraphQL query to check if user exists
+const CHECK_USER_QUERY = `
+  query CheckUser($email: String!) {
+    users(where: { search: $email }) {
+      nodes {
+        id
         email
+        username
       }
     }
   }
 `
-
-// Alternative REST API approach if GraphQL mutation is not available
-async function sendPasswordResetViaREST(email: string) {
-  const restUrl = process.env.WORDPRESS_REST_URL || 'https://wordpress-1521448-5854014.cloudwaysapps.com/wp-json'
-  
-  try {
-    const response = await fetch(`${restUrl}/wp/v2/users/password-reset`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        user_login: email
-      })
-    })
-
-    if (response.ok) {
-      return { success: true }
-    } else {
-      // Try alternative endpoint
-      const altResponse = await fetch(`${restUrl}/bdpwr/v1/reset-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email
-        })
-      })
-
-      if (altResponse.ok) {
-        return { success: true }
-      } else {
-        throw new Error('REST API password reset failed')
-      }
-    }
-  } catch (error) {
-    console.error('REST API password reset error:', error)
-    throw error
-  }
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -81,51 +40,82 @@ export async function POST(request: NextRequest) {
     console.log(`Password reset requested for email: ${email}`)
 
     try {
-      // First, try using GraphQL mutation
-      console.log('Attempting password reset via GraphQL...')
-      const resetData = await client.request(SEND_PASSWORD_RESET_EMAIL_MUTATION, {
-        username: email
-      }) as any
-
-      console.log('GraphQL password reset response:', resetData)
-
-      if (resetData.sendPasswordResetEmail?.success) {
-        return NextResponse.json({
-          success: true,
-          message: 'Password reset instructions have been sent to your email address'
-        })
-      } else {
-        throw new Error('GraphQL mutation returned unsuccessful result')
-      }
-    } catch (graphqlError: any) {
-      console.error('GraphQL password reset failed:', graphqlError.message)
-      
-      // Fallback to REST API approach
+      // Check if user exists in WordPress (optional - for better UX)
+      let userExists = true
       try {
-        console.log('Attempting password reset via REST API...')
-        await sendPasswordResetViaREST(email)
+        const userData = await client.request(CHECK_USER_QUERY, { email }) as any
+        userExists = userData?.users?.nodes?.length > 0
         
-        return NextResponse.json({
-          success: true,
-          message: 'Password reset instructions have been sent to your email address'
-        })
-      } catch (restError: any) {
-        console.error('REST API password reset failed:', restError.message)
-        
-        // If both methods fail, we'll still return success for security reasons
-        // (to prevent email enumeration attacks)
-        console.log('Both GraphQL and REST methods failed, but returning success for security')
-        return NextResponse.json({
-          success: true,
-          message: 'If an account with that email exists, password reset instructions have been sent'
-        })
+        if (userExists) {
+          console.log(`✅ User found in WordPress: ${email}`)
+        } else {
+          console.log(`⚠️ User not found in WordPress: ${email}`)
+        }
+      } catch (wpError) {
+        // If WordPress check fails, we'll still proceed for security
+        console.log('WordPress user check failed, proceeding anyway for security')
+        userExists = true // Assume user exists to prevent email enumeration
       }
+
+      // Generate reset token and store it
+      const resetToken = passwordResetService.generateToken()
+      passwordResetService.storeResetToken(email, resetToken)
+
+      // Create reset URL with token
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'
+      const resetUrl = `${baseUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`
+
+      console.log(`Generated reset URL: ${resetUrl}`)
+
+      // Send password reset email using nodemailer
+      try {
+        const emailSent = await passwordResetService.sendPasswordResetEmail(email, resetUrl)
+        
+        if (emailSent) {
+          console.log(`✅ Password reset email sent successfully to ${email}`)
+          return NextResponse.json({
+            success: true,
+            message: 'Password reset instructions have been sent to your email address'
+          })
+        } else {
+          throw new Error('Failed to send email')
+        }
+      } catch (emailError: any) {
+        console.error('❌ Error sending password reset email:', emailError)
+        
+        // Check if SMTP is configured
+        if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+          console.error('⚠️ SMTP not configured! Please set SMTP_HOST, SMTP_USER, SMTP_PASS, and SMTP_PORT in .env.local')
+          
+          // For development, log the reset URL
+          console.log('='.repeat(80))
+          console.log('DEVELOPMENT MODE - Reset URL:')
+          console.log(resetUrl)
+          console.log('='.repeat(80))
+          
+          return NextResponse.json({
+            success: true,
+            message: 'Password reset link generated (check console in development mode)',
+            devResetUrl: process.env.NODE_ENV === 'development' ? resetUrl : undefined
+          })
+        }
+        
+        throw emailError
+      }
+    } catch (error: any) {
+      console.error('Forgot password error:', error)
+      
+      // For security reasons, always return a generic success message
+      // This prevents attackers from determining if an email exists in the system
+      return NextResponse.json({
+        success: true,
+        message: 'If an account with that email exists, password reset instructions have been sent'
+      })
     }
   } catch (error: any) {
-    console.error('Forgot password error:', error)
+    console.error('Forgot password fatal error:', error)
     
     // For security reasons, always return a generic success message
-    // This prevents attackers from determining if an email exists in the system
     return NextResponse.json({
       success: true,
       message: 'If an account with that email exists, password reset instructions have been sent'

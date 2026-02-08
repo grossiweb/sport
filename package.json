@@ -11,7 +11,9 @@
     "wordpress:setup": "node scripts/wordpress-setup.js",
     "wordpress:check": "node scripts/wordpress-setup.js",
     "wordpress:verify": "node scripts/verify-wordpress-setup.js",
-    "wordpress:install-plugin": "scripts\\install-wordpress-plugin.bat"
+    "wordpress:install-plugin": "scripts\\install-wordpress-plugin.bat",
+    "test:smtp": "node scripts/test-smtp.js",
+    "check:users": "node scripts/check-wordpress-users.js"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.19",

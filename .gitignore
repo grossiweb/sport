@@ -26,6 +26,9 @@ yarn-error.log*
 .env*.local
 .env
 
+# Password reset tokens (temporary storage)
+.reset-tokens.json
+
 # Vercel
 .vercel
 
