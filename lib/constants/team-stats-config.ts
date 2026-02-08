@@ -135,38 +135,55 @@ export const NFL_PREFERRED_STATS: StatConfig[] = [
   { stat_id: -1, abbreviation: 'PENYDS', display_name: 'Total Penalty Yards', category: 'Turnovers & Penalties', description: 'Total penalty yards', priority: 52 },
 ]
 
-// NBA Preferred Stats Configuration (from NBA_Stats_list.txt)
+// NBA Preferred Stats Configuration - Updated with new categorization
 export const NBA_PREFERRED_STATS: StatConfig[] = [
-  // Key Factors (exact stat_ids from user: 1244,1242,1243,1249,1250,1251,1252,1259,1260,1262,1263,1264,1265,1266,1272,1279,1282,1261)
-  { stat_id: 1244, abbreviation: 'PF', display_name: 'Fouls Per Game', category: 'Key Factors', description: 'Average fouls per game.', priority: 1 },
-  { stat_id: 1242, abbreviation: 'REB', display_name: 'Rebounds Per Game', category: 'Key Factors', description: 'Average rebounds per game.', priority: 2 },
-  { stat_id: 1243, abbreviation: 'AST/TO', display_name: 'Assist To Turnover Ratio', category: 'Key Factors', description: 'Assists per turnover.', priority: 3 },
-  { stat_id: 1249, abbreviation: 'REB', display_name: 'Rebounds', category: 'Key Factors', description: 'Total rebounds.', priority: 4 },
-  { stat_id: 1250, abbreviation: 'REB', display_name: 'Rebounds', category: 'Key Factors', description: 'Total rebounds (off+def).', priority: 5 },
-  { stat_id: 1251, abbreviation: 'FT%', display_name: 'Free Throw %', category: 'Key Factors', description: 'FTM / FTA.', priority: 6 },
-  { stat_id: 1252, abbreviation: '3P%', display_name: '3-Point Field Goal Percentage', category: 'Key Factors', description: '3PM / 3PA.', priority: 7 },
-  { stat_id: 1259, abbreviation: 'PTS', display_name: 'Points Per Game', category: 'Key Factors', description: 'Average points per game.', priority: 8 },
-  { stat_id: 1260, abbreviation: 'OR', display_name: 'Offensive Rebounds Per Game', category: 'Key Factors', description: 'Average offensive rebounds per game.', priority: 9 },
-  { stat_id: 1262, abbreviation: 'TO', display_name: 'Turnovers Per Game', category: 'Key Factors', description: 'Average turnovers per game.', priority: 10 },
-  { stat_id: 1263, abbreviation: '2P%', display_name: '2-Point Field Goal Percentage', category: 'Key Factors', description: '2P FG%.', priority: 11 },
-  { stat_id: 1264, abbreviation: 'SC-EFF', display_name: 'Scoring Efficiency', category: 'Key Factors', description: 'Scoring efficiency.', priority: 12 },
-  { stat_id: 1265, abbreviation: 'SH-EFF', display_name: 'Shooting Efficiency', category: 'Key Factors', description: 'Shooting efficiency.', priority: 13 },
-  { stat_id: 1266, abbreviation: 'FG%', display_name: 'Field Goal %', category: 'Key Factors', description: 'FGM / FGA.', priority: 14 },
-  { stat_id: 1272, abbreviation: 'TO', display_name: 'Turnovers', category: 'Key Factors', description: 'Total turnovers.', priority: 15 },
-  { stat_id: 1279, abbreviation: '3P%', display_name: 'Three Point %', category: 'Key Factors', description: '3PM / 3PA.', priority: 16 },
-  { stat_id: 1282, abbreviation: 'DR', display_name: 'Defensive Rebounds Per Game', category: 'Key Factors', description: 'Average defensive rebounds per game.', priority: 17 },
-  { stat_id: 1261, abbreviation: 'AST', display_name: 'Assists Per Game', category: 'Key Factors', description: 'Average assists per game.', priority: 18 },
+  // Defensive Stats
+  { stat_id: -1, abbreviation: 'OPP PTS', display_name: 'Opponent Points', category: 'Defensive', description: 'Opponent points.', priority: 1 },
+  { stat_id: -1, abbreviation: 'OPP AST', display_name: 'Opponent Assists', category: 'Defensive', description: 'Opponent assists.', priority: 2 },
+  { stat_id: 1287, abbreviation: 'BLK', display_name: 'Blocks', category: 'Defensive', description: 'Total blocks.', priority: 3 },
+  { stat_id: -1, abbreviation: 'OPP FG%', display_name: 'Opponent Field Goal %', category: 'Defensive', description: 'Opponent field goal percentage.', priority: 4 },
+  { stat_id: -1, abbreviation: 'OPP 3P%', display_name: 'Opponent 3-Point Field Goal Percentage', category: 'Defensive', description: 'Opponent 3-point field goal percentage.', priority: 5 },
+  { stat_id: -1, abbreviation: 'OPP FT%', display_name: 'Opponent Free Throw %', category: 'Defensive', description: 'Opponent free throw percentage.', priority: 6 },
 
-  // Offensive (exact 4 stats from user: 1269, 1270, 1271, 1287)
-  { stat_id: 1269, abbreviation: 'PTS', display_name: 'Points', category: 'Offensive', description: 'Total points.', priority: 20 },
-  { stat_id: 1270, abbreviation: 'OREB', display_name: 'Offensive Rebounds', category: 'Offensive', description: 'Offensive rebounds total.', priority: 21 },
-  { stat_id: 1271, abbreviation: 'AST', display_name: 'Assists', category: 'Offensive', description: 'Total assists.', priority: 22 },
-  { stat_id: 1287, abbreviation: 'BLK', display_name: 'Blocks', category: 'Offensive', description: 'Total blocks.', priority: 23 },
+  // Key Stats
+  { stat_id: 1272, abbreviation: 'TO', display_name: 'Turnovers', category: 'Key', description: 'Total turnovers.', priority: 10 },
+  { stat_id: -1, abbreviation: 'OPP TO', display_name: 'Opponent Turnovers', category: 'Key', description: 'Opponent turnovers.', priority: 11 },
+  { stat_id: 1270, abbreviation: 'OREB', display_name: 'Offensive Rebounds', category: 'Key', description: 'Offensive rebounds total.', priority: 12 },
+  { stat_id: -1, abbreviation: 'DREB', display_name: 'Defensive Rebounds', category: 'Key', description: 'Defensive rebounds total.', priority: 13 },
+  { stat_id: 1251, abbreviation: 'FT%', display_name: 'Free Throw %', category: 'Key', description: 'FTM / FTA.', priority: 14 },
+  { stat_id: 1264, abbreviation: 'SC-EFF', display_name: 'Scoring Efficiency', category: 'Key', description: 'Scoring efficiency.', priority: 15 },
 
-  // Defense (exact 3 stats from user: 1283, 1284, 1286)
-  { stat_id: 1283, abbreviation: 'BLK', display_name: 'Blocks Per Game', category: 'Defense', description: 'Average blocks per game.', priority: 60 },
-  { stat_id: 1284, abbreviation: 'STL', display_name: 'Steals Per Game', category: 'Defense', description: 'Average steals per game.', priority: 61 },
-  { stat_id: 1286, abbreviation: 'STL', display_name: 'Steals', category: 'Defense', description: 'Total steals.', priority: 62 },
+  // Offensive Stats
+  { stat_id: 1266, abbreviation: 'FG%', display_name: 'Field Goal %', category: 'Offensive', description: 'FGM / FGA.', priority: 20 },
+  { stat_id: 1252, abbreviation: '3P%', display_name: '3-Point Field Goal Percentage', category: 'Offensive', description: '3PM / 3PA.', priority: 21 },
+  { stat_id: 1265, abbreviation: 'SH-EFF', display_name: 'Shooting Efficiency', category: 'Offensive', description: 'Shooting efficiency.', priority: 22 },
+  { stat_id: 1271, abbreviation: 'AST', display_name: 'Assists', category: 'Offensive', description: 'Total assists.', priority: 23 },
+  { stat_id: -1, abbreviation: 'OPP BLK', display_name: 'Opponent Blocks', category: 'Offensive', description: 'Opponent blocks.', priority: 24 },
+
+  // Other Stats
+  { stat_id: 1243, abbreviation: 'AST/TO', display_name: 'Assist To Turnover Ratio', category: 'Other', description: 'Assists per turnover.', priority: 30 },
+  { stat_id: -1, abbreviation: 'OPP AST/TO', display_name: 'Opponent Assist To Turnover Ratio', category: 'Other', description: 'Opponent assist to turnover ratio.', priority: 31 },
+  { stat_id: 1244, abbreviation: 'PF', display_name: 'Fouls', category: 'Other', description: 'Total fouls.', priority: 32 },
+  { stat_id: -1, abbreviation: 'OPP PF', display_name: 'Opponent Fouls', category: 'Other', description: 'Opponent fouls.', priority: 33 },
+  { stat_id: 1286, abbreviation: 'STL', display_name: 'Steals', category: 'Other', description: 'Total steals.', priority: 34 },
+  { stat_id: -1, abbreviation: 'OPP STL', display_name: 'Opponent Steals', category: 'Other', description: 'Opponent steals.', priority: 35 },
+
+  // Additional stats for compatibility (lower priority)
+  // Note: many basketball feeds store core production as "Per Game"; include those so they aren't filtered out.
+  { stat_id: 1242, abbreviation: 'REB', display_name: 'Rebounds Per Game', category: 'Key', description: 'Average rebounds per game.', priority: 50 },
+  { stat_id: 1249, abbreviation: 'REB', display_name: 'Rebounds', category: 'Key', description: 'Total rebounds.', priority: 51 },
+  { stat_id: 1250, abbreviation: 'REB', display_name: 'Rebounds', category: 'Key', description: 'Total rebounds (off+def).', priority: 52 },
+  { stat_id: 1259, abbreviation: 'PTS', display_name: 'Points Per Game', category: 'Offensive', description: 'Average points per game.', priority: 53 },
+  { stat_id: 1260, abbreviation: 'OR', display_name: 'Offensive Rebounds Per Game', category: 'Key', description: 'Average offensive rebounds per game.', priority: 54 },
+  { stat_id: 1262, abbreviation: 'TO', display_name: 'Turnovers Per Game', category: 'Key', description: 'Average turnovers per game.', priority: 55 },
+  { stat_id: 1263, abbreviation: '2P%', display_name: '2-Point Field Goal Percentage', category: 'Offensive', description: '2P FG%.', priority: 56 },
+  { stat_id: 1269, abbreviation: 'PTS', display_name: 'Points', category: 'Offensive', description: 'Total points.', priority: 57 },
+  { stat_id: 1279, abbreviation: '3P%', display_name: 'Three Point %', category: 'Offensive', description: '3PM / 3PA.', priority: 58 },
+  { stat_id: 1282, abbreviation: 'DR', display_name: 'Defensive Rebounds Per Game', category: 'Key', description: 'Average defensive rebounds per game.', priority: 59 },
+  { stat_id: 1261, abbreviation: 'AST', display_name: 'Assists Per Game', category: 'Offensive', description: 'Average assists per game.', priority: 60 },
+  { stat_id: 1283, abbreviation: 'BLK', display_name: 'Blocks Per Game', category: 'Defensive', description: 'Average blocks per game.', priority: 61 },
+  { stat_id: 1284, abbreviation: 'STL', display_name: 'Steals Per Game', category: 'Other', description: 'Average steals per game.', priority: 62 },
+  { stat_id: 1244, abbreviation: 'PF', display_name: 'Fouls Per Game', category: 'Other', description: 'Average fouls per game.', priority: 63 },
 ]
 
 // NCAAB Preferred Stats Configuration - Exact order as specified by user
@@ -215,6 +232,7 @@ export const NBA_ALLOWED_DISPLAY_NAMES = new Set<string>([
   'Rebounds Per Game',
   'Assist To Turnover Ratio',
   'Fouls Per Game',
+  'Fouls',
   'Games Played',
   'Games Started',
   'Minutes',
@@ -252,11 +270,22 @@ export const NBA_ALLOWED_DISPLAY_NAMES = new Set<string>([
   '2-Point Field Goals Made per Game',
   '2-Point Field Goals Attempted per Game',
   'Defensive Rebounds Per Game',
+  'Defensive Rebounds',
   'Blocks Per Game',
   'Steals Per Game',
-  'Defensive Rebounds',
   'Steals',
-  'Blocks'
+  'Blocks',
+  // Opponent stats
+  'Opponent Points',
+  'Opponent Assists',
+  'Opponent Blocks',
+  'Opponent Field Goal %',
+  'Opponent 3-Point Field Goal Percentage',
+  'Opponent Free Throw %',
+  'Opponent Turnovers',
+  'Opponent Assist To Turnover Ratio',
+  'Opponent Fouls',
+  'Opponent Steals'
 ])
 
 // NCAAB Allowlist - Exact stats in priority order plus additional stats
@@ -496,6 +525,12 @@ export function getCategoryDisplayName(category: string, sport: 'CFB' | 'NFL' | 
   if ((sport === 'CFB' || sport === 'NFL') && category === STAT_CATEGORIES.TURNOVERS_PENALTIES) {
     return 'Other'
   }
+  if (sport === 'NBA') {
+    if (category === 'Defensive') return 'Defensive Metrics'
+    if (category === 'Key') return 'Key Metrics'
+    if (category === 'Offensive') return 'Offensive Metrics'
+    if (category === 'Other') return 'Other Metrics'
+  }
   return category
 }
 
@@ -605,22 +640,66 @@ export function mapNbaStatToCategory(stat: any): string {
   const label = (stat?.stat?.display_name || stat?.stat?.name || '').trim().toLowerCase()
   if (!label) return 'Offensive'
   
-  // Handle opponent stats - they inherit the category from the corresponding regular stat
+  // Direct lookup in configuration
+  const pref = NBA_PREFERRED_STATS.find(p => p.display_name.toLowerCase() === label)
+  if (pref) return pref.category
+  
+  // Handle opponent stats - Defensive category
   if (label.startsWith('opponent ')) {
-    const baseLabel = label.replace('opponent ', '')
-    const basePref = NBA_PREFERRED_STATS.find(p => p.display_name.toLowerCase() === baseLabel)
-    if (basePref) return basePref.category
-    // Fallback heuristics for opponent stats
-    if (/efficiency|assist|turnover|points|fg%|3|three|free throw|rebound|foul/i.test(baseLabel)) return 'Key Factors'
-    if (/defensive|steal|block/i.test(baseLabel)) return 'Defense'
+    // Check specific opponent stats
+    if (label.includes('points') || label.includes('assists') || 
+        label.includes('field goal') || label.includes('3-point') || 
+        label.includes('free throw')) {
+      return 'Defensive'
+    }
+    // Opponent turnovers is Key
+    if (label.includes('turnovers') && !label.includes('ratio')) {
+      return 'Key'
+    }
+    // Opponent blocks is Offensive
+    if (label.includes('blocks')) {
+      return 'Offensive'
+    }
+    // Other opponent stats (fouls, steals, assist/turnover ratio)
+    if (label.includes('fouls') || label.includes('steals') || label.includes('assist')) {
+      return 'Other'
+    }
+    // Default for opponent stats
+    return 'Defensive'
+  }
+  
+  // Defensive stats (non-opponent)
+  if (label.includes('blocks per game') || label === 'blocks') {
+    return 'Defensive'
+  }
+  
+  // Key stats
+  if (label.includes('turnovers') && !label.includes('ratio') ||
+      label.includes('offensive rebounds') ||
+      label.includes('defensive rebounds') ||
+      label.includes('rebounds') ||
+      label.includes('free throw %') ||
+      label.includes('scoring efficiency')) {
+    return 'Key'
+  }
+  
+  // Offensive stats
+  if (label.includes('field goal %') ||
+      label.includes('3-point') || label.includes('three point') ||
+      label.includes('shooting efficiency') ||
+      label.includes('assists') && !label.includes('ratio') ||
+      label.includes('points')) {
     return 'Offensive'
   }
   
-  const pref = NBA_PREFERRED_STATS.find(p => p.display_name.toLowerCase() === label)
-  if (pref) return pref.category
-  // Heuristics fallback to requested three buckets
-  if (/efficiency|assist to turnover|ast\/to|points per game|fg%|3|three|free throw/i.test(label)) return 'Key Factors'
-  if (/defensive|steal|block/i.test(label)) return 'Defense'
+  // Other stats
+  if (label.includes('assist to turnover') || label.includes('ast/to') ||
+      label.includes('fouls') ||
+      label.includes('steals')) {
+    return 'Other'
+  }
+  
+  // Default fallback
   return 'Offensive'
 }
 

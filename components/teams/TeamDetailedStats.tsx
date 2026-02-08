@@ -379,31 +379,24 @@ export function TeamDetailedStats({
     if ((sport === 'NBA' || sport === 'NCAAB') && (homeOpponentStats || awayOpponentStats)) {
       console.log(`[TeamDetailedStats] ${sport} Opponent Stats:`, { homeOpponentStats, awayOpponentStats })
       const nbaOpponentStats = [
-        // Key Factors
-        { statId: '1244', name: 'Opponent Fouls Per Game', abbr: 'OPP PF', category: 'Key Factors', description: 'Average fouls per game by opponents', decimals: 1 },
-        { statId: '1242', name: 'Opponent Rebounds Per Game', abbr: 'OPP REB', category: 'Key Factors', description: 'Average rebounds per game by opponents', decimals: 1 },
-        { statId: '1249', name: 'Opponent Rebounds', abbr: 'OPP REB', category: 'Key Factors', description: 'Total rebounds by opponents', decimals: 1 },
-        { statId: '1250', name: 'Opponent Rebounds', abbr: 'OPP REB', category: 'Key Factors', description: 'Total rebounds by opponents', decimals: 1 },
-        { statId: '1251', name: 'Opponent Free Throw %', abbr: 'OPP FT%', category: 'Key Factors', description: 'Opponent free throw percentage', decimals: 1 },
-        { statId: '1252', name: 'Opponent 3-Point Field Goal Percentage', abbr: 'OPP 3P%', category: 'Key Factors', description: 'Opponent 3-point percentage', decimals: 1 },
-        { statId: '1259', name: 'Opponent Points Per Game', abbr: 'OPP PTS', category: 'Key Factors', description: 'Average points per game by opponents', decimals: 1 },
-        { statId: '1260', name: 'Opponent Offensive Rebounds Per Game', abbr: 'OPP OR', category: 'Key Factors', description: 'Average offensive rebounds per game by opponents', decimals: 1 },
-        { statId: '1262', name: 'Opponent Turnovers Per Game', abbr: 'OPP TO', category: 'Key Factors', description: 'Average turnovers per game by opponents', decimals: 1 },
-        { statId: '1263', name: 'Opponent 2-Point Field Goal Percentage', abbr: 'OPP 2P%', category: 'Key Factors', description: 'Opponent 2-point percentage', decimals: 1 },
-        { statId: '1264', name: 'Opponent Scoring Efficiency', abbr: 'OPP SE', category: 'Key Factors', description: 'Opponent points per field goal attempt', decimals: 2 },
-        { statId: '1265', name: 'Opponent Shooting Efficiency', abbr: 'OPP eFG%', category: 'Key Factors', description: 'Opponent effective field goal percentage', decimals: 1 },
-        { statId: '1266', name: 'Opponent Field Goal %', abbr: 'OPP FG%', category: 'Key Factors', description: 'Opponent field goal percentage', decimals: 1 },
-        { statId: '1272', name: 'Opponent Turnovers', abbr: 'OPP TO', category: 'Key Factors', description: 'Total turnovers by opponents', decimals: 1 },
-        { statId: '1279', name: 'Opponent Three Point %', abbr: 'OPP 3P%', category: 'Key Factors', description: 'Opponent three point percentage', decimals: 1 },
-        { statId: '1282', name: 'Opponent Defensive Rebounds Per Game', abbr: 'OPP DR', category: 'Key Factors', description: 'Average defensive rebounds per game by opponents', decimals: 1 },
-        { statId: '1261', name: 'Opponent Assists Per Game', abbr: 'OPP AST', category: 'Key Factors', description: 'Average assists per game by opponents', decimals: 1 },
-        { statKey: 'opp_blocks_per_game', name: 'Opponent Blocks Per Game', abbr: 'OPP BLK', category: 'Key Factors', description: 'Average blocks per game by opponents', decimals: 1 },
-        { statKey: 'opp_steals_per_game', name: 'Opponent Steals Per Game', abbr: 'OPP STL', category: 'Key Factors', description: 'Average steals per game by opponents', decimals: 1 },
-        { statId: '1243', name: 'Opponent Assist To Turnover Ratio', abbr: 'OPP AST/TO', category: 'Key Factors', description: 'Opponent assists per turnover', decimals: 2 },
-        // Offensive
-        { statId: '1269', name: 'Opponent Points', abbr: 'OPP PTS', category: 'Offensive', description: 'Total points by opponents', decimals: 1 },
-        { statId: '1270', name: 'Opponent Offensive Rebounds', abbr: 'OPP OR', category: 'Offensive', description: 'Total offensive rebounds by opponents', decimals: 1 },
-        { statId: '1271', name: 'Opponent Assists', abbr: 'OPP AST', category: 'Offensive', description: 'Total assists by opponents', decimals: 1 },
+        // Defensive Stats
+        { statId: '1259', name: 'Opponent Points', abbr: 'OPP PTS', category: 'Defensive', description: 'Average points per game by opponents', decimals: 1 },
+        { statId: '1261', name: 'Opponent Assists', abbr: 'OPP AST', category: 'Defensive', description: 'Average assists per game by opponents', decimals: 1 },
+        { statKey: 'opp_blocks_per_game', name: 'Opponent Blocks', abbr: 'OPP BLK', category: 'Offensive', description: 'Average blocks per game by opponents', decimals: 1 },
+        { statId: '1266', name: 'Opponent Field Goal %', abbr: 'OPP FG%', category: 'Defensive', description: 'Opponent field goal percentage', decimals: 1 },
+        { statId: '1252', name: 'Opponent 3-Point Field Goal Percentage', abbr: 'OPP 3P%', category: 'Defensive', description: 'Opponent 3-point percentage', decimals: 1 },
+        { statId: '1251', name: 'Opponent Free Throw %', abbr: 'OPP FT%', category: 'Defensive', description: 'Opponent free throw percentage', decimals: 1 },
+        
+        // Key Stats
+        { statId: '1262', name: 'Opponent Turnovers', abbr: 'OPP TO', category: 'Key', description: 'Average turnovers per game by opponents', decimals: 1 },
+        { statId: '1260', name: 'Opponent Offensive Rebounds', abbr: 'OPP OR', category: 'Key', description: 'Average offensive rebounds per game by opponents', decimals: 1 },
+        { statId: '1282', name: 'Opponent Defensive Rebounds', abbr: 'OPP DR', category: 'Key', description: 'Average defensive rebounds per game by opponents', decimals: 1 },
+        { statId: '1264', name: 'Opponent Scoring Efficiency', abbr: 'OPP SE', category: 'Key', description: 'Opponent points per field goal attempt', decimals: 2 },
+        
+        // Other Stats
+        { statId: '1243', name: 'Opponent Assist To Turnover Ratio', abbr: 'OPP AST/TO', category: 'Other', description: 'Opponent assists per turnover', decimals: 2 },
+        { statId: '1244', name: 'Opponent Fouls', abbr: 'OPP PF', category: 'Other', description: 'Average fouls per game by opponents', decimals: 1 },
+        { statKey: 'opp_steals_per_game', name: 'Opponent Steals', abbr: 'OPP STL', category: 'Other', description: 'Average steals per game by opponents', decimals: 1 },
       ]
 
       let addedCount = 0
@@ -523,9 +516,8 @@ export function TeamDetailedStats({
       return order.filter((c, idx) => idx === 0 || computedCategories.includes(c as any))
     }
     if (sport === 'NBA' || sport === 'NCAAB') {
-      // In NBA/NCAAB H2H, we show a single combined ordered list; only keep 'all'
-      if (h2hStyle) return ['all']
-      const order = ['all', 'Key Factors', 'Offensive', 'Defense']
+      // NBA/NCAAB: allow category tabs in both team page and H2H matchup detail
+      const order = ['all', 'Defensive', 'Key', 'Offensive', 'Other']
       const mapFn = sport === 'NBA' ? mapNbaStatToCategory : mapNcaabStatToCategory
       const present = new Set(comparisonData.map(s => mapFn(s)))
       return order.filter((c, idx) => idx === 0 || present.has(c))
@@ -778,30 +770,62 @@ export function TeamDetailedStats({
       return true
     })
 
-    // For NBA/NCAAB H2H, enforce a strict order and filter
+    // For NBA/NCAAB H2H, enforce a strict order, then group into categories so tabs work
     let grouped: Record<string, any[]>
     if (sport === 'NBA' || sport === 'NCAAB') {
-      const desiredOrder = [
-        'Points Per Game', 'Opponent Points Per Game',
-        'Turnovers Per Game', 'Opponent Turnovers Per Game',
-        'Offensive Rebounds Per Game', 'Defensive Rebounds Per Game',
-        'Field Goal %', '3-Point Field Goal Percentage', 'Free Throw %',
-        'Scoring Efficiency', 'Shooting Efficiency',
-        'Assist To Turnover Ratio', 'Opponent Assist To Turnover Ratio',
-        'Assists Per Game', 'Opponent Assists Per Game',
-        'Blocks Per Game', 'Opponent Blocks Per Game',
-        'Fouls Per Game', 'Opponent Fouls Per Game',
-        'Steals Per Game', 'Opponent Steals Per Game',
-        'Opponent Field Goal %', 'Opponent 3-Point Field Goal Percentage', 'Opponent Free Throw %'
+      const desiredOrder: Array<{ key: string; candidates: string[] }> = [
+        { key: 'Opponent Points', candidates: ['Opponent Points', 'Opponent Points Per Game'] },
+        { key: 'Opponent Assists', candidates: ['Opponent Assists', 'Opponent Assists Per Game'] },
+        { key: 'Blocks', candidates: ['Blocks', 'Blocks Per Game'] },
+        { key: 'Opponent Field Goal %', candidates: ['Opponent Field Goal %'] },
+        { key: 'Opponent 3-Point Field Goal Percentage', candidates: ['Opponent 3-Point Field Goal Percentage', 'Opponent Three Point %'] },
+        { key: 'Opponent Free Throw %', candidates: ['Opponent Free Throw %'] },
+
+        { key: 'Turnovers', candidates: ['Turnovers', 'Turnovers Per Game'] },
+        { key: 'Opponent Turnovers', candidates: ['Opponent Turnovers', 'Opponent Turnovers Per Game'] },
+        { key: 'Offensive Rebounds', candidates: ['Offensive Rebounds', 'Offensive Rebounds Per Game'] },
+        { key: 'Defensive Rebounds', candidates: ['Defensive Rebounds', 'Defensive Rebounds Per Game'] },
+        { key: 'Free Throw %', candidates: ['Free Throw %'] },
+        { key: 'Scoring Efficiency', candidates: ['Scoring Efficiency'] },
+
+        { key: 'Field Goal %', candidates: ['Field Goal %'] },
+        { key: '3-Point Field Goal Percentage', candidates: ['3-Point Field Goal Percentage', 'Three Point %'] },
+        { key: 'Shooting Efficiency', candidates: ['Shooting Efficiency'] },
+        { key: 'Assists', candidates: ['Assists', 'Assists Per Game'] },
+        { key: 'Opponent Blocks', candidates: ['Opponent Blocks', 'Opponent Blocks Per Game'] },
+
+        { key: 'Assist To Turnover Ratio', candidates: ['Assist To Turnover Ratio'] },
+        { key: 'Opponent Assist To Turnover Ratio', candidates: ['Opponent Assist To Turnover Ratio'] },
+        { key: 'Fouls', candidates: ['Fouls', 'Fouls Per Game'] },
+        { key: 'Opponent Fouls', candidates: ['Opponent Fouls', 'Opponent Fouls Per Game'] },
+        { key: 'Steals', candidates: ['Steals', 'Steals Per Game'] },
+        { key: 'Opponent Steals', candidates: ['Opponent Steals', 'Opponent Steals Per Game'] }
       ]
+
       const byLabel = new Map<string, any>()
       for (const s of h2hFiltered) {
         const lbl = (s?.stat?.display_name || s?.stat?.name || '').trim()
         if (!lbl) continue
         if (!byLabel.has(lbl)) byLabel.set(lbl, s)
       }
-      const ordered = desiredOrder.map(lbl => byLabel.get(lbl)).filter(Boolean) as any[]
-      grouped = { All: ordered }
+
+      const ordered: any[] = []
+      for (const item of desiredOrder) {
+        const found = item.candidates.map(c => byLabel.get(c)).find(Boolean)
+        if (found) ordered.push(found)
+      }
+
+      // Group while preserving strict order within each category
+      const groupedAll = ordered.reduce((acc: Record<string, any[]>, s) => {
+        const c = getCategory(s)
+        if (!acc[c]) acc[c] = []
+        acc[c].push(s)
+        return acc
+      }, {})
+
+      grouped = selectedCategory === 'all'
+        ? groupedAll
+        : { [selectedCategory]: groupedAll[selectedCategory] ?? [] }
     } else {
       grouped = selectedCategory === 'all'
         ? h2hFiltered.reduce((acc: Record<string, any[]>, s) => {
@@ -823,7 +847,7 @@ export function TeamDetailedStats({
                 STAT_CATEGORIES.SPECIAL_TEAMS,
                 STAT_CATEGORIES.TURNOVERS_PENALTIES
               ].filter(c => grouped[c]?.length)
-              : sport === 'NFL'
+            : sport === 'NFL'
               ? [
                   STAT_CATEGORIES.KEY_FACTORS,
                   STAT_CATEGORIES.OFFENSE,
@@ -831,7 +855,7 @@ export function TeamDetailedStats({
                   STAT_CATEGORIES.TURNOVERS_PENALTIES
                 ].filter(c => grouped[c]?.length)
               : (sport === 'NBA' || sport === 'NCAAB')
-                ? ['All']
+                ? ['Defensive', 'Key', 'Offensive', 'Other'].filter(c => grouped[c]?.length)
                 : Object.keys(grouped)
         )
       : [selectedCategory]
@@ -909,7 +933,7 @@ export function TeamDetailedStats({
                 )}
                 {                (
                   (sport === 'NBA' || sport === 'NCAAB') && h2hStyle
-                    ? [...grouped[cat]!]
+                    ? [...(grouped[cat] ?? [])]
                     : (
                         cat === STAT_CATEGORIES.KEY_FACTORS
                           ? (() => {
@@ -934,6 +958,13 @@ export function TeamDetailedStats({
                   // Only override native team 3rd down pct label; keep Opponent/Defensive labels intact
                   if ((internal === 'thirddownconvpct' || abbr === '3RDC%') && !/opponent|defensive/i.test(String(raw))) {
                     return 'Third Down Conversion Percentage'
+                  }
+                  if (sport === 'NBA' || sport === 'NCAAB') {
+                    const cleaned = String(raw).replace(/\s+per\s*game$/i, '').trim()
+                    const lower = cleaned.toLowerCase()
+                    if (lower === 'three point %') return '3-Point Field Goal Percentage'
+                    if (lower === 'opponent three point %') return 'Opponent 3-Point Field Goal Percentage'
+                    return cleaned
                   }
                   return raw
                 })()
@@ -1020,6 +1051,7 @@ export function TeamDetailedStats({
       : filteredStats.filter(stat => {
           if (sport === 'CFB') return mapCfbStatToCategory(stat) === selectedCategory
           if (sport === 'NFL') return mapNflStatToCategory(stat) === selectedCategory
+          if (sport === 'NBA') return mapNbaStatToCategory(stat) === selectedCategory
           if (sport === 'NCAAB') return mapNcaabStatToCategory(stat) === selectedCategory
           return stat.stat?.category === selectedCategory
         })
