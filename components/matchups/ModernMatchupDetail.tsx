@@ -334,60 +334,6 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
               </div>
             )}
 
-            {/* Recent Form */}
-            {(matchupAnalysis?.recentGames?.home || matchupAnalysis?.recentGames?.away) && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                    <CalendarIcon className="h-5 w-5 mr-2 text-blue-500" />
-                    {game.awayTeam.name} Recent (Last {Math.min(10, matchupAnalysis?.recentGames?.away?.length || 0)})
-                  </h3>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                    Record: {(() => { const r = countRecentRecord(matchupAnalysis?.recentGames?.away); return `${r.wins}-${r.losses}-${r.pushes}` })()}
-                  </div>
-                  <div className="space-y-2">
-                    {(matchupAnalysis?.recentGames?.away || []).map((g: any, idx: number) => (
-                      <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded px-3 py-2">
-                        <span className="text-xs text-gray-600 dark:text-gray-300">
-                          {formatToEasternDate(g.date)}
-                        </span>
-                        <span className="text-xs font-medium text-gray-900 dark:text-white">
-                          {g.isHome ? 'vs' : '@'} {g.opponentName || g.opponentId}
-                        </span>
-                        <span className="text-xs font-semibold {g.result === 'win' ? 'text-green-600 dark:text-green-400' : g.result === 'loss' ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}">
-                          {g.teamScore}-{g.opponentScore} {formatShortResult(g.result)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                    <CalendarIcon className="h-5 w-5 mr-2 text-emerald-500" />
-                    {game.homeTeam.name} Recent (Last {Math.min(10, matchupAnalysis?.recentGames?.home?.length || 0)})
-                  </h3>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                    Record: {(() => { const r = countRecentRecord(matchupAnalysis?.recentGames?.home); return `${r.wins}-${r.losses}-${r.pushes}` })()}
-                  </div>
-                  <div className="space-y-2">
-                    {(matchupAnalysis?.recentGames?.home || []).map((g: any, idx: number) => (
-                      <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded px-3 py-2">
-                        <span className="text-xs text-gray-600 dark:text-gray-300">
-                          {formatToEasternDate(g.date)}
-                        </span>
-                        <span className="text-xs font-medium text-gray-900 dark:text-white">
-                          {g.isHome ? 'vs' : '@'} {g.opponentName || g.opponentId}
-                        </span>
-                        <span className="text-xs font-semibold {g.result === 'win' ? 'text-green-600 dark:text-green-400' : g.result === 'loss' ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}">
-                          {g.teamScore}-{g.opponentScore} {formatShortResult(g.result)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Results */}
             {coversSummary && (
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
@@ -458,7 +404,59 @@ export function ModernMatchupDetail({ matchup, sport }: ModernMatchupDetailProps
               </div>
             )}
 
-            
+            {/* Recent Form */}
+            {(matchupAnalysis?.recentGames?.home || matchupAnalysis?.recentGames?.away) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <CalendarIcon className="h-5 w-5 mr-2 text-blue-500" />
+                    {game.awayTeam.name} Recent (Last {Math.min(10, matchupAnalysis?.recentGames?.away?.length || 0)})
+                  </h3>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    Record: {(() => { const r = countRecentRecord(matchupAnalysis?.recentGames?.away); return `${r.wins}-${r.losses}-${r.pushes}` })()}
+                  </div>
+                  <div className="space-y-2">
+                    {(matchupAnalysis?.recentGames?.away || []).map((g: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded px-3 py-2">
+                        <span className="text-xs text-gray-600 dark:text-gray-300">
+                          {formatToEasternDate(g.date)}
+                        </span>
+                        <span className="text-xs font-medium text-gray-900 dark:text-white">
+                          {g.isHome ? 'vs' : '@'} {g.opponentName || g.opponentId}
+                        </span>
+                        <span className="text-xs font-semibold {g.result === 'win' ? 'text-green-600 dark:text-green-400' : g.result === 'loss' ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}">
+                          {g.teamScore}-{g.opponentScore} {formatShortResult(g.result)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <CalendarIcon className="h-5 w-5 mr-2 text-emerald-500" />
+                    {game.homeTeam.name} Recent (Last {Math.min(10, matchupAnalysis?.recentGames?.home?.length || 0)})
+                  </h3>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    Record: {(() => { const r = countRecentRecord(matchupAnalysis?.recentGames?.home); return `${r.wins}-${r.losses}-${r.pushes}` })()}
+                  </div>
+                  <div className="space-y-2">
+                    {(matchupAnalysis?.recentGames?.home || []).map((g: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded px-3 py-2">
+                        <span className="text-xs text-gray-600 dark:text-gray-300">
+                          {formatToEasternDate(g.date)}
+                        </span>
+                        <span className="text-xs font-medium text-gray-900 dark:text-white">
+                          {g.isHome ? 'vs' : '@'} {g.opponentName || g.opponentId}
+                        </span>
+                        <span className="text-xs font-semibold {g.result === 'win' ? 'text-green-600 dark:text-green-400' : g.result === 'loss' ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}">
+                          {g.teamScore}-{g.opponentScore} {formatShortResult(g.result)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
