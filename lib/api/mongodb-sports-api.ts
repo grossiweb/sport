@@ -97,6 +97,8 @@ export class MongoDBSportsAPI {
       const numericA = parseInt(teamIdA, 10)
       const numericB = parseInt(teamIdB, 10)
 
+      // Pull more than needed because we filter out non-final / future games after fetch
+      const fetchLimit = Math.max(limit * 5, 50)
       const mongoGames = await collection
         .find({
           sport_id: sportId,
@@ -106,7 +108,7 @@ export class MongoDBSportsAPI {
           ]
         })
         .sort({ date_event: -1 })
-        .limit(limit)
+        .limit(fetchLimit)
         .toArray()
 
       // Fetch teams to get names
@@ -124,7 +126,9 @@ export class MongoDBSportsAPI {
 
       const sum = (arr?: number[] | null) => Array.isArray(arr) ? arr.reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0) : undefined
 
-      return mongoGames.map(g => {
+      const now = Date.now()
+
+      const mapped = mongoGames.map(g => {
         const betting = bettingByEvent.get(g.event_id) as MongoBettingData | undefined
         const bdHome = sum(betting?.score?.score_home_by_period)
         const bdAway = sum(betting?.score?.score_away_by_period)
@@ -132,7 +136,8 @@ export class MongoDBSportsAPI {
         const awayScore = (bdAway ?? g.away_score ?? 0)
         const homeTeamName = teamsMap.get(g.home_team_id)?.name
         const awayTeamName = teamsMap.get(g.away_team_id)?.name
-        const result = homeScore > awayScore ? 'Home win' : homeScore < awayScore ? 'Away win' : 'Tie'
+        const status = this.mapEventStatus(g.event_status)
+        const gameDate = this.parseGameDate(g.date_event)
         return {
           date: g.date_event,
           homeTeamId: g.home_team_id.toString(),
@@ -141,6 +146,31 @@ export class MongoDBSportsAPI {
           awayTeamName,
           homeScore,
           awayScore,
+          status,
+          gameDateMs: gameDate.getTime()
+        }
+      })
+
+      // Only include completed games (prevents scheduled future games showing up in H2H)
+      const completed = mapped
+        .filter(g => {
+          if (g.status === 'final') return true
+          // Fallback: if status is missing/mis-set, allow only if in the past and has a non-zero score
+          const hasScore = (g.homeScore ?? 0) > 0 || (g.awayScore ?? 0) > 0
+          return g.gameDateMs <= now && hasScore
+        })
+        .slice(0, limit)
+
+      return completed.map(g => {
+        const result = g.homeScore > g.awayScore ? 'Home win' : g.homeScore < g.awayScore ? 'Away win' : 'Tie'
+        return {
+          date: g.date,
+          homeTeamId: g.homeTeamId,
+          awayTeamId: g.awayTeamId,
+          homeTeamName: g.homeTeamName,
+          awayTeamName: g.awayTeamName,
+          homeScore: g.homeScore,
+          awayScore: g.awayScore,
           result
         }
       })
