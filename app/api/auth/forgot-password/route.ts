@@ -57,9 +57,9 @@ export async function POST(request: NextRequest) {
         userExists = true // Assume user exists to prevent email enumeration
       }
 
-      // Generate reset token and store it
+      // Generate reset token and store it in MongoDB
       const resetToken = passwordResetService.generateToken()
-      passwordResetService.storeResetToken(email, resetToken)
+      await passwordResetService.storeResetToken(email, resetToken)
 
       // Create reset URL with token
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'

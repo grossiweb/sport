@@ -357,3 +357,24 @@ export async function getAtsRecordsCollection(): Promise<Collection<any>> {
   const { db } = await connectToDatabase()
   return db.collection('ats_records')
 }
+
+// Password reset tokens (stored in MongoDB for persistence across server restarts)
+export interface MongoPasswordResetToken {
+  _id?: any
+  token: string
+  email: string
+  expiresAt: Date
+  createdAt: Date
+}
+
+export async function getPasswordResetTokensCollection(): Promise<Collection<MongoPasswordResetToken>> {
+  const { db } = await connectToDatabase()
+  const collection = db.collection<MongoPasswordResetToken>('password_reset_tokens')
+  // Ensure TTL index so expired tokens are auto-cleaned by MongoDB
+  try {
+    await collection.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+  } catch (_) {
+    // Index already exists
+  }
+  return collection
+}
